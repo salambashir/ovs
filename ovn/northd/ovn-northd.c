@@ -757,6 +757,7 @@ ovn_datapath_allocate_key(struct hmap *dp_tnlids)
     return allocate_tnlid(dp_tnlids, "datapath", (1u << 24) - 1, &hint);
 }
 
+//TODO: should also change tables in NB
 /* Updates the southbound Datapath_Binding table so that it contains the
  * logical switches and routers specified by the northbound database.
  *
@@ -2350,6 +2351,7 @@ cleanup_mac_bindings(struct northd_context *ctx, struct hmap *ports)
     }
 }
 
+//TODO: should also change tables in NB
 /* Updates the southbound Port_Binding table so that it contains the logical
  * switch ports specified by the northbound database.
  *
@@ -6870,6 +6872,7 @@ split_addresses(const char *addresses, struct svec *ipv4_addrs,
     destroy_lport_addresses(&laddrs);
 }
 
+//TODO: should also change tables in NB
 /* OVN_Southbound Address_Set table contains same records as in north
  * bound, plus the records generated from Port_Group table in north bound.
  *
@@ -6941,6 +6944,7 @@ sync_address_sets(struct northd_context *ctx)
     shash_destroy(&sb_address_sets);
 }
 
+//TODO: should also change tables in NB
 /* Each port group in Port_Group table in OVN_Northbound has a corresponding
  * entry in Port_Group table in OVN_Southbound. In OVN_Northbound the entries
  * contains lport uuids, while in OVN_Southbound we store the lport names.
@@ -7065,6 +7069,7 @@ done:
     return need_update;
 }
 
+//TODO: should also change tables in NB
 /* Each entry in the Meter and Meter_Band tables in OVN_Northbound have
  * a corresponding entries in the Meter and Meter_Band tables in
  * OVN_Southbound.
@@ -7396,6 +7401,7 @@ static struct gen_opts_map supported_dhcpv6_opts[] = {
     DHCPV6_OPT_DNS_SERVER
 };
 
+//TODO: should also change tables in NB
 static void
 check_and_add_supported_dhcp_opts_to_sb_db(struct northd_context *ctx)
 {
@@ -7429,6 +7435,7 @@ check_and_add_supported_dhcp_opts_to_sb_db(struct northd_context *ctx)
     hmap_destroy(&dhcp_opts_to_add);
 }
 
+//TODO: should also change tables in NB
 static void
 check_and_add_supported_dhcpv6_opts_to_sb_db(struct northd_context *ctx)
 {
@@ -7608,6 +7615,7 @@ ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
                                               rbac_perm);
 }
 
+//TODO: should also change tables in NB
 static void
 check_and_update_rbac(struct northd_context *ctx)
 {
