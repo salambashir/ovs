@@ -20,6 +20,7 @@
 
 struct nbrec_logical_router_port;
 struct sbrec_logical_flow;
+struct nbrec_sb_logical_flow; //Salam
 struct uuid;
 
 struct ipv4_netaddr {
