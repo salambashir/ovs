@@ -8263,7 +8263,7 @@ static struct rbac_perm_cfg {
         .insdel = true,
         .update = rbac_chassis_update,
         .n_update = ARRAY_SIZE(rbac_chassis_update),
-        .row = NULL
+        .row = NULL,
         .nb_row = NULL
     },{
         .table = "Encap",
@@ -8272,7 +8272,7 @@ static struct rbac_perm_cfg {
         .insdel = true,
         .update = rbac_encap_update,
         .n_update = ARRAY_SIZE(rbac_encap_update),
-        .row = NULL
+        .row = NULL,
         .nb_row = NULL
     },{
         .table = "Port_Binding",
@@ -8281,7 +8281,7 @@ static struct rbac_perm_cfg {
         .insdel = false,
         .update = rbac_port_binding_update,
         .n_update = ARRAY_SIZE(rbac_port_binding_update),
-        .row = NULL
+        .row = NULL,
         .nb_row = NULL
     },{
         .table = "MAC_Binding",
@@ -8290,7 +8290,7 @@ static struct rbac_perm_cfg {
         .insdel = true,
         .update = rbac_mac_binding_update,
         .n_update = ARRAY_SIZE(rbac_mac_binding_update),
-        .row = NULL
+        .row = NULL,
         .nb_row = NULL
     },{
         .table = NULL,
@@ -8299,7 +8299,7 @@ static struct rbac_perm_cfg {
         .insdel = false,
         .update = NULL,
         .n_update = 0,
-        .row = NULL
+        .row = NULL,
         .nb_row = NULL
     }
 };
