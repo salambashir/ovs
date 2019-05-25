@@ -3568,6 +3568,3504 @@ const char *match);
 void nbrec_qos_index_set_priority(const struct nbrec_qos *,
 int64_t priority);
 
+/* SB_Address_Set table. */
+struct nbrec_sb_address_set {
+	struct ovsdb_idl_row header_;
+
+	/* addresses column. */
+	char **addresses;
+	size_t n_addresses;
+
+	/* name column. */
+	char *name;	/* Always nonnull. */
+};
+
+enum nbrec_sb_address_set_column_id {
+    NBREC_SB_ADDRESS_SET_COL_ADDRESSES,
+    NBREC_SB_ADDRESS_SET_COL_NAME,
+    NBREC_SB_ADDRESS_SET_N_COLUMNS
+};
+
+#define nbrec_sb_address_set_col_addresses (nbrec_sb_address_set_columns[NBREC_SB_ADDRESS_SET_COL_ADDRESSES])
+#define nbrec_sb_address_set_col_name (nbrec_sb_address_set_columns[NBREC_SB_ADDRESS_SET_COL_NAME])
+
+extern struct ovsdb_idl_column nbrec_sb_address_set_columns[NBREC_SB_ADDRESS_SET_N_COLUMNS];
+
+const struct nbrec_sb_address_set_table *nbrec_sb_address_set_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_address_set *nbrec_sb_address_set_table_first(const struct nbrec_sb_address_set_table *);
+
+#define NBREC_SB_ADDRESS_SET_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_address_set_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_address_set_next(ROW))
+#define NBREC_SB_ADDRESS_SET_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_address_set_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_address_set_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_address_set *nbrec_sb_address_set_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_address_set *nbrec_sb_address_set_table_get_for_uuid(const struct nbrec_sb_address_set_table *, const struct uuid *);
+const struct nbrec_sb_address_set *nbrec_sb_address_set_first(const struct ovsdb_idl *);
+const struct nbrec_sb_address_set *nbrec_sb_address_set_next(const struct nbrec_sb_address_set *);
+#define NBREC_SB_ADDRESS_SET_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_address_set_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_address_set_next(ROW))
+#define NBREC_SB_ADDRESS_SET_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_address_set_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_address_set_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_address_set_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_address_set_row_get_seqno(const struct nbrec_sb_address_set *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_address_set *nbrec_sb_address_set_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_address_set *nbrec_sb_address_set_track_get_next(const struct nbrec_sb_address_set *);
+#define NBREC_SB_ADDRESS_SET_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_address_set_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_address_set_track_get_next(ROW))
+
+const struct nbrec_sb_address_set *nbrec_sb_address_set_table_track_get_first(const struct nbrec_sb_address_set_table *);
+#define NBREC_SB_ADDRESS_SET_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_address_set_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_address_set_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_address_set_is_new(const struct nbrec_sb_address_set *row)
+{
+    return nbrec_sb_address_set_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_address_set_is_deleted(const struct nbrec_sb_address_set *row)
+{
+    return nbrec_sb_address_set_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_address_set_index_destroy_row(const struct nbrec_sb_address_set *);
+
+struct nbrec_sb_address_set *nbrec_sb_address_set_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_address_set *);
+
+int nbrec_sb_address_set_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_address_set *, 
+    const struct nbrec_sb_address_set *);
+struct ovsdb_idl_cursor nbrec_sb_address_set_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_address_set_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_address_set *);
+struct ovsdb_idl_cursor nbrec_sb_address_set_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_address_set *);
+
+struct nbrec_sb_address_set *nbrec_sb_address_set_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_ADDRESS_SET_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_address_set_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_address_set_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_address_set_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_ADDRESS_SET_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_address_set_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_address_set_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_ADDRESS_SET_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_address_set_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_address_set_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_address_set_init(struct nbrec_sb_address_set *);
+void nbrec_sb_address_set_delete(const struct nbrec_sb_address_set *);
+struct nbrec_sb_address_set *nbrec_sb_address_set_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_address_set_is_updated(const struct nbrec_sb_address_set *, enum nbrec_sb_address_set_column_id);
+
+void nbrec_sb_address_set_verify_addresses(const struct nbrec_sb_address_set *);
+void nbrec_sb_address_set_verify_name(const struct nbrec_sb_address_set *);
+
+const struct ovsdb_datum *nbrec_sb_address_set_get_addresses(const struct nbrec_sb_address_set *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_address_set_get_name(const struct nbrec_sb_address_set *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_address_set_set_addresses(const struct nbrec_sb_address_set *, const char **addresses, size_t n_addresses);
+void nbrec_sb_address_set_set_name(const struct nbrec_sb_address_set *, const char *name);
+
+void nbrec_sb_address_set_update_addresses_addvalue(const struct nbrec_sb_address_set *,  const char *);
+void nbrec_sb_address_set_update_addresses_delvalue(const struct nbrec_sb_address_set *,  const char *);
+void nbrec_sb_address_set_add_clause_addresses(struct ovsdb_idl_condition *, enum ovsdb_function function, const char **addresses, size_t n_addresses);
+void nbrec_sb_address_set_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_address_set_add_clause_name(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *name);
+void nbrec_sb_address_set_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_address_set *nbrec_sb_address_set_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_address_set_index_set_addresses(const struct nbrec_sb_address_set *,
+const char **addresses, size_t n_addresses);
+void nbrec_sb_address_set_index_set_name(const struct nbrec_sb_address_set *,
+const char *name);
+
+/* SB_Chassis table. */
+struct nbrec_sb_chassis {
+	struct ovsdb_idl_row header_;
+
+	/* encaps column. */
+	struct nbrec_sb_encap **encaps;
+	size_t n_encaps;
+
+	/* external_ids column. */
+	struct smap external_ids;
+
+	/* hostname column. */
+	char *hostname;	/* Always nonnull. */
+
+	/* name column. */
+	char *name;	/* Always nonnull. */
+
+	/* nb_cfg column. */
+	int64_t nb_cfg;
+
+	/* vtep_logical_switches column. */
+	char **vtep_logical_switches;
+	size_t n_vtep_logical_switches;
+};
+
+enum nbrec_sb_chassis_column_id {
+    NBREC_SB_CHASSIS_COL_ENCAPS,
+    NBREC_SB_CHASSIS_COL_EXTERNAL_IDS,
+    NBREC_SB_CHASSIS_COL_HOSTNAME,
+    NBREC_SB_CHASSIS_COL_NAME,
+    NBREC_SB_CHASSIS_COL_NB_CFG,
+    NBREC_SB_CHASSIS_COL_VTEP_LOGICAL_SWITCHES,
+    NBREC_SB_CHASSIS_N_COLUMNS
+};
+
+#define nbrec_sb_chassis_col_name (nbrec_sb_chassis_columns[NBREC_SB_CHASSIS_COL_NAME])
+#define nbrec_sb_chassis_col_hostname (nbrec_sb_chassis_columns[NBREC_SB_CHASSIS_COL_HOSTNAME])
+#define nbrec_sb_chassis_col_encaps (nbrec_sb_chassis_columns[NBREC_SB_CHASSIS_COL_ENCAPS])
+#define nbrec_sb_chassis_col_nb_cfg (nbrec_sb_chassis_columns[NBREC_SB_CHASSIS_COL_NB_CFG])
+#define nbrec_sb_chassis_col_vtep_logical_switches (nbrec_sb_chassis_columns[NBREC_SB_CHASSIS_COL_VTEP_LOGICAL_SWITCHES])
+#define nbrec_sb_chassis_col_external_ids (nbrec_sb_chassis_columns[NBREC_SB_CHASSIS_COL_EXTERNAL_IDS])
+
+extern struct ovsdb_idl_column nbrec_sb_chassis_columns[NBREC_SB_CHASSIS_N_COLUMNS];
+
+const struct nbrec_sb_chassis_table *nbrec_sb_chassis_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_chassis *nbrec_sb_chassis_table_first(const struct nbrec_sb_chassis_table *);
+
+#define NBREC_SB_CHASSIS_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_chassis_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_chassis_next(ROW))
+#define NBREC_SB_CHASSIS_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_chassis_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_chassis_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_chassis *nbrec_sb_chassis_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_chassis *nbrec_sb_chassis_table_get_for_uuid(const struct nbrec_sb_chassis_table *, const struct uuid *);
+const struct nbrec_sb_chassis *nbrec_sb_chassis_first(const struct ovsdb_idl *);
+const struct nbrec_sb_chassis *nbrec_sb_chassis_next(const struct nbrec_sb_chassis *);
+#define NBREC_SB_CHASSIS_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_chassis_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_chassis_next(ROW))
+#define NBREC_SB_CHASSIS_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_chassis_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_chassis_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_chassis_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_chassis_row_get_seqno(const struct nbrec_sb_chassis *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_chassis *nbrec_sb_chassis_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_chassis *nbrec_sb_chassis_track_get_next(const struct nbrec_sb_chassis *);
+#define NBREC_SB_CHASSIS_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_chassis_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_chassis_track_get_next(ROW))
+
+const struct nbrec_sb_chassis *nbrec_sb_chassis_table_track_get_first(const struct nbrec_sb_chassis_table *);
+#define NBREC_SB_CHASSIS_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_chassis_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_chassis_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_chassis_is_new(const struct nbrec_sb_chassis *row)
+{
+    return nbrec_sb_chassis_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_chassis_is_deleted(const struct nbrec_sb_chassis *row)
+{
+    return nbrec_sb_chassis_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_chassis_index_destroy_row(const struct nbrec_sb_chassis *);
+
+struct nbrec_sb_chassis *nbrec_sb_chassis_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_chassis *);
+
+int nbrec_sb_chassis_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_chassis *, 
+    const struct nbrec_sb_chassis *);
+struct ovsdb_idl_cursor nbrec_sb_chassis_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_chassis_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_chassis *);
+struct ovsdb_idl_cursor nbrec_sb_chassis_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_chassis *);
+
+struct nbrec_sb_chassis *nbrec_sb_chassis_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_CHASSIS_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_chassis_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_chassis_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_chassis_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_CHASSIS_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_chassis_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_chassis_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_CHASSIS_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_chassis_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_chassis_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_chassis_init(struct nbrec_sb_chassis *);
+void nbrec_sb_chassis_delete(const struct nbrec_sb_chassis *);
+struct nbrec_sb_chassis *nbrec_sb_chassis_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_chassis_is_updated(const struct nbrec_sb_chassis *, enum nbrec_sb_chassis_column_id);
+
+void nbrec_sb_chassis_verify_encaps(const struct nbrec_sb_chassis *);
+void nbrec_sb_chassis_verify_external_ids(const struct nbrec_sb_chassis *);
+void nbrec_sb_chassis_verify_hostname(const struct nbrec_sb_chassis *);
+void nbrec_sb_chassis_verify_name(const struct nbrec_sb_chassis *);
+void nbrec_sb_chassis_verify_nb_cfg(const struct nbrec_sb_chassis *);
+void nbrec_sb_chassis_verify_vtep_logical_switches(const struct nbrec_sb_chassis *);
+
+const struct ovsdb_datum *nbrec_sb_chassis_get_encaps(const struct nbrec_sb_chassis *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_chassis_get_external_ids(const struct nbrec_sb_chassis *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_chassis_get_hostname(const struct nbrec_sb_chassis *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_chassis_get_name(const struct nbrec_sb_chassis *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_chassis_get_nb_cfg(const struct nbrec_sb_chassis *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_chassis_get_vtep_logical_switches(const struct nbrec_sb_chassis *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_chassis_set_encaps(const struct nbrec_sb_chassis *, struct nbrec_sb_encap **encaps, size_t n_encaps);
+void nbrec_sb_chassis_set_external_ids(const struct nbrec_sb_chassis *, const struct smap *);
+void nbrec_sb_chassis_set_hostname(const struct nbrec_sb_chassis *, const char *hostname);
+void nbrec_sb_chassis_set_name(const struct nbrec_sb_chassis *, const char *name);
+void nbrec_sb_chassis_set_nb_cfg(const struct nbrec_sb_chassis *, int64_t nb_cfg);
+void nbrec_sb_chassis_set_vtep_logical_switches(const struct nbrec_sb_chassis *, const char **vtep_logical_switches, size_t n_vtep_logical_switches);
+
+void nbrec_sb_chassis_update_encaps_addvalue(const struct nbrec_sb_chassis *,  const struct nbrec_sb_encap *);
+void nbrec_sb_chassis_update_encaps_delvalue(const struct nbrec_sb_chassis *,  const struct nbrec_sb_encap *);
+void nbrec_sb_chassis_add_clause_encaps(struct ovsdb_idl_condition *, enum ovsdb_function function, struct uuid **encaps, size_t n_encaps);
+void nbrec_sb_chassis_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_chassis_update_external_ids_setkey(const struct nbrec_sb_chassis *,  const char *, const char *);
+void nbrec_sb_chassis_update_external_ids_delkey(const struct nbrec_sb_chassis *,  const char *);
+void nbrec_sb_chassis_add_clause_external_ids(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_chassis_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_chassis_add_clause_hostname(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *hostname);
+void nbrec_sb_chassis_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_chassis_add_clause_name(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *name);
+void nbrec_sb_chassis_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_chassis_add_clause_nb_cfg(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t nb_cfg);
+void nbrec_sb_chassis_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_chassis_update_vtep_logical_switches_addvalue(const struct nbrec_sb_chassis *,  const char *);
+void nbrec_sb_chassis_update_vtep_logical_switches_delvalue(const struct nbrec_sb_chassis *,  const char *);
+void nbrec_sb_chassis_add_clause_vtep_logical_switches(struct ovsdb_idl_condition *, enum ovsdb_function function, const char **vtep_logical_switches, size_t n_vtep_logical_switches);
+void nbrec_sb_chassis_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_chassis *nbrec_sb_chassis_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_chassis_index_set_encaps(const struct nbrec_sb_chassis *,
+struct nbrec_sb_encap **encaps, size_t n_encaps);
+void nbrec_sb_chassis_index_set_external_ids(const struct nbrec_sb_chassis *,
+const struct smap *);
+void nbrec_sb_chassis_index_set_hostname(const struct nbrec_sb_chassis *,
+const char *hostname);
+void nbrec_sb_chassis_index_set_name(const struct nbrec_sb_chassis *,
+const char *name);
+void nbrec_sb_chassis_index_set_nb_cfg(const struct nbrec_sb_chassis *,
+int64_t nb_cfg);
+void nbrec_sb_chassis_index_set_vtep_logical_switches(const struct nbrec_sb_chassis *,
+const char **vtep_logical_switches, size_t n_vtep_logical_switches);
+
+/* SB_Connection table. */
+struct nbrec_sb_connection {
+	struct ovsdb_idl_row header_;
+
+	/* external_ids column. */
+	struct smap external_ids;
+
+	/* inactivity_probe column. */
+	int64_t *inactivity_probe;
+	size_t n_inactivity_probe;
+
+	/* is_connected column. */
+	bool is_connected;
+
+	/* max_backoff column. */
+	int64_t *max_backoff;
+	size_t n_max_backoff;
+
+	/* other_config column. */
+	struct smap other_config;
+
+	/* read_only column. */
+	bool read_only;
+
+	/* role column. */
+	char *role;	/* Always nonnull. */
+
+	/* status column. */
+	struct smap status;
+
+	/* target column. */
+	char *target;	/* Always nonnull. */
+};
+
+enum nbrec_sb_connection_column_id {
+    NBREC_SB_CONNECTION_COL_EXTERNAL_IDS,
+    NBREC_SB_CONNECTION_COL_INACTIVITY_PROBE,
+    NBREC_SB_CONNECTION_COL_IS_CONNECTED,
+    NBREC_SB_CONNECTION_COL_MAX_BACKOFF,
+    NBREC_SB_CONNECTION_COL_OTHER_CONFIG,
+    NBREC_SB_CONNECTION_COL_READ_ONLY,
+    NBREC_SB_CONNECTION_COL_ROLE,
+    NBREC_SB_CONNECTION_COL_STATUS,
+    NBREC_SB_CONNECTION_COL_TARGET,
+    NBREC_SB_CONNECTION_N_COLUMNS
+};
+
+#define nbrec_sb_connection_col_max_backoff (nbrec_sb_connection_columns[NBREC_SB_CONNECTION_COL_MAX_BACKOFF])
+#define nbrec_sb_connection_col_read_only (nbrec_sb_connection_columns[NBREC_SB_CONNECTION_COL_READ_ONLY])
+#define nbrec_sb_connection_col_target (nbrec_sb_connection_columns[NBREC_SB_CONNECTION_COL_TARGET])
+#define nbrec_sb_connection_col_other_config (nbrec_sb_connection_columns[NBREC_SB_CONNECTION_COL_OTHER_CONFIG])
+#define nbrec_sb_connection_col_inactivity_probe (nbrec_sb_connection_columns[NBREC_SB_CONNECTION_COL_INACTIVITY_PROBE])
+#define nbrec_sb_connection_col_status (nbrec_sb_connection_columns[NBREC_SB_CONNECTION_COL_STATUS])
+#define nbrec_sb_connection_col_role (nbrec_sb_connection_columns[NBREC_SB_CONNECTION_COL_ROLE])
+#define nbrec_sb_connection_col_external_ids (nbrec_sb_connection_columns[NBREC_SB_CONNECTION_COL_EXTERNAL_IDS])
+#define nbrec_sb_connection_col_is_connected (nbrec_sb_connection_columns[NBREC_SB_CONNECTION_COL_IS_CONNECTED])
+
+extern struct ovsdb_idl_column nbrec_sb_connection_columns[NBREC_SB_CONNECTION_N_COLUMNS];
+
+const struct nbrec_sb_connection_table *nbrec_sb_connection_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_connection *nbrec_sb_connection_table_first(const struct nbrec_sb_connection_table *);
+
+#define NBREC_SB_CONNECTION_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_connection_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_connection_next(ROW))
+#define NBREC_SB_CONNECTION_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_connection_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_connection_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_connection *nbrec_sb_connection_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_connection *nbrec_sb_connection_table_get_for_uuid(const struct nbrec_sb_connection_table *, const struct uuid *);
+const struct nbrec_sb_connection *nbrec_sb_connection_first(const struct ovsdb_idl *);
+const struct nbrec_sb_connection *nbrec_sb_connection_next(const struct nbrec_sb_connection *);
+#define NBREC_SB_CONNECTION_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_connection_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_connection_next(ROW))
+#define NBREC_SB_CONNECTION_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_connection_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_connection_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_connection_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_connection_row_get_seqno(const struct nbrec_sb_connection *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_connection *nbrec_sb_connection_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_connection *nbrec_sb_connection_track_get_next(const struct nbrec_sb_connection *);
+#define NBREC_SB_CONNECTION_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_connection_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_connection_track_get_next(ROW))
+
+const struct nbrec_sb_connection *nbrec_sb_connection_table_track_get_first(const struct nbrec_sb_connection_table *);
+#define NBREC_SB_CONNECTION_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_connection_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_connection_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_connection_is_new(const struct nbrec_sb_connection *row)
+{
+    return nbrec_sb_connection_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_connection_is_deleted(const struct nbrec_sb_connection *row)
+{
+    return nbrec_sb_connection_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_connection_index_destroy_row(const struct nbrec_sb_connection *);
+
+struct nbrec_sb_connection *nbrec_sb_connection_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_connection *);
+
+int nbrec_sb_connection_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_connection *, 
+    const struct nbrec_sb_connection *);
+struct ovsdb_idl_cursor nbrec_sb_connection_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_connection_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_connection *);
+struct ovsdb_idl_cursor nbrec_sb_connection_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_connection *);
+
+struct nbrec_sb_connection *nbrec_sb_connection_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_CONNECTION_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_connection_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_connection_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_connection_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_CONNECTION_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_connection_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_connection_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_CONNECTION_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_connection_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_connection_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_connection_init(struct nbrec_sb_connection *);
+void nbrec_sb_connection_delete(const struct nbrec_sb_connection *);
+struct nbrec_sb_connection *nbrec_sb_connection_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_connection_is_updated(const struct nbrec_sb_connection *, enum nbrec_sb_connection_column_id);
+
+void nbrec_sb_connection_verify_external_ids(const struct nbrec_sb_connection *);
+void nbrec_sb_connection_verify_inactivity_probe(const struct nbrec_sb_connection *);
+void nbrec_sb_connection_verify_is_connected(const struct nbrec_sb_connection *);
+void nbrec_sb_connection_verify_max_backoff(const struct nbrec_sb_connection *);
+void nbrec_sb_connection_verify_other_config(const struct nbrec_sb_connection *);
+void nbrec_sb_connection_verify_read_only(const struct nbrec_sb_connection *);
+void nbrec_sb_connection_verify_role(const struct nbrec_sb_connection *);
+void nbrec_sb_connection_verify_status(const struct nbrec_sb_connection *);
+void nbrec_sb_connection_verify_target(const struct nbrec_sb_connection *);
+
+const struct ovsdb_datum *nbrec_sb_connection_get_external_ids(const struct nbrec_sb_connection *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_connection_get_inactivity_probe(const struct nbrec_sb_connection *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_connection_get_is_connected(const struct nbrec_sb_connection *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_connection_get_max_backoff(const struct nbrec_sb_connection *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_connection_get_other_config(const struct nbrec_sb_connection *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_connection_get_read_only(const struct nbrec_sb_connection *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_connection_get_role(const struct nbrec_sb_connection *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_connection_get_status(const struct nbrec_sb_connection *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_connection_get_target(const struct nbrec_sb_connection *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_connection_set_external_ids(const struct nbrec_sb_connection *, const struct smap *);
+void nbrec_sb_connection_set_inactivity_probe(const struct nbrec_sb_connection *, const int64_t *inactivity_probe, size_t n_inactivity_probe);
+void nbrec_sb_connection_set_is_connected(const struct nbrec_sb_connection *, bool is_connected);
+void nbrec_sb_connection_set_max_backoff(const struct nbrec_sb_connection *, const int64_t *max_backoff, size_t n_max_backoff);
+void nbrec_sb_connection_set_other_config(const struct nbrec_sb_connection *, const struct smap *);
+void nbrec_sb_connection_set_read_only(const struct nbrec_sb_connection *, bool read_only);
+void nbrec_sb_connection_set_role(const struct nbrec_sb_connection *, const char *role);
+void nbrec_sb_connection_set_status(const struct nbrec_sb_connection *, const struct smap *);
+void nbrec_sb_connection_set_target(const struct nbrec_sb_connection *, const char *target);
+
+void nbrec_sb_connection_update_external_ids_setkey(const struct nbrec_sb_connection *,  const char *, const char *);
+void nbrec_sb_connection_update_external_ids_delkey(const struct nbrec_sb_connection *,  const char *);
+void nbrec_sb_connection_add_clause_external_ids(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_connection_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_connection_update_inactivity_probe_addvalue(const struct nbrec_sb_connection *,  int64_t );
+void nbrec_sb_connection_update_inactivity_probe_delvalue(const struct nbrec_sb_connection *,  int64_t );
+void nbrec_sb_connection_add_clause_inactivity_probe(struct ovsdb_idl_condition *, enum ovsdb_function function, const int64_t *inactivity_probe, size_t n_inactivity_probe);
+void nbrec_sb_connection_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_connection_add_clause_is_connected(struct ovsdb_idl_condition *, enum ovsdb_function function, bool is_connected);
+void nbrec_sb_connection_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_connection_update_max_backoff_addvalue(const struct nbrec_sb_connection *,  int64_t );
+void nbrec_sb_connection_update_max_backoff_delvalue(const struct nbrec_sb_connection *,  int64_t );
+void nbrec_sb_connection_add_clause_max_backoff(struct ovsdb_idl_condition *, enum ovsdb_function function, const int64_t *max_backoff, size_t n_max_backoff);
+void nbrec_sb_connection_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_connection_update_other_config_setkey(const struct nbrec_sb_connection *,  const char *, const char *);
+void nbrec_sb_connection_update_other_config_delkey(const struct nbrec_sb_connection *,  const char *);
+void nbrec_sb_connection_add_clause_other_config(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_connection_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_connection_add_clause_read_only(struct ovsdb_idl_condition *, enum ovsdb_function function, bool read_only);
+void nbrec_sb_connection_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_connection_add_clause_role(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *role);
+void nbrec_sb_connection_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_connection_update_status_setkey(const struct nbrec_sb_connection *,  const char *, const char *);
+void nbrec_sb_connection_update_status_delkey(const struct nbrec_sb_connection *,  const char *);
+void nbrec_sb_connection_add_clause_status(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_connection_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_connection_add_clause_target(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *target);
+void nbrec_sb_connection_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_connection *nbrec_sb_connection_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_connection_index_set_external_ids(const struct nbrec_sb_connection *,
+const struct smap *);
+void nbrec_sb_connection_index_set_inactivity_probe(const struct nbrec_sb_connection *,
+const int64_t *inactivity_probe, size_t n_inactivity_probe);
+void nbrec_sb_connection_index_set_is_connected(const struct nbrec_sb_connection *,
+bool is_connected);
+void nbrec_sb_connection_index_set_max_backoff(const struct nbrec_sb_connection *,
+const int64_t *max_backoff, size_t n_max_backoff);
+void nbrec_sb_connection_index_set_other_config(const struct nbrec_sb_connection *,
+const struct smap *);
+void nbrec_sb_connection_index_set_read_only(const struct nbrec_sb_connection *,
+bool read_only);
+void nbrec_sb_connection_index_set_role(const struct nbrec_sb_connection *,
+const char *role);
+void nbrec_sb_connection_index_set_status(const struct nbrec_sb_connection *,
+const struct smap *);
+void nbrec_sb_connection_index_set_target(const struct nbrec_sb_connection *,
+const char *target);
+
+/* SB_DHCP_Options table. */
+struct nbrec_sb_dhcp_options {
+	struct ovsdb_idl_row header_;
+
+	/* code column. */
+	int64_t code;
+
+	/* name column. */
+	char *name;	/* Always nonnull. */
+
+	/* type column. */
+	char *type;	/* Always nonnull. */
+};
+
+enum nbrec_sb_dhcp_options_column_id {
+    NBREC_SB_DHCP_OPTIONS_COL_CODE,
+    NBREC_SB_DHCP_OPTIONS_COL_NAME,
+    NBREC_SB_DHCP_OPTIONS_COL_TYPE,
+    NBREC_SB_DHCP_OPTIONS_N_COLUMNS
+};
+
+#define nbrec_sb_dhcp_options_col_code (nbrec_sb_dhcp_options_columns[NBREC_SB_DHCP_OPTIONS_COL_CODE])
+#define nbrec_sb_dhcp_options_col_type (nbrec_sb_dhcp_options_columns[NBREC_SB_DHCP_OPTIONS_COL_TYPE])
+#define nbrec_sb_dhcp_options_col_name (nbrec_sb_dhcp_options_columns[NBREC_SB_DHCP_OPTIONS_COL_NAME])
+
+extern struct ovsdb_idl_column nbrec_sb_dhcp_options_columns[NBREC_SB_DHCP_OPTIONS_N_COLUMNS];
+
+const struct nbrec_sb_dhcp_options_table *nbrec_sb_dhcp_options_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_table_first(const struct nbrec_sb_dhcp_options_table *);
+
+#define NBREC_SB_DHCP_OPTIONS_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_dhcp_options_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_dhcp_options_next(ROW))
+#define NBREC_SB_DHCP_OPTIONS_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_dhcp_options_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_dhcp_options_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_table_get_for_uuid(const struct nbrec_sb_dhcp_options_table *, const struct uuid *);
+const struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_first(const struct ovsdb_idl *);
+const struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_next(const struct nbrec_sb_dhcp_options *);
+#define NBREC_SB_DHCP_OPTIONS_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_dhcp_options_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_dhcp_options_next(ROW))
+#define NBREC_SB_DHCP_OPTIONS_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_dhcp_options_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_dhcp_options_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_dhcp_options_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_dhcp_options_row_get_seqno(const struct nbrec_sb_dhcp_options *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_track_get_next(const struct nbrec_sb_dhcp_options *);
+#define NBREC_SB_DHCP_OPTIONS_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_dhcp_options_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_dhcp_options_track_get_next(ROW))
+
+const struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_table_track_get_first(const struct nbrec_sb_dhcp_options_table *);
+#define NBREC_SB_DHCP_OPTIONS_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_dhcp_options_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_dhcp_options_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_dhcp_options_is_new(const struct nbrec_sb_dhcp_options *row)
+{
+    return nbrec_sb_dhcp_options_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_dhcp_options_is_deleted(const struct nbrec_sb_dhcp_options *row)
+{
+    return nbrec_sb_dhcp_options_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_dhcp_options_index_destroy_row(const struct nbrec_sb_dhcp_options *);
+
+struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_dhcp_options *);
+
+int nbrec_sb_dhcp_options_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_dhcp_options *, 
+    const struct nbrec_sb_dhcp_options *);
+struct ovsdb_idl_cursor nbrec_sb_dhcp_options_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_dhcp_options_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_dhcp_options *);
+struct ovsdb_idl_cursor nbrec_sb_dhcp_options_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_dhcp_options *);
+
+struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_DHCP_OPTIONS_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_dhcp_options_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_dhcp_options_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_dhcp_options_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_DHCP_OPTIONS_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_dhcp_options_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_dhcp_options_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_DHCP_OPTIONS_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_dhcp_options_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_dhcp_options_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_dhcp_options_init(struct nbrec_sb_dhcp_options *);
+void nbrec_sb_dhcp_options_delete(const struct nbrec_sb_dhcp_options *);
+struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_dhcp_options_is_updated(const struct nbrec_sb_dhcp_options *, enum nbrec_sb_dhcp_options_column_id);
+
+void nbrec_sb_dhcp_options_verify_code(const struct nbrec_sb_dhcp_options *);
+void nbrec_sb_dhcp_options_verify_name(const struct nbrec_sb_dhcp_options *);
+void nbrec_sb_dhcp_options_verify_type(const struct nbrec_sb_dhcp_options *);
+
+const struct ovsdb_datum *nbrec_sb_dhcp_options_get_code(const struct nbrec_sb_dhcp_options *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_dhcp_options_get_name(const struct nbrec_sb_dhcp_options *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_dhcp_options_get_type(const struct nbrec_sb_dhcp_options *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_dhcp_options_set_code(const struct nbrec_sb_dhcp_options *, int64_t code);
+void nbrec_sb_dhcp_options_set_name(const struct nbrec_sb_dhcp_options *, const char *name);
+void nbrec_sb_dhcp_options_set_type(const struct nbrec_sb_dhcp_options *, const char *type);
+
+void nbrec_sb_dhcp_options_add_clause_code(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t code);
+void nbrec_sb_dhcp_options_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_dhcp_options_add_clause_name(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *name);
+void nbrec_sb_dhcp_options_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_dhcp_options_add_clause_type(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *type);
+void nbrec_sb_dhcp_options_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_options_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_dhcp_options_index_set_code(const struct nbrec_sb_dhcp_options *,
+int64_t code);
+void nbrec_sb_dhcp_options_index_set_name(const struct nbrec_sb_dhcp_options *,
+const char *name);
+void nbrec_sb_dhcp_options_index_set_type(const struct nbrec_sb_dhcp_options *,
+const char *type);
+
+/* SB_DHCPv6_Options table. */
+struct nbrec_sb_dhcpv6_options {
+	struct ovsdb_idl_row header_;
+
+	/* code column. */
+	int64_t code;
+
+	/* name column. */
+	char *name;	/* Always nonnull. */
+
+	/* type column. */
+	char *type;	/* Always nonnull. */
+};
+
+enum nbrec_sb_dhcpv6_options_column_id {
+    NBREC_SB_DHCPV6_OPTIONS_COL_CODE,
+    NBREC_SB_DHCPV6_OPTIONS_COL_NAME,
+    NBREC_SB_DHCPV6_OPTIONS_COL_TYPE,
+    NBREC_SB_DHCPV6_OPTIONS_N_COLUMNS
+};
+
+#define nbrec_sb_dhcpv6_options_col_code (nbrec_sb_dhcpv6_options_columns[NBREC_SB_DHCPV6_OPTIONS_COL_CODE])
+#define nbrec_sb_dhcpv6_options_col_type (nbrec_sb_dhcpv6_options_columns[NBREC_SB_DHCPV6_OPTIONS_COL_TYPE])
+#define nbrec_sb_dhcpv6_options_col_name (nbrec_sb_dhcpv6_options_columns[NBREC_SB_DHCPV6_OPTIONS_COL_NAME])
+
+extern struct ovsdb_idl_column nbrec_sb_dhcpv6_options_columns[NBREC_SB_DHCPV6_OPTIONS_N_COLUMNS];
+
+const struct nbrec_sb_dhcpv6_options_table *nbrec_sb_dhcpv6_options_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_table_first(const struct nbrec_sb_dhcpv6_options_table *);
+
+#define NBREC_SB_DHCPV6_OPTIONS_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_dhcpv6_options_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_dhcpv6_options_next(ROW))
+#define NBREC_SB_DHCPV6_OPTIONS_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_dhcpv6_options_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_dhcpv6_options_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_table_get_for_uuid(const struct nbrec_sb_dhcpv6_options_table *, const struct uuid *);
+const struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_first(const struct ovsdb_idl *);
+const struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_next(const struct nbrec_sb_dhcpv6_options *);
+#define NBREC_SB_DHCPV6_OPTIONS_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_dhcpv6_options_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_dhcpv6_options_next(ROW))
+#define NBREC_SB_DHCPV6_OPTIONS_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_dhcpv6_options_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_dhcpv6_options_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_dhcpv6_options_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_dhcpv6_options_row_get_seqno(const struct nbrec_sb_dhcpv6_options *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_track_get_next(const struct nbrec_sb_dhcpv6_options *);
+#define NBREC_SB_DHCPV6_OPTIONS_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_dhcpv6_options_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_dhcpv6_options_track_get_next(ROW))
+
+const struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_table_track_get_first(const struct nbrec_sb_dhcpv6_options_table *);
+#define NBREC_SB_DHCPV6_OPTIONS_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_dhcpv6_options_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_dhcpv6_options_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_dhcpv6_options_is_new(const struct nbrec_sb_dhcpv6_options *row)
+{
+    return nbrec_sb_dhcpv6_options_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_dhcpv6_options_is_deleted(const struct nbrec_sb_dhcpv6_options *row)
+{
+    return nbrec_sb_dhcpv6_options_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_dhcpv6_options_index_destroy_row(const struct nbrec_sb_dhcpv6_options *);
+
+struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_dhcpv6_options *);
+
+int nbrec_sb_dhcpv6_options_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_dhcpv6_options *, 
+    const struct nbrec_sb_dhcpv6_options *);
+struct ovsdb_idl_cursor nbrec_sb_dhcpv6_options_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_dhcpv6_options_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_dhcpv6_options *);
+struct ovsdb_idl_cursor nbrec_sb_dhcpv6_options_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_dhcpv6_options *);
+
+struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_DHCPV6_OPTIONS_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_dhcpv6_options_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_dhcpv6_options_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_dhcpv6_options_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_DHCPV6_OPTIONS_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_dhcpv6_options_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_dhcpv6_options_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_DHCPV6_OPTIONS_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_dhcpv6_options_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_dhcpv6_options_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_dhcpv6_options_init(struct nbrec_sb_dhcpv6_options *);
+void nbrec_sb_dhcpv6_options_delete(const struct nbrec_sb_dhcpv6_options *);
+struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_dhcpv6_options_is_updated(const struct nbrec_sb_dhcpv6_options *, enum nbrec_sb_dhcpv6_options_column_id);
+
+void nbrec_sb_dhcpv6_options_verify_code(const struct nbrec_sb_dhcpv6_options *);
+void nbrec_sb_dhcpv6_options_verify_name(const struct nbrec_sb_dhcpv6_options *);
+void nbrec_sb_dhcpv6_options_verify_type(const struct nbrec_sb_dhcpv6_options *);
+
+const struct ovsdb_datum *nbrec_sb_dhcpv6_options_get_code(const struct nbrec_sb_dhcpv6_options *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_dhcpv6_options_get_name(const struct nbrec_sb_dhcpv6_options *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_dhcpv6_options_get_type(const struct nbrec_sb_dhcpv6_options *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_dhcpv6_options_set_code(const struct nbrec_sb_dhcpv6_options *, int64_t code);
+void nbrec_sb_dhcpv6_options_set_name(const struct nbrec_sb_dhcpv6_options *, const char *name);
+void nbrec_sb_dhcpv6_options_set_type(const struct nbrec_sb_dhcpv6_options *, const char *type);
+
+void nbrec_sb_dhcpv6_options_add_clause_code(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t code);
+void nbrec_sb_dhcpv6_options_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_dhcpv6_options_add_clause_name(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *name);
+void nbrec_sb_dhcpv6_options_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_dhcpv6_options_add_clause_type(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *type);
+void nbrec_sb_dhcpv6_options_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_options_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_dhcpv6_options_index_set_code(const struct nbrec_sb_dhcpv6_options *,
+int64_t code);
+void nbrec_sb_dhcpv6_options_index_set_name(const struct nbrec_sb_dhcpv6_options *,
+const char *name);
+void nbrec_sb_dhcpv6_options_index_set_type(const struct nbrec_sb_dhcpv6_options *,
+const char *type);
+
+/* SB_DNS table. */
+struct nbrec_sb_dns {
+	struct ovsdb_idl_row header_;
+
+	/* datapaths column. */
+	struct nbrec_sb_datapath_binding **datapaths;
+	size_t n_datapaths;
+
+	/* external_ids column. */
+	struct smap external_ids;
+
+	/* records column. */
+	struct smap records;
+};
+
+enum nbrec_sb_dns_column_id {
+    NBREC_SB_DNS_COL_DATAPATHS,
+    NBREC_SB_DNS_COL_EXTERNAL_IDS,
+    NBREC_SB_DNS_COL_RECORDS,
+    NBREC_SB_DNS_N_COLUMNS
+};
+
+#define nbrec_sb_dns_col_records (nbrec_sb_dns_columns[NBREC_SB_DNS_COL_RECORDS])
+#define nbrec_sb_dns_col_external_ids (nbrec_sb_dns_columns[NBREC_SB_DNS_COL_EXTERNAL_IDS])
+#define nbrec_sb_dns_col_datapaths (nbrec_sb_dns_columns[NBREC_SB_DNS_COL_DATAPATHS])
+
+extern struct ovsdb_idl_column nbrec_sb_dns_columns[NBREC_SB_DNS_N_COLUMNS];
+
+const struct nbrec_sb_dns_table *nbrec_sb_dns_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_dns *nbrec_sb_dns_table_first(const struct nbrec_sb_dns_table *);
+
+#define NBREC_SB_DNS_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_dns_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_dns_next(ROW))
+#define NBREC_SB_DNS_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_dns_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_dns_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_dns *nbrec_sb_dns_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_dns *nbrec_sb_dns_table_get_for_uuid(const struct nbrec_sb_dns_table *, const struct uuid *);
+const struct nbrec_sb_dns *nbrec_sb_dns_first(const struct ovsdb_idl *);
+const struct nbrec_sb_dns *nbrec_sb_dns_next(const struct nbrec_sb_dns *);
+#define NBREC_SB_DNS_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_dns_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_dns_next(ROW))
+#define NBREC_SB_DNS_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_dns_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_dns_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_dns_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_dns_row_get_seqno(const struct nbrec_sb_dns *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_dns *nbrec_sb_dns_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_dns *nbrec_sb_dns_track_get_next(const struct nbrec_sb_dns *);
+#define NBREC_SB_DNS_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_dns_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_dns_track_get_next(ROW))
+
+const struct nbrec_sb_dns *nbrec_sb_dns_table_track_get_first(const struct nbrec_sb_dns_table *);
+#define NBREC_SB_DNS_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_dns_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_dns_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_dns_is_new(const struct nbrec_sb_dns *row)
+{
+    return nbrec_sb_dns_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_dns_is_deleted(const struct nbrec_sb_dns *row)
+{
+    return nbrec_sb_dns_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_dns_index_destroy_row(const struct nbrec_sb_dns *);
+
+struct nbrec_sb_dns *nbrec_sb_dns_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_dns *);
+
+int nbrec_sb_dns_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_dns *, 
+    const struct nbrec_sb_dns *);
+struct ovsdb_idl_cursor nbrec_sb_dns_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_dns_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_dns *);
+struct ovsdb_idl_cursor nbrec_sb_dns_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_dns *);
+
+struct nbrec_sb_dns *nbrec_sb_dns_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_DNS_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_dns_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_dns_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_dns_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_DNS_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_dns_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_dns_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_DNS_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_dns_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_dns_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_dns_init(struct nbrec_sb_dns *);
+void nbrec_sb_dns_delete(const struct nbrec_sb_dns *);
+struct nbrec_sb_dns *nbrec_sb_dns_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_dns_is_updated(const struct nbrec_sb_dns *, enum nbrec_sb_dns_column_id);
+
+void nbrec_sb_dns_verify_datapaths(const struct nbrec_sb_dns *);
+void nbrec_sb_dns_verify_external_ids(const struct nbrec_sb_dns *);
+void nbrec_sb_dns_verify_records(const struct nbrec_sb_dns *);
+
+const struct ovsdb_datum *nbrec_sb_dns_get_datapaths(const struct nbrec_sb_dns *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_dns_get_external_ids(const struct nbrec_sb_dns *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_dns_get_records(const struct nbrec_sb_dns *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+
+void nbrec_sb_dns_set_datapaths(const struct nbrec_sb_dns *, struct nbrec_sb_datapath_binding **datapaths, size_t n_datapaths);
+void nbrec_sb_dns_set_external_ids(const struct nbrec_sb_dns *, const struct smap *);
+void nbrec_sb_dns_set_records(const struct nbrec_sb_dns *, const struct smap *);
+
+void nbrec_sb_dns_update_datapaths_addvalue(const struct nbrec_sb_dns *,  const struct nbrec_sb_datapath_binding *);
+void nbrec_sb_dns_update_datapaths_delvalue(const struct nbrec_sb_dns *,  const struct nbrec_sb_datapath_binding *);
+void nbrec_sb_dns_add_clause_datapaths(struct ovsdb_idl_condition *, enum ovsdb_function function, struct uuid **datapaths, size_t n_datapaths);
+void nbrec_sb_dns_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_dns_update_external_ids_setkey(const struct nbrec_sb_dns *,  const char *, const char *);
+void nbrec_sb_dns_update_external_ids_delkey(const struct nbrec_sb_dns *,  const char *);
+void nbrec_sb_dns_add_clause_external_ids(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_dns_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_dns_update_records_setkey(const struct nbrec_sb_dns *,  const char *, const char *);
+void nbrec_sb_dns_update_records_delkey(const struct nbrec_sb_dns *,  const char *);
+void nbrec_sb_dns_add_clause_records(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_dns_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_dns *nbrec_sb_dns_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_dns_index_set_datapaths(const struct nbrec_sb_dns *,
+struct nbrec_sb_datapath_binding **datapaths, size_t n_datapaths);
+void nbrec_sb_dns_index_set_external_ids(const struct nbrec_sb_dns *,
+const struct smap *);
+void nbrec_sb_dns_index_set_records(const struct nbrec_sb_dns *,
+const struct smap *);
+
+/* SB_Datapath_Binding table. */
+struct nbrec_sb_datapath_binding {
+	struct ovsdb_idl_row header_;
+
+	/* external_ids column. */
+	struct smap external_ids;
+
+	/* tunnel_key column. */
+	int64_t tunnel_key;
+};
+
+enum nbrec_sb_datapath_binding_column_id {
+    NBREC_SB_DATAPATH_BINDING_COL_EXTERNAL_IDS,
+    NBREC_SB_DATAPATH_BINDING_COL_TUNNEL_KEY,
+    NBREC_SB_DATAPATH_BINDING_N_COLUMNS
+};
+
+#define nbrec_sb_datapath_binding_col_tunnel_key (nbrec_sb_datapath_binding_columns[NBREC_SB_DATAPATH_BINDING_COL_TUNNEL_KEY])
+#define nbrec_sb_datapath_binding_col_external_ids (nbrec_sb_datapath_binding_columns[NBREC_SB_DATAPATH_BINDING_COL_EXTERNAL_IDS])
+
+extern struct ovsdb_idl_column nbrec_sb_datapath_binding_columns[NBREC_SB_DATAPATH_BINDING_N_COLUMNS];
+
+const struct nbrec_sb_datapath_binding_table *nbrec_sb_datapath_binding_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_table_first(const struct nbrec_sb_datapath_binding_table *);
+
+#define NBREC_SB_DATAPATH_BINDING_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_datapath_binding_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_datapath_binding_next(ROW))
+#define NBREC_SB_DATAPATH_BINDING_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_datapath_binding_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_datapath_binding_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_table_get_for_uuid(const struct nbrec_sb_datapath_binding_table *, const struct uuid *);
+const struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_first(const struct ovsdb_idl *);
+const struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_next(const struct nbrec_sb_datapath_binding *);
+#define NBREC_SB_DATAPATH_BINDING_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_datapath_binding_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_datapath_binding_next(ROW))
+#define NBREC_SB_DATAPATH_BINDING_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_datapath_binding_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_datapath_binding_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_datapath_binding_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_datapath_binding_row_get_seqno(const struct nbrec_sb_datapath_binding *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_track_get_next(const struct nbrec_sb_datapath_binding *);
+#define NBREC_SB_DATAPATH_BINDING_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_datapath_binding_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_datapath_binding_track_get_next(ROW))
+
+const struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_table_track_get_first(const struct nbrec_sb_datapath_binding_table *);
+#define NBREC_SB_DATAPATH_BINDING_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_datapath_binding_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_datapath_binding_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_datapath_binding_is_new(const struct nbrec_sb_datapath_binding *row)
+{
+    return nbrec_sb_datapath_binding_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_datapath_binding_is_deleted(const struct nbrec_sb_datapath_binding *row)
+{
+    return nbrec_sb_datapath_binding_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_datapath_binding_index_destroy_row(const struct nbrec_sb_datapath_binding *);
+
+struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_datapath_binding *);
+
+int nbrec_sb_datapath_binding_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_datapath_binding *, 
+    const struct nbrec_sb_datapath_binding *);
+struct ovsdb_idl_cursor nbrec_sb_datapath_binding_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_datapath_binding_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_datapath_binding *);
+struct ovsdb_idl_cursor nbrec_sb_datapath_binding_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_datapath_binding *);
+
+struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_DATAPATH_BINDING_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_datapath_binding_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_datapath_binding_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_datapath_binding_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_DATAPATH_BINDING_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_datapath_binding_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_datapath_binding_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_DATAPATH_BINDING_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_datapath_binding_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_datapath_binding_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_datapath_binding_init(struct nbrec_sb_datapath_binding *);
+void nbrec_sb_datapath_binding_delete(const struct nbrec_sb_datapath_binding *);
+struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_datapath_binding_is_updated(const struct nbrec_sb_datapath_binding *, enum nbrec_sb_datapath_binding_column_id);
+
+void nbrec_sb_datapath_binding_verify_external_ids(const struct nbrec_sb_datapath_binding *);
+void nbrec_sb_datapath_binding_verify_tunnel_key(const struct nbrec_sb_datapath_binding *);
+
+const struct ovsdb_datum *nbrec_sb_datapath_binding_get_external_ids(const struct nbrec_sb_datapath_binding *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_datapath_binding_get_tunnel_key(const struct nbrec_sb_datapath_binding *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_datapath_binding_set_external_ids(const struct nbrec_sb_datapath_binding *, const struct smap *);
+void nbrec_sb_datapath_binding_set_tunnel_key(const struct nbrec_sb_datapath_binding *, int64_t tunnel_key);
+
+void nbrec_sb_datapath_binding_update_external_ids_setkey(const struct nbrec_sb_datapath_binding *,  const char *, const char *);
+void nbrec_sb_datapath_binding_update_external_ids_delkey(const struct nbrec_sb_datapath_binding *,  const char *);
+void nbrec_sb_datapath_binding_add_clause_external_ids(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_datapath_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_datapath_binding_add_clause_tunnel_key(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t tunnel_key);
+void nbrec_sb_datapath_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_datapath_binding *nbrec_sb_datapath_binding_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_datapath_binding_index_set_external_ids(const struct nbrec_sb_datapath_binding *,
+const struct smap *);
+void nbrec_sb_datapath_binding_index_set_tunnel_key(const struct nbrec_sb_datapath_binding *,
+int64_t tunnel_key);
+
+/* SB_Encap table. */
+struct nbrec_sb_encap {
+	struct ovsdb_idl_row header_;
+
+	/* chassis_name column. */
+	char *chassis_name;	/* Always nonnull. */
+
+	/* ip column. */
+	char *ip;	/* Always nonnull. */
+
+	/* options column. */
+	struct smap options;
+
+	/* type column. */
+	char *type;	/* Always nonnull. */
+};
+
+enum nbrec_sb_encap_column_id {
+    NBREC_SB_ENCAP_COL_CHASSIS_NAME,
+    NBREC_SB_ENCAP_COL_IP,
+    NBREC_SB_ENCAP_COL_OPTIONS,
+    NBREC_SB_ENCAP_COL_TYPE,
+    NBREC_SB_ENCAP_N_COLUMNS
+};
+
+#define nbrec_sb_encap_col_ip (nbrec_sb_encap_columns[NBREC_SB_ENCAP_COL_IP])
+#define nbrec_sb_encap_col_chassis_name (nbrec_sb_encap_columns[NBREC_SB_ENCAP_COL_CHASSIS_NAME])
+#define nbrec_sb_encap_col_type (nbrec_sb_encap_columns[NBREC_SB_ENCAP_COL_TYPE])
+#define nbrec_sb_encap_col_options (nbrec_sb_encap_columns[NBREC_SB_ENCAP_COL_OPTIONS])
+
+extern struct ovsdb_idl_column nbrec_sb_encap_columns[NBREC_SB_ENCAP_N_COLUMNS];
+
+const struct nbrec_sb_encap_table *nbrec_sb_encap_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_encap *nbrec_sb_encap_table_first(const struct nbrec_sb_encap_table *);
+
+#define NBREC_SB_ENCAP_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_encap_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_encap_next(ROW))
+#define NBREC_SB_ENCAP_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_encap_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_encap_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_encap *nbrec_sb_encap_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_encap *nbrec_sb_encap_table_get_for_uuid(const struct nbrec_sb_encap_table *, const struct uuid *);
+const struct nbrec_sb_encap *nbrec_sb_encap_first(const struct ovsdb_idl *);
+const struct nbrec_sb_encap *nbrec_sb_encap_next(const struct nbrec_sb_encap *);
+#define NBREC_SB_ENCAP_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_encap_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_encap_next(ROW))
+#define NBREC_SB_ENCAP_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_encap_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_encap_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_encap_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_encap_row_get_seqno(const struct nbrec_sb_encap *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_encap *nbrec_sb_encap_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_encap *nbrec_sb_encap_track_get_next(const struct nbrec_sb_encap *);
+#define NBREC_SB_ENCAP_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_encap_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_encap_track_get_next(ROW))
+
+const struct nbrec_sb_encap *nbrec_sb_encap_table_track_get_first(const struct nbrec_sb_encap_table *);
+#define NBREC_SB_ENCAP_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_encap_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_encap_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_encap_is_new(const struct nbrec_sb_encap *row)
+{
+    return nbrec_sb_encap_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_encap_is_deleted(const struct nbrec_sb_encap *row)
+{
+    return nbrec_sb_encap_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_encap_index_destroy_row(const struct nbrec_sb_encap *);
+
+struct nbrec_sb_encap *nbrec_sb_encap_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_encap *);
+
+int nbrec_sb_encap_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_encap *, 
+    const struct nbrec_sb_encap *);
+struct ovsdb_idl_cursor nbrec_sb_encap_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_encap_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_encap *);
+struct ovsdb_idl_cursor nbrec_sb_encap_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_encap *);
+
+struct nbrec_sb_encap *nbrec_sb_encap_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_ENCAP_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_encap_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_encap_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_encap_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_ENCAP_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_encap_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_encap_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_ENCAP_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_encap_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_encap_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_encap_init(struct nbrec_sb_encap *);
+void nbrec_sb_encap_delete(const struct nbrec_sb_encap *);
+struct nbrec_sb_encap *nbrec_sb_encap_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_encap_is_updated(const struct nbrec_sb_encap *, enum nbrec_sb_encap_column_id);
+
+void nbrec_sb_encap_verify_chassis_name(const struct nbrec_sb_encap *);
+void nbrec_sb_encap_verify_ip(const struct nbrec_sb_encap *);
+void nbrec_sb_encap_verify_options(const struct nbrec_sb_encap *);
+void nbrec_sb_encap_verify_type(const struct nbrec_sb_encap *);
+
+const struct ovsdb_datum *nbrec_sb_encap_get_chassis_name(const struct nbrec_sb_encap *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_encap_get_ip(const struct nbrec_sb_encap *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_encap_get_options(const struct nbrec_sb_encap *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_encap_get_type(const struct nbrec_sb_encap *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_encap_set_chassis_name(const struct nbrec_sb_encap *, const char *chassis_name);
+void nbrec_sb_encap_set_ip(const struct nbrec_sb_encap *, const char *ip);
+void nbrec_sb_encap_set_options(const struct nbrec_sb_encap *, const struct smap *);
+void nbrec_sb_encap_set_type(const struct nbrec_sb_encap *, const char *type);
+
+void nbrec_sb_encap_add_clause_chassis_name(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *chassis_name);
+void nbrec_sb_encap_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_encap_add_clause_ip(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *ip);
+void nbrec_sb_encap_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_encap_update_options_setkey(const struct nbrec_sb_encap *,  const char *, const char *);
+void nbrec_sb_encap_update_options_delkey(const struct nbrec_sb_encap *,  const char *);
+void nbrec_sb_encap_add_clause_options(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_encap_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_encap_add_clause_type(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *type);
+void nbrec_sb_encap_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_encap *nbrec_sb_encap_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_encap_index_set_chassis_name(const struct nbrec_sb_encap *,
+const char *chassis_name);
+void nbrec_sb_encap_index_set_ip(const struct nbrec_sb_encap *,
+const char *ip);
+void nbrec_sb_encap_index_set_options(const struct nbrec_sb_encap *,
+const struct smap *);
+void nbrec_sb_encap_index_set_type(const struct nbrec_sb_encap *,
+const char *type);
+
+/* SB_Gateway_Chassis table. */
+struct nbrec_sb_gateway_chassis {
+	struct ovsdb_idl_row header_;
+
+	/* chassis column. */
+	struct nbrec_sb_chassis *chassis;
+
+	/* external_ids column. */
+	struct smap external_ids;
+
+	/* name column. */
+	char *name;	/* Always nonnull. */
+
+	/* options column. */
+	struct smap options;
+
+	/* priority column. */
+	int64_t priority;
+};
+
+enum nbrec_sb_gateway_chassis_column_id {
+    NBREC_SB_GATEWAY_CHASSIS_COL_CHASSIS,
+    NBREC_SB_GATEWAY_CHASSIS_COL_EXTERNAL_IDS,
+    NBREC_SB_GATEWAY_CHASSIS_COL_NAME,
+    NBREC_SB_GATEWAY_CHASSIS_COL_OPTIONS,
+    NBREC_SB_GATEWAY_CHASSIS_COL_PRIORITY,
+    NBREC_SB_GATEWAY_CHASSIS_N_COLUMNS
+};
+
+#define nbrec_sb_gateway_chassis_col_priority (nbrec_sb_gateway_chassis_columns[NBREC_SB_GATEWAY_CHASSIS_COL_PRIORITY])
+#define nbrec_sb_gateway_chassis_col_external_ids (nbrec_sb_gateway_chassis_columns[NBREC_SB_GATEWAY_CHASSIS_COL_EXTERNAL_IDS])
+#define nbrec_sb_gateway_chassis_col_chassis (nbrec_sb_gateway_chassis_columns[NBREC_SB_GATEWAY_CHASSIS_COL_CHASSIS])
+#define nbrec_sb_gateway_chassis_col_name (nbrec_sb_gateway_chassis_columns[NBREC_SB_GATEWAY_CHASSIS_COL_NAME])
+#define nbrec_sb_gateway_chassis_col_options (nbrec_sb_gateway_chassis_columns[NBREC_SB_GATEWAY_CHASSIS_COL_OPTIONS])
+
+extern struct ovsdb_idl_column nbrec_sb_gateway_chassis_columns[NBREC_SB_GATEWAY_CHASSIS_N_COLUMNS];
+
+const struct nbrec_sb_gateway_chassis_table *nbrec_sb_gateway_chassis_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_table_first(const struct nbrec_sb_gateway_chassis_table *);
+
+#define NBREC_SB_GATEWAY_CHASSIS_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_gateway_chassis_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_gateway_chassis_next(ROW))
+#define NBREC_SB_GATEWAY_CHASSIS_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_gateway_chassis_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_gateway_chassis_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_table_get_for_uuid(const struct nbrec_sb_gateway_chassis_table *, const struct uuid *);
+const struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_first(const struct ovsdb_idl *);
+const struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_next(const struct nbrec_sb_gateway_chassis *);
+#define NBREC_SB_GATEWAY_CHASSIS_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_gateway_chassis_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_gateway_chassis_next(ROW))
+#define NBREC_SB_GATEWAY_CHASSIS_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_gateway_chassis_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_gateway_chassis_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_gateway_chassis_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_gateway_chassis_row_get_seqno(const struct nbrec_sb_gateway_chassis *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_track_get_next(const struct nbrec_sb_gateway_chassis *);
+#define NBREC_SB_GATEWAY_CHASSIS_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_gateway_chassis_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_gateway_chassis_track_get_next(ROW))
+
+const struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_table_track_get_first(const struct nbrec_sb_gateway_chassis_table *);
+#define NBREC_SB_GATEWAY_CHASSIS_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_gateway_chassis_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_gateway_chassis_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_gateway_chassis_is_new(const struct nbrec_sb_gateway_chassis *row)
+{
+    return nbrec_sb_gateway_chassis_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_gateway_chassis_is_deleted(const struct nbrec_sb_gateway_chassis *row)
+{
+    return nbrec_sb_gateway_chassis_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_gateway_chassis_index_destroy_row(const struct nbrec_sb_gateway_chassis *);
+
+struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_gateway_chassis *);
+
+int nbrec_sb_gateway_chassis_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_gateway_chassis *, 
+    const struct nbrec_sb_gateway_chassis *);
+struct ovsdb_idl_cursor nbrec_sb_gateway_chassis_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_gateway_chassis_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_gateway_chassis *);
+struct ovsdb_idl_cursor nbrec_sb_gateway_chassis_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_gateway_chassis *);
+
+struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_GATEWAY_CHASSIS_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_gateway_chassis_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_gateway_chassis_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_gateway_chassis_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_GATEWAY_CHASSIS_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_gateway_chassis_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_gateway_chassis_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_GATEWAY_CHASSIS_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_gateway_chassis_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_gateway_chassis_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_gateway_chassis_init(struct nbrec_sb_gateway_chassis *);
+void nbrec_sb_gateway_chassis_delete(const struct nbrec_sb_gateway_chassis *);
+struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_gateway_chassis_is_updated(const struct nbrec_sb_gateway_chassis *, enum nbrec_sb_gateway_chassis_column_id);
+
+void nbrec_sb_gateway_chassis_verify_chassis(const struct nbrec_sb_gateway_chassis *);
+void nbrec_sb_gateway_chassis_verify_external_ids(const struct nbrec_sb_gateway_chassis *);
+void nbrec_sb_gateway_chassis_verify_name(const struct nbrec_sb_gateway_chassis *);
+void nbrec_sb_gateway_chassis_verify_options(const struct nbrec_sb_gateway_chassis *);
+void nbrec_sb_gateway_chassis_verify_priority(const struct nbrec_sb_gateway_chassis *);
+
+const struct ovsdb_datum *nbrec_sb_gateway_chassis_get_chassis(const struct nbrec_sb_gateway_chassis *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_gateway_chassis_get_external_ids(const struct nbrec_sb_gateway_chassis *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_gateway_chassis_get_name(const struct nbrec_sb_gateway_chassis *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_gateway_chassis_get_options(const struct nbrec_sb_gateway_chassis *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_gateway_chassis_get_priority(const struct nbrec_sb_gateway_chassis *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_gateway_chassis_set_chassis(const struct nbrec_sb_gateway_chassis *, const struct nbrec_sb_chassis *chassis);
+void nbrec_sb_gateway_chassis_set_external_ids(const struct nbrec_sb_gateway_chassis *, const struct smap *);
+void nbrec_sb_gateway_chassis_set_name(const struct nbrec_sb_gateway_chassis *, const char *name);
+void nbrec_sb_gateway_chassis_set_options(const struct nbrec_sb_gateway_chassis *, const struct smap *);
+void nbrec_sb_gateway_chassis_set_priority(const struct nbrec_sb_gateway_chassis *, int64_t priority);
+
+void nbrec_sb_gateway_chassis_update_chassis_addvalue(const struct nbrec_sb_gateway_chassis *,  const struct nbrec_sb_chassis *);
+void nbrec_sb_gateway_chassis_update_chassis_delvalue(const struct nbrec_sb_gateway_chassis *,  const struct nbrec_sb_chassis *);
+void nbrec_sb_gateway_chassis_add_clause_chassis(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct uuid *chassis);
+void nbrec_sb_gateway_chassis_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_gateway_chassis_update_external_ids_setkey(const struct nbrec_sb_gateway_chassis *,  const char *, const char *);
+void nbrec_sb_gateway_chassis_update_external_ids_delkey(const struct nbrec_sb_gateway_chassis *,  const char *);
+void nbrec_sb_gateway_chassis_add_clause_external_ids(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_gateway_chassis_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_gateway_chassis_add_clause_name(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *name);
+void nbrec_sb_gateway_chassis_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_gateway_chassis_update_options_setkey(const struct nbrec_sb_gateway_chassis *,  const char *, const char *);
+void nbrec_sb_gateway_chassis_update_options_delkey(const struct nbrec_sb_gateway_chassis *,  const char *);
+void nbrec_sb_gateway_chassis_add_clause_options(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_gateway_chassis_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_gateway_chassis_add_clause_priority(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t priority);
+void nbrec_sb_gateway_chassis_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_gateway_chassis *nbrec_sb_gateway_chassis_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_gateway_chassis_index_set_chassis(const struct nbrec_sb_gateway_chassis *,
+const struct nbrec_sb_chassis *chassis);
+void nbrec_sb_gateway_chassis_index_set_external_ids(const struct nbrec_sb_gateway_chassis *,
+const struct smap *);
+void nbrec_sb_gateway_chassis_index_set_name(const struct nbrec_sb_gateway_chassis *,
+const char *name);
+void nbrec_sb_gateway_chassis_index_set_options(const struct nbrec_sb_gateway_chassis *,
+const struct smap *);
+void nbrec_sb_gateway_chassis_index_set_priority(const struct nbrec_sb_gateway_chassis *,
+int64_t priority);
+
+/* SB_Global table. */
+struct nbrec_sb_global {
+	struct ovsdb_idl_row header_;
+
+	/* connections column. */
+	struct nbrec_sb_connection **connections;
+	size_t n_connections;
+
+	/* external_ids column. */
+	struct smap external_ids;
+
+	/* ipsec column. */
+	bool ipsec;
+
+	/* nb_cfg column. */
+	int64_t nb_cfg;
+
+	/* options column. */
+	struct smap options;
+
+	/* ssl column. */
+	struct nbrec_sb_ssl *ssl;
+};
+
+enum nbrec_sb_global_column_id {
+    NBREC_SB_GLOBAL_COL_CONNECTIONS,
+    NBREC_SB_GLOBAL_COL_EXTERNAL_IDS,
+    NBREC_SB_GLOBAL_COL_IPSEC,
+    NBREC_SB_GLOBAL_COL_NB_CFG,
+    NBREC_SB_GLOBAL_COL_OPTIONS,
+    NBREC_SB_GLOBAL_COL_SSL,
+    NBREC_SB_GLOBAL_N_COLUMNS
+};
+
+#define nbrec_sb_global_col_nb_cfg (nbrec_sb_global_columns[NBREC_SB_GLOBAL_COL_NB_CFG])
+#define nbrec_sb_global_col_connections (nbrec_sb_global_columns[NBREC_SB_GLOBAL_COL_CONNECTIONS])
+#define nbrec_sb_global_col_ssl (nbrec_sb_global_columns[NBREC_SB_GLOBAL_COL_SSL])
+#define nbrec_sb_global_col_external_ids (nbrec_sb_global_columns[NBREC_SB_GLOBAL_COL_EXTERNAL_IDS])
+#define nbrec_sb_global_col_options (nbrec_sb_global_columns[NBREC_SB_GLOBAL_COL_OPTIONS])
+#define nbrec_sb_global_col_ipsec (nbrec_sb_global_columns[NBREC_SB_GLOBAL_COL_IPSEC])
+
+extern struct ovsdb_idl_column nbrec_sb_global_columns[NBREC_SB_GLOBAL_N_COLUMNS];
+
+const struct nbrec_sb_global_table *nbrec_sb_global_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_global *nbrec_sb_global_table_first(const struct nbrec_sb_global_table *);
+
+#define NBREC_SB_GLOBAL_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_global_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_global_next(ROW))
+#define NBREC_SB_GLOBAL_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_global_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_global_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_global *nbrec_sb_global_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_global *nbrec_sb_global_table_get_for_uuid(const struct nbrec_sb_global_table *, const struct uuid *);
+const struct nbrec_sb_global *nbrec_sb_global_first(const struct ovsdb_idl *);
+const struct nbrec_sb_global *nbrec_sb_global_next(const struct nbrec_sb_global *);
+#define NBREC_SB_GLOBAL_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_global_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_global_next(ROW))
+#define NBREC_SB_GLOBAL_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_global_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_global_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_global_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_global_row_get_seqno(const struct nbrec_sb_global *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_global *nbrec_sb_global_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_global *nbrec_sb_global_track_get_next(const struct nbrec_sb_global *);
+#define NBREC_SB_GLOBAL_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_global_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_global_track_get_next(ROW))
+
+const struct nbrec_sb_global *nbrec_sb_global_table_track_get_first(const struct nbrec_sb_global_table *);
+#define NBREC_SB_GLOBAL_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_global_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_global_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_global_is_new(const struct nbrec_sb_global *row)
+{
+    return nbrec_sb_global_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_global_is_deleted(const struct nbrec_sb_global *row)
+{
+    return nbrec_sb_global_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_global_index_destroy_row(const struct nbrec_sb_global *);
+
+struct nbrec_sb_global *nbrec_sb_global_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_global *);
+
+int nbrec_sb_global_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_global *, 
+    const struct nbrec_sb_global *);
+struct ovsdb_idl_cursor nbrec_sb_global_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_global_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_global *);
+struct ovsdb_idl_cursor nbrec_sb_global_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_global *);
+
+struct nbrec_sb_global *nbrec_sb_global_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_GLOBAL_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_global_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_global_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_global_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_GLOBAL_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_global_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_global_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_GLOBAL_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_global_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_global_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_global_init(struct nbrec_sb_global *);
+void nbrec_sb_global_delete(const struct nbrec_sb_global *);
+struct nbrec_sb_global *nbrec_sb_global_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_global_is_updated(const struct nbrec_sb_global *, enum nbrec_sb_global_column_id);
+
+void nbrec_sb_global_verify_connections(const struct nbrec_sb_global *);
+void nbrec_sb_global_verify_external_ids(const struct nbrec_sb_global *);
+void nbrec_sb_global_verify_ipsec(const struct nbrec_sb_global *);
+void nbrec_sb_global_verify_nb_cfg(const struct nbrec_sb_global *);
+void nbrec_sb_global_verify_options(const struct nbrec_sb_global *);
+void nbrec_sb_global_verify_ssl(const struct nbrec_sb_global *);
+
+const struct ovsdb_datum *nbrec_sb_global_get_connections(const struct nbrec_sb_global *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_global_get_external_ids(const struct nbrec_sb_global *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_global_get_ipsec(const struct nbrec_sb_global *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_global_get_nb_cfg(const struct nbrec_sb_global *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_global_get_options(const struct nbrec_sb_global *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_global_get_ssl(const struct nbrec_sb_global *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_global_set_connections(const struct nbrec_sb_global *, struct nbrec_sb_connection **connections, size_t n_connections);
+void nbrec_sb_global_set_external_ids(const struct nbrec_sb_global *, const struct smap *);
+void nbrec_sb_global_set_ipsec(const struct nbrec_sb_global *, bool ipsec);
+void nbrec_sb_global_set_nb_cfg(const struct nbrec_sb_global *, int64_t nb_cfg);
+void nbrec_sb_global_set_options(const struct nbrec_sb_global *, const struct smap *);
+void nbrec_sb_global_set_ssl(const struct nbrec_sb_global *, const struct nbrec_sb_ssl *ssl);
+
+void nbrec_sb_global_update_connections_addvalue(const struct nbrec_sb_global *,  const struct nbrec_sb_connection *);
+void nbrec_sb_global_update_connections_delvalue(const struct nbrec_sb_global *,  const struct nbrec_sb_connection *);
+void nbrec_sb_global_add_clause_connections(struct ovsdb_idl_condition *, enum ovsdb_function function, struct uuid **connections, size_t n_connections);
+void nbrec_sb_global_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_global_update_external_ids_setkey(const struct nbrec_sb_global *,  const char *, const char *);
+void nbrec_sb_global_update_external_ids_delkey(const struct nbrec_sb_global *,  const char *);
+void nbrec_sb_global_add_clause_external_ids(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_global_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_global_add_clause_ipsec(struct ovsdb_idl_condition *, enum ovsdb_function function, bool ipsec);
+void nbrec_sb_global_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_global_add_clause_nb_cfg(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t nb_cfg);
+void nbrec_sb_global_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_global_update_options_setkey(const struct nbrec_sb_global *,  const char *, const char *);
+void nbrec_sb_global_update_options_delkey(const struct nbrec_sb_global *,  const char *);
+void nbrec_sb_global_add_clause_options(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_global_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_global_update_ssl_addvalue(const struct nbrec_sb_global *,  const struct nbrec_sb_ssl *);
+void nbrec_sb_global_update_ssl_delvalue(const struct nbrec_sb_global *,  const struct nbrec_sb_ssl *);
+void nbrec_sb_global_add_clause_ssl(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct uuid *ssl);
+void nbrec_sb_global_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_global *nbrec_sb_global_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_global_index_set_connections(const struct nbrec_sb_global *,
+struct nbrec_sb_connection **connections, size_t n_connections);
+void nbrec_sb_global_index_set_external_ids(const struct nbrec_sb_global *,
+const struct smap *);
+void nbrec_sb_global_index_set_ipsec(const struct nbrec_sb_global *,
+bool ipsec);
+void nbrec_sb_global_index_set_nb_cfg(const struct nbrec_sb_global *,
+int64_t nb_cfg);
+void nbrec_sb_global_index_set_options(const struct nbrec_sb_global *,
+const struct smap *);
+void nbrec_sb_global_index_set_ssl(const struct nbrec_sb_global *,
+const struct nbrec_sb_ssl *ssl);
+
+/* SB_Logical_Flow table. */
+struct nbrec_sb_logical_flow {
+	struct ovsdb_idl_row header_;
+
+	/* actions column. */
+	char *actions;	/* Always nonnull. */
+
+	/* external_ids column. */
+	struct smap external_ids;
+
+	/* logical_datapath column. */
+	struct nbrec_sb_datapath_binding *logical_datapath;
+
+	/* match column. */
+	char *match;	/* Always nonnull. */
+
+	/* pipeline column. */
+	char *pipeline;	/* Always nonnull. */
+
+	/* priority column. */
+	int64_t priority;
+
+	/* table_id column. */
+	int64_t table_id;
+};
+
+enum nbrec_sb_logical_flow_column_id {
+    NBREC_SB_LOGICAL_FLOW_COL_ACTIONS,
+    NBREC_SB_LOGICAL_FLOW_COL_EXTERNAL_IDS,
+    NBREC_SB_LOGICAL_FLOW_COL_LOGICAL_DATAPATH,
+    NBREC_SB_LOGICAL_FLOW_COL_MATCH,
+    NBREC_SB_LOGICAL_FLOW_COL_PIPELINE,
+    NBREC_SB_LOGICAL_FLOW_COL_PRIORITY,
+    NBREC_SB_LOGICAL_FLOW_COL_TABLE_ID,
+    NBREC_SB_LOGICAL_FLOW_N_COLUMNS
+};
+
+#define nbrec_sb_logical_flow_col_logical_datapath (nbrec_sb_logical_flow_columns[NBREC_SB_LOGICAL_FLOW_COL_LOGICAL_DATAPATH])
+#define nbrec_sb_logical_flow_col_pipeline (nbrec_sb_logical_flow_columns[NBREC_SB_LOGICAL_FLOW_COL_PIPELINE])
+#define nbrec_sb_logical_flow_col_actions (nbrec_sb_logical_flow_columns[NBREC_SB_LOGICAL_FLOW_COL_ACTIONS])
+#define nbrec_sb_logical_flow_col_priority (nbrec_sb_logical_flow_columns[NBREC_SB_LOGICAL_FLOW_COL_PRIORITY])
+#define nbrec_sb_logical_flow_col_table_id (nbrec_sb_logical_flow_columns[NBREC_SB_LOGICAL_FLOW_COL_TABLE_ID])
+#define nbrec_sb_logical_flow_col_external_ids (nbrec_sb_logical_flow_columns[NBREC_SB_LOGICAL_FLOW_COL_EXTERNAL_IDS])
+#define nbrec_sb_logical_flow_col_match (nbrec_sb_logical_flow_columns[NBREC_SB_LOGICAL_FLOW_COL_MATCH])
+
+extern struct ovsdb_idl_column nbrec_sb_logical_flow_columns[NBREC_SB_LOGICAL_FLOW_N_COLUMNS];
+
+const struct nbrec_sb_logical_flow_table *nbrec_sb_logical_flow_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_table_first(const struct nbrec_sb_logical_flow_table *);
+
+#define NBREC_SB_LOGICAL_FLOW_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_logical_flow_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_logical_flow_next(ROW))
+#define NBREC_SB_LOGICAL_FLOW_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_logical_flow_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_logical_flow_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_table_get_for_uuid(const struct nbrec_sb_logical_flow_table *, const struct uuid *);
+const struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_first(const struct ovsdb_idl *);
+const struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_next(const struct nbrec_sb_logical_flow *);
+#define NBREC_SB_LOGICAL_FLOW_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_logical_flow_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_logical_flow_next(ROW))
+#define NBREC_SB_LOGICAL_FLOW_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_logical_flow_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_logical_flow_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_logical_flow_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_logical_flow_row_get_seqno(const struct nbrec_sb_logical_flow *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_track_get_next(const struct nbrec_sb_logical_flow *);
+#define NBREC_SB_LOGICAL_FLOW_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_logical_flow_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_logical_flow_track_get_next(ROW))
+
+const struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_table_track_get_first(const struct nbrec_sb_logical_flow_table *);
+#define NBREC_SB_LOGICAL_FLOW_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_logical_flow_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_logical_flow_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_logical_flow_is_new(const struct nbrec_sb_logical_flow *row)
+{
+    return nbrec_sb_logical_flow_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_logical_flow_is_deleted(const struct nbrec_sb_logical_flow *row)
+{
+    return nbrec_sb_logical_flow_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_logical_flow_index_destroy_row(const struct nbrec_sb_logical_flow *);
+
+struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_logical_flow *);
+
+int nbrec_sb_logical_flow_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_logical_flow *, 
+    const struct nbrec_sb_logical_flow *);
+struct ovsdb_idl_cursor nbrec_sb_logical_flow_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_logical_flow_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_logical_flow *);
+struct ovsdb_idl_cursor nbrec_sb_logical_flow_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_logical_flow *);
+
+struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_LOGICAL_FLOW_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_logical_flow_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_logical_flow_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_logical_flow_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_LOGICAL_FLOW_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_logical_flow_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_logical_flow_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_LOGICAL_FLOW_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_logical_flow_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_logical_flow_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_logical_flow_init(struct nbrec_sb_logical_flow *);
+void nbrec_sb_logical_flow_delete(const struct nbrec_sb_logical_flow *);
+struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_logical_flow_is_updated(const struct nbrec_sb_logical_flow *, enum nbrec_sb_logical_flow_column_id);
+
+void nbrec_sb_logical_flow_verify_actions(const struct nbrec_sb_logical_flow *);
+void nbrec_sb_logical_flow_verify_external_ids(const struct nbrec_sb_logical_flow *);
+void nbrec_sb_logical_flow_verify_logical_datapath(const struct nbrec_sb_logical_flow *);
+void nbrec_sb_logical_flow_verify_match(const struct nbrec_sb_logical_flow *);
+void nbrec_sb_logical_flow_verify_pipeline(const struct nbrec_sb_logical_flow *);
+void nbrec_sb_logical_flow_verify_priority(const struct nbrec_sb_logical_flow *);
+void nbrec_sb_logical_flow_verify_table_id(const struct nbrec_sb_logical_flow *);
+
+const struct ovsdb_datum *nbrec_sb_logical_flow_get_actions(const struct nbrec_sb_logical_flow *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_logical_flow_get_external_ids(const struct nbrec_sb_logical_flow *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_logical_flow_get_logical_datapath(const struct nbrec_sb_logical_flow *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_logical_flow_get_match(const struct nbrec_sb_logical_flow *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_logical_flow_get_pipeline(const struct nbrec_sb_logical_flow *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_logical_flow_get_priority(const struct nbrec_sb_logical_flow *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_logical_flow_get_table_id(const struct nbrec_sb_logical_flow *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_logical_flow_set_actions(const struct nbrec_sb_logical_flow *, const char *actions);
+void nbrec_sb_logical_flow_set_external_ids(const struct nbrec_sb_logical_flow *, const struct smap *);
+void nbrec_sb_logical_flow_set_logical_datapath(const struct nbrec_sb_logical_flow *, const struct nbrec_sb_datapath_binding *logical_datapath);
+void nbrec_sb_logical_flow_set_match(const struct nbrec_sb_logical_flow *, const char *match);
+void nbrec_sb_logical_flow_set_pipeline(const struct nbrec_sb_logical_flow *, const char *pipeline);
+void nbrec_sb_logical_flow_set_priority(const struct nbrec_sb_logical_flow *, int64_t priority);
+void nbrec_sb_logical_flow_set_table_id(const struct nbrec_sb_logical_flow *, int64_t table_id);
+
+void nbrec_sb_logical_flow_add_clause_actions(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *actions);
+void nbrec_sb_logical_flow_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_logical_flow_update_external_ids_setkey(const struct nbrec_sb_logical_flow *,  const char *, const char *);
+void nbrec_sb_logical_flow_update_external_ids_delkey(const struct nbrec_sb_logical_flow *,  const char *);
+void nbrec_sb_logical_flow_add_clause_external_ids(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_logical_flow_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_logical_flow_add_clause_logical_datapath(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct uuid *logical_datapath);
+void nbrec_sb_logical_flow_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_logical_flow_add_clause_match(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *match);
+void nbrec_sb_logical_flow_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_logical_flow_add_clause_pipeline(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *pipeline);
+void nbrec_sb_logical_flow_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_logical_flow_add_clause_priority(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t priority);
+void nbrec_sb_logical_flow_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_logical_flow_add_clause_table_id(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t table_id);
+void nbrec_sb_logical_flow_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_logical_flow *nbrec_sb_logical_flow_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_logical_flow_index_set_actions(const struct nbrec_sb_logical_flow *,
+const char *actions);
+void nbrec_sb_logical_flow_index_set_external_ids(const struct nbrec_sb_logical_flow *,
+const struct smap *);
+void nbrec_sb_logical_flow_index_set_logical_datapath(const struct nbrec_sb_logical_flow *,
+const struct nbrec_sb_datapath_binding *logical_datapath);
+void nbrec_sb_logical_flow_index_set_match(const struct nbrec_sb_logical_flow *,
+const char *match);
+void nbrec_sb_logical_flow_index_set_pipeline(const struct nbrec_sb_logical_flow *,
+const char *pipeline);
+void nbrec_sb_logical_flow_index_set_priority(const struct nbrec_sb_logical_flow *,
+int64_t priority);
+void nbrec_sb_logical_flow_index_set_table_id(const struct nbrec_sb_logical_flow *,
+int64_t table_id);
+
+/* SB_MAC_Binding table. */
+struct nbrec_sb_mac_binding {
+	struct ovsdb_idl_row header_;
+
+	/* datapath column. */
+	struct nbrec_sb_datapath_binding *datapath;
+
+	/* ip column. */
+	char *ip;	/* Always nonnull. */
+
+	/* logical_port column. */
+	char *logical_port;	/* Always nonnull. */
+
+	/* mac column. */
+	char *mac;	/* Always nonnull. */
+};
+
+enum nbrec_sb_mac_binding_column_id {
+    NBREC_SB_MAC_BINDING_COL_DATAPATH,
+    NBREC_SB_MAC_BINDING_COL_IP,
+    NBREC_SB_MAC_BINDING_COL_LOGICAL_PORT,
+    NBREC_SB_MAC_BINDING_COL_MAC,
+    NBREC_SB_MAC_BINDING_N_COLUMNS
+};
+
+#define nbrec_sb_mac_binding_col_ip (nbrec_sb_mac_binding_columns[NBREC_SB_MAC_BINDING_COL_IP])
+#define nbrec_sb_mac_binding_col_mac (nbrec_sb_mac_binding_columns[NBREC_SB_MAC_BINDING_COL_MAC])
+#define nbrec_sb_mac_binding_col_datapath (nbrec_sb_mac_binding_columns[NBREC_SB_MAC_BINDING_COL_DATAPATH])
+#define nbrec_sb_mac_binding_col_logical_port (nbrec_sb_mac_binding_columns[NBREC_SB_MAC_BINDING_COL_LOGICAL_PORT])
+
+extern struct ovsdb_idl_column nbrec_sb_mac_binding_columns[NBREC_SB_MAC_BINDING_N_COLUMNS];
+
+const struct nbrec_sb_mac_binding_table *nbrec_sb_mac_binding_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_table_first(const struct nbrec_sb_mac_binding_table *);
+
+#define NBREC_SB_MAC_BINDING_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_mac_binding_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_mac_binding_next(ROW))
+#define NBREC_SB_MAC_BINDING_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_mac_binding_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_mac_binding_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_table_get_for_uuid(const struct nbrec_sb_mac_binding_table *, const struct uuid *);
+const struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_first(const struct ovsdb_idl *);
+const struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_next(const struct nbrec_sb_mac_binding *);
+#define NBREC_SB_MAC_BINDING_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_mac_binding_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_mac_binding_next(ROW))
+#define NBREC_SB_MAC_BINDING_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_mac_binding_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_mac_binding_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_mac_binding_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_mac_binding_row_get_seqno(const struct nbrec_sb_mac_binding *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_track_get_next(const struct nbrec_sb_mac_binding *);
+#define NBREC_SB_MAC_BINDING_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_mac_binding_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_mac_binding_track_get_next(ROW))
+
+const struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_table_track_get_first(const struct nbrec_sb_mac_binding_table *);
+#define NBREC_SB_MAC_BINDING_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_mac_binding_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_mac_binding_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_mac_binding_is_new(const struct nbrec_sb_mac_binding *row)
+{
+    return nbrec_sb_mac_binding_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_mac_binding_is_deleted(const struct nbrec_sb_mac_binding *row)
+{
+    return nbrec_sb_mac_binding_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_mac_binding_index_destroy_row(const struct nbrec_sb_mac_binding *);
+
+struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_mac_binding *);
+
+int nbrec_sb_mac_binding_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_mac_binding *, 
+    const struct nbrec_sb_mac_binding *);
+struct ovsdb_idl_cursor nbrec_sb_mac_binding_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_mac_binding_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_mac_binding *);
+struct ovsdb_idl_cursor nbrec_sb_mac_binding_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_mac_binding *);
+
+struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_MAC_BINDING_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_mac_binding_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_mac_binding_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_mac_binding_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_MAC_BINDING_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_mac_binding_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_mac_binding_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_MAC_BINDING_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_mac_binding_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_mac_binding_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_mac_binding_init(struct nbrec_sb_mac_binding *);
+void nbrec_sb_mac_binding_delete(const struct nbrec_sb_mac_binding *);
+struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_mac_binding_is_updated(const struct nbrec_sb_mac_binding *, enum nbrec_sb_mac_binding_column_id);
+
+void nbrec_sb_mac_binding_verify_datapath(const struct nbrec_sb_mac_binding *);
+void nbrec_sb_mac_binding_verify_ip(const struct nbrec_sb_mac_binding *);
+void nbrec_sb_mac_binding_verify_logical_port(const struct nbrec_sb_mac_binding *);
+void nbrec_sb_mac_binding_verify_mac(const struct nbrec_sb_mac_binding *);
+
+const struct ovsdb_datum *nbrec_sb_mac_binding_get_datapath(const struct nbrec_sb_mac_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_mac_binding_get_ip(const struct nbrec_sb_mac_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_mac_binding_get_logical_port(const struct nbrec_sb_mac_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_mac_binding_get_mac(const struct nbrec_sb_mac_binding *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_mac_binding_set_datapath(const struct nbrec_sb_mac_binding *, const struct nbrec_sb_datapath_binding *datapath);
+void nbrec_sb_mac_binding_set_ip(const struct nbrec_sb_mac_binding *, const char *ip);
+void nbrec_sb_mac_binding_set_logical_port(const struct nbrec_sb_mac_binding *, const char *logical_port);
+void nbrec_sb_mac_binding_set_mac(const struct nbrec_sb_mac_binding *, const char *mac);
+
+void nbrec_sb_mac_binding_add_clause_datapath(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct uuid *datapath);
+void nbrec_sb_mac_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_mac_binding_add_clause_ip(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *ip);
+void nbrec_sb_mac_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_mac_binding_add_clause_logical_port(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *logical_port);
+void nbrec_sb_mac_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_mac_binding_add_clause_mac(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *mac);
+void nbrec_sb_mac_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_mac_binding *nbrec_sb_mac_binding_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_mac_binding_index_set_datapath(const struct nbrec_sb_mac_binding *,
+const struct nbrec_sb_datapath_binding *datapath);
+void nbrec_sb_mac_binding_index_set_ip(const struct nbrec_sb_mac_binding *,
+const char *ip);
+void nbrec_sb_mac_binding_index_set_logical_port(const struct nbrec_sb_mac_binding *,
+const char *logical_port);
+void nbrec_sb_mac_binding_index_set_mac(const struct nbrec_sb_mac_binding *,
+const char *mac);
+
+/* SB_Meter table. */
+struct nbrec_sb_meter {
+	struct ovsdb_idl_row header_;
+
+	/* bands column. */
+	struct nbrec_sb_meter_band **bands;
+	size_t n_bands;
+
+	/* name column. */
+	char *name;	/* Always nonnull. */
+
+	/* unit column. */
+	char *unit;	/* Always nonnull. */
+};
+
+enum nbrec_sb_meter_column_id {
+    NBREC_SB_METER_COL_BANDS,
+    NBREC_SB_METER_COL_NAME,
+    NBREC_SB_METER_COL_UNIT,
+    NBREC_SB_METER_N_COLUMNS
+};
+
+#define nbrec_sb_meter_col_bands (nbrec_sb_meter_columns[NBREC_SB_METER_COL_BANDS])
+#define nbrec_sb_meter_col_name (nbrec_sb_meter_columns[NBREC_SB_METER_COL_NAME])
+#define nbrec_sb_meter_col_unit (nbrec_sb_meter_columns[NBREC_SB_METER_COL_UNIT])
+
+extern struct ovsdb_idl_column nbrec_sb_meter_columns[NBREC_SB_METER_N_COLUMNS];
+
+const struct nbrec_sb_meter_table *nbrec_sb_meter_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_meter *nbrec_sb_meter_table_first(const struct nbrec_sb_meter_table *);
+
+#define NBREC_SB_METER_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_meter_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_meter_next(ROW))
+#define NBREC_SB_METER_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_meter_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_meter_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_meter *nbrec_sb_meter_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_meter *nbrec_sb_meter_table_get_for_uuid(const struct nbrec_sb_meter_table *, const struct uuid *);
+const struct nbrec_sb_meter *nbrec_sb_meter_first(const struct ovsdb_idl *);
+const struct nbrec_sb_meter *nbrec_sb_meter_next(const struct nbrec_sb_meter *);
+#define NBREC_SB_METER_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_meter_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_meter_next(ROW))
+#define NBREC_SB_METER_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_meter_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_meter_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_meter_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_meter_row_get_seqno(const struct nbrec_sb_meter *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_meter *nbrec_sb_meter_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_meter *nbrec_sb_meter_track_get_next(const struct nbrec_sb_meter *);
+#define NBREC_SB_METER_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_meter_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_meter_track_get_next(ROW))
+
+const struct nbrec_sb_meter *nbrec_sb_meter_table_track_get_first(const struct nbrec_sb_meter_table *);
+#define NBREC_SB_METER_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_meter_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_meter_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_meter_is_new(const struct nbrec_sb_meter *row)
+{
+    return nbrec_sb_meter_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_meter_is_deleted(const struct nbrec_sb_meter *row)
+{
+    return nbrec_sb_meter_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_meter_index_destroy_row(const struct nbrec_sb_meter *);
+
+struct nbrec_sb_meter *nbrec_sb_meter_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_meter *);
+
+int nbrec_sb_meter_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_meter *, 
+    const struct nbrec_sb_meter *);
+struct ovsdb_idl_cursor nbrec_sb_meter_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_meter_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_meter *);
+struct ovsdb_idl_cursor nbrec_sb_meter_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_meter *);
+
+struct nbrec_sb_meter *nbrec_sb_meter_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_METER_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_meter_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_meter_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_meter_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_METER_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_meter_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_meter_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_METER_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_meter_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_meter_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_meter_init(struct nbrec_sb_meter *);
+void nbrec_sb_meter_delete(const struct nbrec_sb_meter *);
+struct nbrec_sb_meter *nbrec_sb_meter_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_meter_is_updated(const struct nbrec_sb_meter *, enum nbrec_sb_meter_column_id);
+
+void nbrec_sb_meter_verify_bands(const struct nbrec_sb_meter *);
+void nbrec_sb_meter_verify_name(const struct nbrec_sb_meter *);
+void nbrec_sb_meter_verify_unit(const struct nbrec_sb_meter *);
+
+const struct ovsdb_datum *nbrec_sb_meter_get_bands(const struct nbrec_sb_meter *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_meter_get_name(const struct nbrec_sb_meter *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_meter_get_unit(const struct nbrec_sb_meter *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_meter_set_bands(const struct nbrec_sb_meter *, struct nbrec_sb_meter_band **bands, size_t n_bands);
+void nbrec_sb_meter_set_name(const struct nbrec_sb_meter *, const char *name);
+void nbrec_sb_meter_set_unit(const struct nbrec_sb_meter *, const char *unit);
+
+void nbrec_sb_meter_update_bands_addvalue(const struct nbrec_sb_meter *,  const struct nbrec_sb_meter_band *);
+void nbrec_sb_meter_update_bands_delvalue(const struct nbrec_sb_meter *,  const struct nbrec_sb_meter_band *);
+void nbrec_sb_meter_add_clause_bands(struct ovsdb_idl_condition *, enum ovsdb_function function, struct uuid **bands, size_t n_bands);
+void nbrec_sb_meter_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_meter_add_clause_name(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *name);
+void nbrec_sb_meter_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_meter_add_clause_unit(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *unit);
+void nbrec_sb_meter_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_meter *nbrec_sb_meter_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_meter_index_set_bands(const struct nbrec_sb_meter *,
+struct nbrec_sb_meter_band **bands, size_t n_bands);
+void nbrec_sb_meter_index_set_name(const struct nbrec_sb_meter *,
+const char *name);
+void nbrec_sb_meter_index_set_unit(const struct nbrec_sb_meter *,
+const char *unit);
+
+/* SB_Meter_Band table. */
+struct nbrec_sb_meter_band {
+	struct ovsdb_idl_row header_;
+
+	/* action column. */
+	char *action;	/* Always nonnull. */
+
+	/* burst_size column. */
+	int64_t burst_size;
+
+	/* rate column. */
+	int64_t rate;
+};
+
+enum nbrec_sb_meter_band_column_id {
+    NBREC_SB_METER_BAND_COL_ACTION,
+    NBREC_SB_METER_BAND_COL_BURST_SIZE,
+    NBREC_SB_METER_BAND_COL_RATE,
+    NBREC_SB_METER_BAND_N_COLUMNS
+};
+
+#define nbrec_sb_meter_band_col_action (nbrec_sb_meter_band_columns[NBREC_SB_METER_BAND_COL_ACTION])
+#define nbrec_sb_meter_band_col_rate (nbrec_sb_meter_band_columns[NBREC_SB_METER_BAND_COL_RATE])
+#define nbrec_sb_meter_band_col_burst_size (nbrec_sb_meter_band_columns[NBREC_SB_METER_BAND_COL_BURST_SIZE])
+
+extern struct ovsdb_idl_column nbrec_sb_meter_band_columns[NBREC_SB_METER_BAND_N_COLUMNS];
+
+const struct nbrec_sb_meter_band_table *nbrec_sb_meter_band_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_meter_band *nbrec_sb_meter_band_table_first(const struct nbrec_sb_meter_band_table *);
+
+#define NBREC_SB_METER_BAND_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_meter_band_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_meter_band_next(ROW))
+#define NBREC_SB_METER_BAND_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_meter_band_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_meter_band_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_meter_band *nbrec_sb_meter_band_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_meter_band *nbrec_sb_meter_band_table_get_for_uuid(const struct nbrec_sb_meter_band_table *, const struct uuid *);
+const struct nbrec_sb_meter_band *nbrec_sb_meter_band_first(const struct ovsdb_idl *);
+const struct nbrec_sb_meter_band *nbrec_sb_meter_band_next(const struct nbrec_sb_meter_band *);
+#define NBREC_SB_METER_BAND_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_meter_band_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_meter_band_next(ROW))
+#define NBREC_SB_METER_BAND_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_meter_band_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_meter_band_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_meter_band_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_meter_band_row_get_seqno(const struct nbrec_sb_meter_band *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_meter_band *nbrec_sb_meter_band_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_meter_band *nbrec_sb_meter_band_track_get_next(const struct nbrec_sb_meter_band *);
+#define NBREC_SB_METER_BAND_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_meter_band_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_meter_band_track_get_next(ROW))
+
+const struct nbrec_sb_meter_band *nbrec_sb_meter_band_table_track_get_first(const struct nbrec_sb_meter_band_table *);
+#define NBREC_SB_METER_BAND_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_meter_band_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_meter_band_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_meter_band_is_new(const struct nbrec_sb_meter_band *row)
+{
+    return nbrec_sb_meter_band_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_meter_band_is_deleted(const struct nbrec_sb_meter_band *row)
+{
+    return nbrec_sb_meter_band_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_meter_band_index_destroy_row(const struct nbrec_sb_meter_band *);
+
+struct nbrec_sb_meter_band *nbrec_sb_meter_band_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_meter_band *);
+
+int nbrec_sb_meter_band_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_meter_band *, 
+    const struct nbrec_sb_meter_band *);
+struct ovsdb_idl_cursor nbrec_sb_meter_band_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_meter_band_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_meter_band *);
+struct ovsdb_idl_cursor nbrec_sb_meter_band_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_meter_band *);
+
+struct nbrec_sb_meter_band *nbrec_sb_meter_band_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_METER_BAND_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_meter_band_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_meter_band_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_meter_band_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_METER_BAND_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_meter_band_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_meter_band_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_METER_BAND_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_meter_band_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_meter_band_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_meter_band_init(struct nbrec_sb_meter_band *);
+void nbrec_sb_meter_band_delete(const struct nbrec_sb_meter_band *);
+struct nbrec_sb_meter_band *nbrec_sb_meter_band_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_meter_band_is_updated(const struct nbrec_sb_meter_band *, enum nbrec_sb_meter_band_column_id);
+
+void nbrec_sb_meter_band_verify_action(const struct nbrec_sb_meter_band *);
+void nbrec_sb_meter_band_verify_burst_size(const struct nbrec_sb_meter_band *);
+void nbrec_sb_meter_band_verify_rate(const struct nbrec_sb_meter_band *);
+
+const struct ovsdb_datum *nbrec_sb_meter_band_get_action(const struct nbrec_sb_meter_band *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_meter_band_get_burst_size(const struct nbrec_sb_meter_band *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_meter_band_get_rate(const struct nbrec_sb_meter_band *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_meter_band_set_action(const struct nbrec_sb_meter_band *, const char *action);
+void nbrec_sb_meter_band_set_burst_size(const struct nbrec_sb_meter_band *, int64_t burst_size);
+void nbrec_sb_meter_band_set_rate(const struct nbrec_sb_meter_band *, int64_t rate);
+
+void nbrec_sb_meter_band_add_clause_action(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *action);
+void nbrec_sb_meter_band_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_meter_band_add_clause_burst_size(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t burst_size);
+void nbrec_sb_meter_band_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_meter_band_add_clause_rate(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t rate);
+void nbrec_sb_meter_band_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_meter_band *nbrec_sb_meter_band_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_meter_band_index_set_action(const struct nbrec_sb_meter_band *,
+const char *action);
+void nbrec_sb_meter_band_index_set_burst_size(const struct nbrec_sb_meter_band *,
+int64_t burst_size);
+void nbrec_sb_meter_band_index_set_rate(const struct nbrec_sb_meter_band *,
+int64_t rate);
+
+/* SB_Multicast_Group table. */
+struct nbrec_sb_multicast_group {
+	struct ovsdb_idl_row header_;
+
+	/* datapath column. */
+	struct nbrec_sb_datapath_binding *datapath;
+
+	/* name column. */
+	char *name;	/* Always nonnull. */
+
+	/* ports column. */
+	struct nbrec_sb_port_binding **ports;
+	size_t n_ports;
+
+	/* tunnel_key column. */
+	int64_t tunnel_key;
+};
+
+enum nbrec_sb_multicast_group_column_id {
+    NBREC_SB_MULTICAST_GROUP_COL_DATAPATH,
+    NBREC_SB_MULTICAST_GROUP_COL_NAME,
+    NBREC_SB_MULTICAST_GROUP_COL_PORTS,
+    NBREC_SB_MULTICAST_GROUP_COL_TUNNEL_KEY,
+    NBREC_SB_MULTICAST_GROUP_N_COLUMNS
+};
+
+#define nbrec_sb_multicast_group_col_tunnel_key (nbrec_sb_multicast_group_columns[NBREC_SB_MULTICAST_GROUP_COL_TUNNEL_KEY])
+#define nbrec_sb_multicast_group_col_ports (nbrec_sb_multicast_group_columns[NBREC_SB_MULTICAST_GROUP_COL_PORTS])
+#define nbrec_sb_multicast_group_col_name (nbrec_sb_multicast_group_columns[NBREC_SB_MULTICAST_GROUP_COL_NAME])
+#define nbrec_sb_multicast_group_col_datapath (nbrec_sb_multicast_group_columns[NBREC_SB_MULTICAST_GROUP_COL_DATAPATH])
+
+extern struct ovsdb_idl_column nbrec_sb_multicast_group_columns[NBREC_SB_MULTICAST_GROUP_N_COLUMNS];
+
+const struct nbrec_sb_multicast_group_table *nbrec_sb_multicast_group_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_table_first(const struct nbrec_sb_multicast_group_table *);
+
+#define NBREC_SB_MULTICAST_GROUP_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_multicast_group_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_multicast_group_next(ROW))
+#define NBREC_SB_MULTICAST_GROUP_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_multicast_group_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_multicast_group_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_table_get_for_uuid(const struct nbrec_sb_multicast_group_table *, const struct uuid *);
+const struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_first(const struct ovsdb_idl *);
+const struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_next(const struct nbrec_sb_multicast_group *);
+#define NBREC_SB_MULTICAST_GROUP_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_multicast_group_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_multicast_group_next(ROW))
+#define NBREC_SB_MULTICAST_GROUP_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_multicast_group_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_multicast_group_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_multicast_group_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_multicast_group_row_get_seqno(const struct nbrec_sb_multicast_group *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_track_get_next(const struct nbrec_sb_multicast_group *);
+#define NBREC_SB_MULTICAST_GROUP_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_multicast_group_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_multicast_group_track_get_next(ROW))
+
+const struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_table_track_get_first(const struct nbrec_sb_multicast_group_table *);
+#define NBREC_SB_MULTICAST_GROUP_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_multicast_group_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_multicast_group_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_multicast_group_is_new(const struct nbrec_sb_multicast_group *row)
+{
+    return nbrec_sb_multicast_group_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_multicast_group_is_deleted(const struct nbrec_sb_multicast_group *row)
+{
+    return nbrec_sb_multicast_group_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_multicast_group_index_destroy_row(const struct nbrec_sb_multicast_group *);
+
+struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_multicast_group *);
+
+int nbrec_sb_multicast_group_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_multicast_group *, 
+    const struct nbrec_sb_multicast_group *);
+struct ovsdb_idl_cursor nbrec_sb_multicast_group_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_multicast_group_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_multicast_group *);
+struct ovsdb_idl_cursor nbrec_sb_multicast_group_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_multicast_group *);
+
+struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_MULTICAST_GROUP_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_multicast_group_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_multicast_group_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_multicast_group_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_MULTICAST_GROUP_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_multicast_group_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_multicast_group_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_MULTICAST_GROUP_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_multicast_group_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_multicast_group_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_multicast_group_init(struct nbrec_sb_multicast_group *);
+void nbrec_sb_multicast_group_delete(const struct nbrec_sb_multicast_group *);
+struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_multicast_group_is_updated(const struct nbrec_sb_multicast_group *, enum nbrec_sb_multicast_group_column_id);
+
+void nbrec_sb_multicast_group_verify_datapath(const struct nbrec_sb_multicast_group *);
+void nbrec_sb_multicast_group_verify_name(const struct nbrec_sb_multicast_group *);
+void nbrec_sb_multicast_group_verify_ports(const struct nbrec_sb_multicast_group *);
+void nbrec_sb_multicast_group_verify_tunnel_key(const struct nbrec_sb_multicast_group *);
+
+const struct ovsdb_datum *nbrec_sb_multicast_group_get_datapath(const struct nbrec_sb_multicast_group *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_multicast_group_get_name(const struct nbrec_sb_multicast_group *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_multicast_group_get_ports(const struct nbrec_sb_multicast_group *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_multicast_group_get_tunnel_key(const struct nbrec_sb_multicast_group *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_multicast_group_set_datapath(const struct nbrec_sb_multicast_group *, const struct nbrec_sb_datapath_binding *datapath);
+void nbrec_sb_multicast_group_set_name(const struct nbrec_sb_multicast_group *, const char *name);
+void nbrec_sb_multicast_group_set_ports(const struct nbrec_sb_multicast_group *, struct nbrec_sb_port_binding **ports, size_t n_ports);
+void nbrec_sb_multicast_group_set_tunnel_key(const struct nbrec_sb_multicast_group *, int64_t tunnel_key);
+
+void nbrec_sb_multicast_group_add_clause_datapath(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct uuid *datapath);
+void nbrec_sb_multicast_group_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_multicast_group_add_clause_name(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *name);
+void nbrec_sb_multicast_group_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_multicast_group_update_ports_addvalue(const struct nbrec_sb_multicast_group *,  const struct nbrec_sb_port_binding *);
+void nbrec_sb_multicast_group_update_ports_delvalue(const struct nbrec_sb_multicast_group *,  const struct nbrec_sb_port_binding *);
+void nbrec_sb_multicast_group_add_clause_ports(struct ovsdb_idl_condition *, enum ovsdb_function function, struct uuid **ports, size_t n_ports);
+void nbrec_sb_multicast_group_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_multicast_group_add_clause_tunnel_key(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t tunnel_key);
+void nbrec_sb_multicast_group_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_multicast_group *nbrec_sb_multicast_group_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_multicast_group_index_set_datapath(const struct nbrec_sb_multicast_group *,
+const struct nbrec_sb_datapath_binding *datapath);
+void nbrec_sb_multicast_group_index_set_name(const struct nbrec_sb_multicast_group *,
+const char *name);
+void nbrec_sb_multicast_group_index_set_ports(const struct nbrec_sb_multicast_group *,
+struct nbrec_sb_port_binding **ports, size_t n_ports);
+void nbrec_sb_multicast_group_index_set_tunnel_key(const struct nbrec_sb_multicast_group *,
+int64_t tunnel_key);
+
+/* SB_Port_Binding table. */
+struct nbrec_sb_port_binding {
+	struct ovsdb_idl_row header_;
+
+	/* chassis column. */
+	struct nbrec_sb_chassis *chassis;
+
+	/* datapath column. */
+	struct nbrec_sb_datapath_binding *datapath;
+
+	/* encap column. */
+	struct nbrec_sb_encap *encap;
+
+	/* external_ids column. */
+	struct smap external_ids;
+
+	/* gateway_chassis column. */
+	struct nbrec_sb_gateway_chassis **gateway_chassis;
+	size_t n_gateway_chassis;
+
+	/* logical_port column. */
+	char *logical_port;	/* Always nonnull. */
+
+	/* mac column. */
+	char **mac;
+	size_t n_mac;
+
+	/* nat_addresses column. */
+	char **nat_addresses;
+	size_t n_nat_addresses;
+
+	/* options column. */
+	struct smap options;
+
+	/* parent_port column. */
+	char *parent_port;
+
+	/* tag column. */
+	int64_t *tag;
+	size_t n_tag;
+
+	/* tunnel_key column. */
+	int64_t tunnel_key;
+
+	/* type column. */
+	char *type;	/* Always nonnull. */
+};
+
+enum nbrec_sb_port_binding_column_id {
+    NBREC_SB_PORT_BINDING_COL_CHASSIS,
+    NBREC_SB_PORT_BINDING_COL_DATAPATH,
+    NBREC_SB_PORT_BINDING_COL_ENCAP,
+    NBREC_SB_PORT_BINDING_COL_EXTERNAL_IDS,
+    NBREC_SB_PORT_BINDING_COL_GATEWAY_CHASSIS,
+    NBREC_SB_PORT_BINDING_COL_LOGICAL_PORT,
+    NBREC_SB_PORT_BINDING_COL_MAC,
+    NBREC_SB_PORT_BINDING_COL_NAT_ADDRESSES,
+    NBREC_SB_PORT_BINDING_COL_OPTIONS,
+    NBREC_SB_PORT_BINDING_COL_PARENT_PORT,
+    NBREC_SB_PORT_BINDING_COL_TAG,
+    NBREC_SB_PORT_BINDING_COL_TUNNEL_KEY,
+    NBREC_SB_PORT_BINDING_COL_TYPE,
+    NBREC_SB_PORT_BINDING_N_COLUMNS
+};
+
+#define nbrec_sb_port_binding_col_nat_addresses (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_NAT_ADDRESSES])
+#define nbrec_sb_port_binding_col_gateway_chassis (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_GATEWAY_CHASSIS])
+#define nbrec_sb_port_binding_col_chassis (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_CHASSIS])
+#define nbrec_sb_port_binding_col_parent_port (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_PARENT_PORT])
+#define nbrec_sb_port_binding_col_datapath (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_DATAPATH])
+#define nbrec_sb_port_binding_col_logical_port (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_LOGICAL_PORT])
+#define nbrec_sb_port_binding_col_mac (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_MAC])
+#define nbrec_sb_port_binding_col_tag (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_TAG])
+#define nbrec_sb_port_binding_col_encap (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_ENCAP])
+#define nbrec_sb_port_binding_col_tunnel_key (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_TUNNEL_KEY])
+#define nbrec_sb_port_binding_col_external_ids (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_EXTERNAL_IDS])
+#define nbrec_sb_port_binding_col_type (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_TYPE])
+#define nbrec_sb_port_binding_col_options (nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_COL_OPTIONS])
+
+extern struct ovsdb_idl_column nbrec_sb_port_binding_columns[NBREC_SB_PORT_BINDING_N_COLUMNS];
+
+const struct nbrec_sb_port_binding_table *nbrec_sb_port_binding_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_port_binding *nbrec_sb_port_binding_table_first(const struct nbrec_sb_port_binding_table *);
+
+#define NBREC_SB_PORT_BINDING_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_port_binding_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_port_binding_next(ROW))
+#define NBREC_SB_PORT_BINDING_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_port_binding_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_port_binding_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_port_binding *nbrec_sb_port_binding_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_port_binding *nbrec_sb_port_binding_table_get_for_uuid(const struct nbrec_sb_port_binding_table *, const struct uuid *);
+const struct nbrec_sb_port_binding *nbrec_sb_port_binding_first(const struct ovsdb_idl *);
+const struct nbrec_sb_port_binding *nbrec_sb_port_binding_next(const struct nbrec_sb_port_binding *);
+#define NBREC_SB_PORT_BINDING_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_port_binding_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_port_binding_next(ROW))
+#define NBREC_SB_PORT_BINDING_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_port_binding_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_port_binding_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_port_binding_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_port_binding_row_get_seqno(const struct nbrec_sb_port_binding *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_port_binding *nbrec_sb_port_binding_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_port_binding *nbrec_sb_port_binding_track_get_next(const struct nbrec_sb_port_binding *);
+#define NBREC_SB_PORT_BINDING_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_port_binding_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_port_binding_track_get_next(ROW))
+
+const struct nbrec_sb_port_binding *nbrec_sb_port_binding_table_track_get_first(const struct nbrec_sb_port_binding_table *);
+#define NBREC_SB_PORT_BINDING_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_port_binding_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_port_binding_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_port_binding_is_new(const struct nbrec_sb_port_binding *row)
+{
+    return nbrec_sb_port_binding_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_port_binding_is_deleted(const struct nbrec_sb_port_binding *row)
+{
+    return nbrec_sb_port_binding_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_port_binding_index_destroy_row(const struct nbrec_sb_port_binding *);
+
+struct nbrec_sb_port_binding *nbrec_sb_port_binding_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_port_binding *);
+
+int nbrec_sb_port_binding_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_port_binding *, 
+    const struct nbrec_sb_port_binding *);
+struct ovsdb_idl_cursor nbrec_sb_port_binding_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_port_binding_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_port_binding *);
+struct ovsdb_idl_cursor nbrec_sb_port_binding_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_port_binding *);
+
+struct nbrec_sb_port_binding *nbrec_sb_port_binding_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_PORT_BINDING_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_port_binding_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_port_binding_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_port_binding_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_PORT_BINDING_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_port_binding_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_port_binding_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_PORT_BINDING_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_port_binding_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_port_binding_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_port_binding_init(struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_delete(const struct nbrec_sb_port_binding *);
+struct nbrec_sb_port_binding *nbrec_sb_port_binding_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_port_binding_is_updated(const struct nbrec_sb_port_binding *, enum nbrec_sb_port_binding_column_id);
+
+void nbrec_sb_port_binding_verify_chassis(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_datapath(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_encap(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_external_ids(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_gateway_chassis(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_logical_port(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_mac(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_nat_addresses(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_options(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_parent_port(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_tag(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_tunnel_key(const struct nbrec_sb_port_binding *);
+void nbrec_sb_port_binding_verify_type(const struct nbrec_sb_port_binding *);
+
+const struct ovsdb_datum *nbrec_sb_port_binding_get_chassis(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_datapath(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_encap(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_external_ids(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_gateway_chassis(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_logical_port(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_mac(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_nat_addresses(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_options(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_parent_port(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_tag(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_tunnel_key(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_port_binding_get_type(const struct nbrec_sb_port_binding *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_port_binding_set_chassis(const struct nbrec_sb_port_binding *, const struct nbrec_sb_chassis *chassis);
+void nbrec_sb_port_binding_set_datapath(const struct nbrec_sb_port_binding *, const struct nbrec_sb_datapath_binding *datapath);
+void nbrec_sb_port_binding_set_encap(const struct nbrec_sb_port_binding *, const struct nbrec_sb_encap *encap);
+void nbrec_sb_port_binding_set_external_ids(const struct nbrec_sb_port_binding *, const struct smap *);
+void nbrec_sb_port_binding_set_gateway_chassis(const struct nbrec_sb_port_binding *, struct nbrec_sb_gateway_chassis **gateway_chassis, size_t n_gateway_chassis);
+void nbrec_sb_port_binding_set_logical_port(const struct nbrec_sb_port_binding *, const char *logical_port);
+void nbrec_sb_port_binding_set_mac(const struct nbrec_sb_port_binding *, const char **mac, size_t n_mac);
+void nbrec_sb_port_binding_set_nat_addresses(const struct nbrec_sb_port_binding *, const char **nat_addresses, size_t n_nat_addresses);
+void nbrec_sb_port_binding_set_options(const struct nbrec_sb_port_binding *, const struct smap *);
+void nbrec_sb_port_binding_set_parent_port(const struct nbrec_sb_port_binding *, const char *parent_port);
+void nbrec_sb_port_binding_set_tag(const struct nbrec_sb_port_binding *, const int64_t *tag, size_t n_tag);
+void nbrec_sb_port_binding_set_tunnel_key(const struct nbrec_sb_port_binding *, int64_t tunnel_key);
+void nbrec_sb_port_binding_set_type(const struct nbrec_sb_port_binding *, const char *type);
+
+void nbrec_sb_port_binding_update_chassis_addvalue(const struct nbrec_sb_port_binding *,  const struct nbrec_sb_chassis *);
+void nbrec_sb_port_binding_update_chassis_delvalue(const struct nbrec_sb_port_binding *,  const struct nbrec_sb_chassis *);
+void nbrec_sb_port_binding_add_clause_chassis(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct uuid *chassis);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_add_clause_datapath(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct uuid *datapath);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_update_encap_addvalue(const struct nbrec_sb_port_binding *,  const struct nbrec_sb_encap *);
+void nbrec_sb_port_binding_update_encap_delvalue(const struct nbrec_sb_port_binding *,  const struct nbrec_sb_encap *);
+void nbrec_sb_port_binding_add_clause_encap(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct uuid *encap);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_update_external_ids_setkey(const struct nbrec_sb_port_binding *,  const char *, const char *);
+void nbrec_sb_port_binding_update_external_ids_delkey(const struct nbrec_sb_port_binding *,  const char *);
+void nbrec_sb_port_binding_add_clause_external_ids(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_update_gateway_chassis_addvalue(const struct nbrec_sb_port_binding *,  const struct nbrec_sb_gateway_chassis *);
+void nbrec_sb_port_binding_update_gateway_chassis_delvalue(const struct nbrec_sb_port_binding *,  const struct nbrec_sb_gateway_chassis *);
+void nbrec_sb_port_binding_add_clause_gateway_chassis(struct ovsdb_idl_condition *, enum ovsdb_function function, struct uuid **gateway_chassis, size_t n_gateway_chassis);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_add_clause_logical_port(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *logical_port);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_update_mac_addvalue(const struct nbrec_sb_port_binding *,  const char *);
+void nbrec_sb_port_binding_update_mac_delvalue(const struct nbrec_sb_port_binding *,  const char *);
+void nbrec_sb_port_binding_add_clause_mac(struct ovsdb_idl_condition *, enum ovsdb_function function, const char **mac, size_t n_mac);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_update_nat_addresses_addvalue(const struct nbrec_sb_port_binding *,  const char *);
+void nbrec_sb_port_binding_update_nat_addresses_delvalue(const struct nbrec_sb_port_binding *,  const char *);
+void nbrec_sb_port_binding_add_clause_nat_addresses(struct ovsdb_idl_condition *, enum ovsdb_function function, const char **nat_addresses, size_t n_nat_addresses);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_update_options_setkey(const struct nbrec_sb_port_binding *,  const char *, const char *);
+void nbrec_sb_port_binding_update_options_delkey(const struct nbrec_sb_port_binding *,  const char *);
+void nbrec_sb_port_binding_add_clause_options(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_update_parent_port_addvalue(const struct nbrec_sb_port_binding *,  const char *);
+void nbrec_sb_port_binding_update_parent_port_delvalue(const struct nbrec_sb_port_binding *,  const char *);
+void nbrec_sb_port_binding_add_clause_parent_port(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *parent_port);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_update_tag_addvalue(const struct nbrec_sb_port_binding *,  int64_t );
+void nbrec_sb_port_binding_update_tag_delvalue(const struct nbrec_sb_port_binding *,  int64_t );
+void nbrec_sb_port_binding_add_clause_tag(struct ovsdb_idl_condition *, enum ovsdb_function function, const int64_t *tag, size_t n_tag);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_add_clause_tunnel_key(struct ovsdb_idl_condition *, enum ovsdb_function function, int64_t tunnel_key);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_binding_add_clause_type(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *type);
+void nbrec_sb_port_binding_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_port_binding *nbrec_sb_port_binding_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_port_binding_index_set_chassis(const struct nbrec_sb_port_binding *,
+const struct nbrec_sb_chassis *chassis);
+void nbrec_sb_port_binding_index_set_datapath(const struct nbrec_sb_port_binding *,
+const struct nbrec_sb_datapath_binding *datapath);
+void nbrec_sb_port_binding_index_set_encap(const struct nbrec_sb_port_binding *,
+const struct nbrec_sb_encap *encap);
+void nbrec_sb_port_binding_index_set_external_ids(const struct nbrec_sb_port_binding *,
+const struct smap *);
+void nbrec_sb_port_binding_index_set_gateway_chassis(const struct nbrec_sb_port_binding *,
+struct nbrec_sb_gateway_chassis **gateway_chassis, size_t n_gateway_chassis);
+void nbrec_sb_port_binding_index_set_logical_port(const struct nbrec_sb_port_binding *,
+const char *logical_port);
+void nbrec_sb_port_binding_index_set_mac(const struct nbrec_sb_port_binding *,
+const char **mac, size_t n_mac);
+void nbrec_sb_port_binding_index_set_nat_addresses(const struct nbrec_sb_port_binding *,
+const char **nat_addresses, size_t n_nat_addresses);
+void nbrec_sb_port_binding_index_set_options(const struct nbrec_sb_port_binding *,
+const struct smap *);
+void nbrec_sb_port_binding_index_set_parent_port(const struct nbrec_sb_port_binding *,
+const char *parent_port);
+void nbrec_sb_port_binding_index_set_tag(const struct nbrec_sb_port_binding *,
+const int64_t *tag, size_t n_tag);
+void nbrec_sb_port_binding_index_set_tunnel_key(const struct nbrec_sb_port_binding *,
+int64_t tunnel_key);
+void nbrec_sb_port_binding_index_set_type(const struct nbrec_sb_port_binding *,
+const char *type);
+
+/* SB_Port_Group table. */
+struct nbrec_sb_port_group {
+	struct ovsdb_idl_row header_;
+
+	/* name column. */
+	char *name;	/* Always nonnull. */
+
+	/* ports column. */
+	char **ports;
+	size_t n_ports;
+};
+
+enum nbrec_sb_port_group_column_id {
+    NBREC_SB_PORT_GROUP_COL_NAME,
+    NBREC_SB_PORT_GROUP_COL_PORTS,
+    NBREC_SB_PORT_GROUP_N_COLUMNS
+};
+
+#define nbrec_sb_port_group_col_name (nbrec_sb_port_group_columns[NBREC_SB_PORT_GROUP_COL_NAME])
+#define nbrec_sb_port_group_col_ports (nbrec_sb_port_group_columns[NBREC_SB_PORT_GROUP_COL_PORTS])
+
+extern struct ovsdb_idl_column nbrec_sb_port_group_columns[NBREC_SB_PORT_GROUP_N_COLUMNS];
+
+const struct nbrec_sb_port_group_table *nbrec_sb_port_group_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_port_group *nbrec_sb_port_group_table_first(const struct nbrec_sb_port_group_table *);
+
+#define NBREC_SB_PORT_GROUP_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_port_group_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_port_group_next(ROW))
+#define NBREC_SB_PORT_GROUP_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_port_group_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_port_group_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_port_group *nbrec_sb_port_group_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_port_group *nbrec_sb_port_group_table_get_for_uuid(const struct nbrec_sb_port_group_table *, const struct uuid *);
+const struct nbrec_sb_port_group *nbrec_sb_port_group_first(const struct ovsdb_idl *);
+const struct nbrec_sb_port_group *nbrec_sb_port_group_next(const struct nbrec_sb_port_group *);
+#define NBREC_SB_PORT_GROUP_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_port_group_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_port_group_next(ROW))
+#define NBREC_SB_PORT_GROUP_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_port_group_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_port_group_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_port_group_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_port_group_row_get_seqno(const struct nbrec_sb_port_group *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_port_group *nbrec_sb_port_group_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_port_group *nbrec_sb_port_group_track_get_next(const struct nbrec_sb_port_group *);
+#define NBREC_SB_PORT_GROUP_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_port_group_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_port_group_track_get_next(ROW))
+
+const struct nbrec_sb_port_group *nbrec_sb_port_group_table_track_get_first(const struct nbrec_sb_port_group_table *);
+#define NBREC_SB_PORT_GROUP_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_port_group_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_port_group_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_port_group_is_new(const struct nbrec_sb_port_group *row)
+{
+    return nbrec_sb_port_group_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_port_group_is_deleted(const struct nbrec_sb_port_group *row)
+{
+    return nbrec_sb_port_group_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_port_group_index_destroy_row(const struct nbrec_sb_port_group *);
+
+struct nbrec_sb_port_group *nbrec_sb_port_group_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_port_group *);
+
+int nbrec_sb_port_group_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_port_group *, 
+    const struct nbrec_sb_port_group *);
+struct ovsdb_idl_cursor nbrec_sb_port_group_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_port_group_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_port_group *);
+struct ovsdb_idl_cursor nbrec_sb_port_group_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_port_group *);
+
+struct nbrec_sb_port_group *nbrec_sb_port_group_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_PORT_GROUP_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_port_group_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_port_group_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_port_group_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_PORT_GROUP_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_port_group_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_port_group_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_PORT_GROUP_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_port_group_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_port_group_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_port_group_init(struct nbrec_sb_port_group *);
+void nbrec_sb_port_group_delete(const struct nbrec_sb_port_group *);
+struct nbrec_sb_port_group *nbrec_sb_port_group_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_port_group_is_updated(const struct nbrec_sb_port_group *, enum nbrec_sb_port_group_column_id);
+
+void nbrec_sb_port_group_verify_name(const struct nbrec_sb_port_group *);
+void nbrec_sb_port_group_verify_ports(const struct nbrec_sb_port_group *);
+
+const struct ovsdb_datum *nbrec_sb_port_group_get_name(const struct nbrec_sb_port_group *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_port_group_get_ports(const struct nbrec_sb_port_group *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_port_group_set_name(const struct nbrec_sb_port_group *, const char *name);
+void nbrec_sb_port_group_set_ports(const struct nbrec_sb_port_group *, const char **ports, size_t n_ports);
+
+void nbrec_sb_port_group_add_clause_name(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *name);
+void nbrec_sb_port_group_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_port_group_update_ports_addvalue(const struct nbrec_sb_port_group *,  const char *);
+void nbrec_sb_port_group_update_ports_delvalue(const struct nbrec_sb_port_group *,  const char *);
+void nbrec_sb_port_group_add_clause_ports(struct ovsdb_idl_condition *, enum ovsdb_function function, const char **ports, size_t n_ports);
+void nbrec_sb_port_group_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_port_group *nbrec_sb_port_group_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_port_group_index_set_name(const struct nbrec_sb_port_group *,
+const char *name);
+void nbrec_sb_port_group_index_set_ports(const struct nbrec_sb_port_group *,
+const char **ports, size_t n_ports);
+
+/* SB_RBAC_Permission table. */
+struct nbrec_sb_rbac_permission {
+	struct ovsdb_idl_row header_;
+
+	/* authorization column. */
+	char **authorization;
+	size_t n_authorization;
+
+	/* insert_delete column. */
+	bool insert_delete;
+
+	/* table column. */
+	char *table;	/* Always nonnull. */
+
+	/* update column. */
+	char **update;
+	size_t n_update;
+};
+
+enum nbrec_sb_rbac_permission_column_id {
+    NBREC_SB_RBAC_PERMISSION_COL_AUTHORIZATION,
+    NBREC_SB_RBAC_PERMISSION_COL_INSERT_DELETE,
+    NBREC_SB_RBAC_PERMISSION_COL_TABLE,
+    NBREC_SB_RBAC_PERMISSION_COL_UPDATE,
+    NBREC_SB_RBAC_PERMISSION_N_COLUMNS
+};
+
+#define nbrec_sb_rbac_permission_col_table (nbrec_sb_rbac_permission_columns[NBREC_SB_RBAC_PERMISSION_COL_TABLE])
+#define nbrec_sb_rbac_permission_col_authorization (nbrec_sb_rbac_permission_columns[NBREC_SB_RBAC_PERMISSION_COL_AUTHORIZATION])
+#define nbrec_sb_rbac_permission_col_insert_delete (nbrec_sb_rbac_permission_columns[NBREC_SB_RBAC_PERMISSION_COL_INSERT_DELETE])
+#define nbrec_sb_rbac_permission_col_update (nbrec_sb_rbac_permission_columns[NBREC_SB_RBAC_PERMISSION_COL_UPDATE])
+
+extern struct ovsdb_idl_column nbrec_sb_rbac_permission_columns[NBREC_SB_RBAC_PERMISSION_N_COLUMNS];
+
+const struct nbrec_sb_rbac_permission_table *nbrec_sb_rbac_permission_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_table_first(const struct nbrec_sb_rbac_permission_table *);
+
+#define NBREC_SB_RBAC_PERMISSION_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_rbac_permission_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_rbac_permission_next(ROW))
+#define NBREC_SB_RBAC_PERMISSION_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_rbac_permission_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_rbac_permission_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_table_get_for_uuid(const struct nbrec_sb_rbac_permission_table *, const struct uuid *);
+const struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_first(const struct ovsdb_idl *);
+const struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_next(const struct nbrec_sb_rbac_permission *);
+#define NBREC_SB_RBAC_PERMISSION_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_rbac_permission_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_rbac_permission_next(ROW))
+#define NBREC_SB_RBAC_PERMISSION_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_rbac_permission_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_rbac_permission_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_rbac_permission_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_rbac_permission_row_get_seqno(const struct nbrec_sb_rbac_permission *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_track_get_next(const struct nbrec_sb_rbac_permission *);
+#define NBREC_SB_RBAC_PERMISSION_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_rbac_permission_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_rbac_permission_track_get_next(ROW))
+
+const struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_table_track_get_first(const struct nbrec_sb_rbac_permission_table *);
+#define NBREC_SB_RBAC_PERMISSION_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_rbac_permission_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_rbac_permission_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_rbac_permission_is_new(const struct nbrec_sb_rbac_permission *row)
+{
+    return nbrec_sb_rbac_permission_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_rbac_permission_is_deleted(const struct nbrec_sb_rbac_permission *row)
+{
+    return nbrec_sb_rbac_permission_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_rbac_permission_index_destroy_row(const struct nbrec_sb_rbac_permission *);
+
+struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_rbac_permission *);
+
+int nbrec_sb_rbac_permission_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_rbac_permission *, 
+    const struct nbrec_sb_rbac_permission *);
+struct ovsdb_idl_cursor nbrec_sb_rbac_permission_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_rbac_permission_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_rbac_permission *);
+struct ovsdb_idl_cursor nbrec_sb_rbac_permission_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_rbac_permission *);
+
+struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_RBAC_PERMISSION_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_rbac_permission_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_rbac_permission_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_rbac_permission_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_RBAC_PERMISSION_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_rbac_permission_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_rbac_permission_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_RBAC_PERMISSION_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_rbac_permission_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_rbac_permission_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_rbac_permission_init(struct nbrec_sb_rbac_permission *);
+void nbrec_sb_rbac_permission_delete(const struct nbrec_sb_rbac_permission *);
+struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_rbac_permission_is_updated(const struct nbrec_sb_rbac_permission *, enum nbrec_sb_rbac_permission_column_id);
+
+void nbrec_sb_rbac_permission_verify_authorization(const struct nbrec_sb_rbac_permission *);
+void nbrec_sb_rbac_permission_verify_insert_delete(const struct nbrec_sb_rbac_permission *);
+void nbrec_sb_rbac_permission_verify_table(const struct nbrec_sb_rbac_permission *);
+void nbrec_sb_rbac_permission_verify_update(const struct nbrec_sb_rbac_permission *);
+
+const struct ovsdb_datum *nbrec_sb_rbac_permission_get_authorization(const struct nbrec_sb_rbac_permission *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_rbac_permission_get_insert_delete(const struct nbrec_sb_rbac_permission *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_rbac_permission_get_table(const struct nbrec_sb_rbac_permission *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_rbac_permission_get_update(const struct nbrec_sb_rbac_permission *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_rbac_permission_set_authorization(const struct nbrec_sb_rbac_permission *, const char **authorization, size_t n_authorization);
+void nbrec_sb_rbac_permission_set_insert_delete(const struct nbrec_sb_rbac_permission *, bool insert_delete);
+void nbrec_sb_rbac_permission_set_table(const struct nbrec_sb_rbac_permission *, const char *table);
+void nbrec_sb_rbac_permission_set_update(const struct nbrec_sb_rbac_permission *, const char **update, size_t n_update);
+
+void nbrec_sb_rbac_permission_update_authorization_addvalue(const struct nbrec_sb_rbac_permission *,  const char *);
+void nbrec_sb_rbac_permission_update_authorization_delvalue(const struct nbrec_sb_rbac_permission *,  const char *);
+void nbrec_sb_rbac_permission_add_clause_authorization(struct ovsdb_idl_condition *, enum ovsdb_function function, const char **authorization, size_t n_authorization);
+void nbrec_sb_rbac_permission_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_rbac_permission_add_clause_insert_delete(struct ovsdb_idl_condition *, enum ovsdb_function function, bool insert_delete);
+void nbrec_sb_rbac_permission_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_rbac_permission_add_clause_table(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *table);
+void nbrec_sb_rbac_permission_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_rbac_permission_update_update_addvalue(const struct nbrec_sb_rbac_permission *,  const char *);
+void nbrec_sb_rbac_permission_update_update_delvalue(const struct nbrec_sb_rbac_permission *,  const char *);
+void nbrec_sb_rbac_permission_add_clause_update(struct ovsdb_idl_condition *, enum ovsdb_function function, const char **update, size_t n_update);
+void nbrec_sb_rbac_permission_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_rbac_permission *nbrec_sb_rbac_permission_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_rbac_permission_index_set_authorization(const struct nbrec_sb_rbac_permission *,
+const char **authorization, size_t n_authorization);
+void nbrec_sb_rbac_permission_index_set_insert_delete(const struct nbrec_sb_rbac_permission *,
+bool insert_delete);
+void nbrec_sb_rbac_permission_index_set_table(const struct nbrec_sb_rbac_permission *,
+const char *table);
+void nbrec_sb_rbac_permission_index_set_update(const struct nbrec_sb_rbac_permission *,
+const char **update, size_t n_update);
+
+/* SB_RBAC_Role table. */
+struct nbrec_sb_rbac_role {
+	struct ovsdb_idl_row header_;
+
+	/* name column. */
+	char *name;	/* Always nonnull. */
+
+	/* permissions column. */
+	char **key_permissions;
+	struct nbrec_sb_rbac_permission **value_permissions;
+	size_t n_permissions;
+};
+
+enum nbrec_sb_rbac_role_column_id {
+    NBREC_SB_RBAC_ROLE_COL_NAME,
+    NBREC_SB_RBAC_ROLE_COL_PERMISSIONS,
+    NBREC_SB_RBAC_ROLE_N_COLUMNS
+};
+
+#define nbrec_sb_rbac_role_col_name (nbrec_sb_rbac_role_columns[NBREC_SB_RBAC_ROLE_COL_NAME])
+#define nbrec_sb_rbac_role_col_permissions (nbrec_sb_rbac_role_columns[NBREC_SB_RBAC_ROLE_COL_PERMISSIONS])
+
+extern struct ovsdb_idl_column nbrec_sb_rbac_role_columns[NBREC_SB_RBAC_ROLE_N_COLUMNS];
+
+const struct nbrec_sb_rbac_role_table *nbrec_sb_rbac_role_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_table_first(const struct nbrec_sb_rbac_role_table *);
+
+#define NBREC_SB_RBAC_ROLE_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_rbac_role_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_rbac_role_next(ROW))
+#define NBREC_SB_RBAC_ROLE_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_rbac_role_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_rbac_role_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_table_get_for_uuid(const struct nbrec_sb_rbac_role_table *, const struct uuid *);
+const struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_first(const struct ovsdb_idl *);
+const struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_next(const struct nbrec_sb_rbac_role *);
+#define NBREC_SB_RBAC_ROLE_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_rbac_role_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_rbac_role_next(ROW))
+#define NBREC_SB_RBAC_ROLE_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_rbac_role_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_rbac_role_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_rbac_role_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_rbac_role_row_get_seqno(const struct nbrec_sb_rbac_role *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_track_get_next(const struct nbrec_sb_rbac_role *);
+#define NBREC_SB_RBAC_ROLE_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_rbac_role_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_rbac_role_track_get_next(ROW))
+
+const struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_table_track_get_first(const struct nbrec_sb_rbac_role_table *);
+#define NBREC_SB_RBAC_ROLE_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_rbac_role_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_rbac_role_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_rbac_role_is_new(const struct nbrec_sb_rbac_role *row)
+{
+    return nbrec_sb_rbac_role_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_rbac_role_is_deleted(const struct nbrec_sb_rbac_role *row)
+{
+    return nbrec_sb_rbac_role_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_rbac_role_index_destroy_row(const struct nbrec_sb_rbac_role *);
+
+struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_rbac_role *);
+
+int nbrec_sb_rbac_role_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_rbac_role *, 
+    const struct nbrec_sb_rbac_role *);
+struct ovsdb_idl_cursor nbrec_sb_rbac_role_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_rbac_role_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_rbac_role *);
+struct ovsdb_idl_cursor nbrec_sb_rbac_role_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_rbac_role *);
+
+struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_RBAC_ROLE_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_rbac_role_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_rbac_role_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_rbac_role_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_RBAC_ROLE_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_rbac_role_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_rbac_role_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_RBAC_ROLE_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_rbac_role_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_rbac_role_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_rbac_role_init(struct nbrec_sb_rbac_role *);
+void nbrec_sb_rbac_role_delete(const struct nbrec_sb_rbac_role *);
+struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_rbac_role_is_updated(const struct nbrec_sb_rbac_role *, enum nbrec_sb_rbac_role_column_id);
+
+void nbrec_sb_rbac_role_verify_name(const struct nbrec_sb_rbac_role *);
+void nbrec_sb_rbac_role_verify_permissions(const struct nbrec_sb_rbac_role *);
+
+const struct ovsdb_datum *nbrec_sb_rbac_role_get_name(const struct nbrec_sb_rbac_role *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_rbac_role_get_permissions(const struct nbrec_sb_rbac_role *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+
+void nbrec_sb_rbac_role_set_name(const struct nbrec_sb_rbac_role *, const char *name);
+void nbrec_sb_rbac_role_set_permissions(const struct nbrec_sb_rbac_role *, const char **key_permissions, struct nbrec_sb_rbac_permission **value_permissions, size_t n_permissions);
+
+void nbrec_sb_rbac_role_add_clause_name(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *name);
+void nbrec_sb_rbac_role_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_rbac_role_update_permissions_setkey(const struct nbrec_sb_rbac_role *,  const char *, const struct nbrec_sb_rbac_permission *);
+void nbrec_sb_rbac_role_update_permissions_delkey(const struct nbrec_sb_rbac_role *,  const char *);
+void nbrec_sb_rbac_role_add_clause_permissions(struct ovsdb_idl_condition *, enum ovsdb_function function, const char **key_permissions, struct uuid **value_permissions, size_t n_permissions);
+void nbrec_sb_rbac_role_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_rbac_role *nbrec_sb_rbac_role_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_rbac_role_index_set_name(const struct nbrec_sb_rbac_role *,
+const char *name);
+void nbrec_sb_rbac_role_index_set_permissions(const struct nbrec_sb_rbac_role *,
+const char **key_permissions, struct nbrec_sb_rbac_permission **value_permissions, size_t n_permissions);
+
+/* SB_SSL table. */
+struct nbrec_sb_ssl {
+	struct ovsdb_idl_row header_;
+
+	/* bootstrap_ca_cert column. */
+	bool bootstrap_ca_cert;
+
+	/* ca_cert column. */
+	char *ca_cert;	/* Always nonnull. */
+
+	/* certificate column. */
+	char *certificate;	/* Always nonnull. */
+
+	/* external_ids column. */
+	struct smap external_ids;
+
+	/* private_key column. */
+	char *private_key;	/* Always nonnull. */
+
+	/* ssl_ciphers column. */
+	char *ssl_ciphers;	/* Always nonnull. */
+
+	/* ssl_protocols column. */
+	char *ssl_protocols;	/* Always nonnull. */
+};
+
+enum nbrec_sb_ssl_column_id {
+    NBREC_SB_SSL_COL_BOOTSTRAP_CA_CERT,
+    NBREC_SB_SSL_COL_CA_CERT,
+    NBREC_SB_SSL_COL_CERTIFICATE,
+    NBREC_SB_SSL_COL_EXTERNAL_IDS,
+    NBREC_SB_SSL_COL_PRIVATE_KEY,
+    NBREC_SB_SSL_COL_SSL_CIPHERS,
+    NBREC_SB_SSL_COL_SSL_PROTOCOLS,
+    NBREC_SB_SSL_N_COLUMNS
+};
+
+#define nbrec_sb_ssl_col_private_key (nbrec_sb_ssl_columns[NBREC_SB_SSL_COL_PRIVATE_KEY])
+#define nbrec_sb_ssl_col_ca_cert (nbrec_sb_ssl_columns[NBREC_SB_SSL_COL_CA_CERT])
+#define nbrec_sb_ssl_col_certificate (nbrec_sb_ssl_columns[NBREC_SB_SSL_COL_CERTIFICATE])
+#define nbrec_sb_ssl_col_ssl_ciphers (nbrec_sb_ssl_columns[NBREC_SB_SSL_COL_SSL_CIPHERS])
+#define nbrec_sb_ssl_col_bootstrap_ca_cert (nbrec_sb_ssl_columns[NBREC_SB_SSL_COL_BOOTSTRAP_CA_CERT])
+#define nbrec_sb_ssl_col_ssl_protocols (nbrec_sb_ssl_columns[NBREC_SB_SSL_COL_SSL_PROTOCOLS])
+#define nbrec_sb_ssl_col_external_ids (nbrec_sb_ssl_columns[NBREC_SB_SSL_COL_EXTERNAL_IDS])
+
+extern struct ovsdb_idl_column nbrec_sb_ssl_columns[NBREC_SB_SSL_N_COLUMNS];
+
+const struct nbrec_sb_ssl_table *nbrec_sb_ssl_table_get(const struct ovsdb_idl *);
+const struct nbrec_sb_ssl *nbrec_sb_ssl_table_first(const struct nbrec_sb_ssl_table *);
+
+#define NBREC_SB_SSL_TABLE_FOR_EACH(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_ssl_table_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_ssl_next(ROW))
+#define NBREC_SB_SSL_TABLE_FOR_EACH_SAFE(ROW, NEXT, TABLE) \
+        for ((ROW) = nbrec_sb_ssl_table_first(TABLE); \
+             (ROW) ? ((NEXT) = nbrec_sb_ssl_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+const struct nbrec_sb_ssl *nbrec_sb_ssl_get_for_uuid(const struct ovsdb_idl *, const struct uuid *);
+const struct nbrec_sb_ssl *nbrec_sb_ssl_table_get_for_uuid(const struct nbrec_sb_ssl_table *, const struct uuid *);
+const struct nbrec_sb_ssl *nbrec_sb_ssl_first(const struct ovsdb_idl *);
+const struct nbrec_sb_ssl *nbrec_sb_ssl_next(const struct nbrec_sb_ssl *);
+#define NBREC_SB_SSL_FOR_EACH(ROW, IDL) \
+        for ((ROW) = nbrec_sb_ssl_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_ssl_next(ROW))
+#define NBREC_SB_SSL_FOR_EACH_SAFE(ROW, NEXT, IDL) \
+        for ((ROW) = nbrec_sb_ssl_first(IDL); \
+             (ROW) ? ((NEXT) = nbrec_sb_ssl_next(ROW), 1) : 0; \
+             (ROW) = (NEXT))
+
+unsigned int nbrec_sb_ssl_get_seqno(const struct ovsdb_idl *);
+unsigned int nbrec_sb_ssl_row_get_seqno(const struct nbrec_sb_ssl *row, enum ovsdb_idl_change change);
+const struct nbrec_sb_ssl *nbrec_sb_ssl_track_get_first(const struct ovsdb_idl *);
+const struct nbrec_sb_ssl *nbrec_sb_ssl_track_get_next(const struct nbrec_sb_ssl *);
+#define NBREC_SB_SSL_FOR_EACH_TRACKED(ROW, IDL) \
+        for ((ROW) = nbrec_sb_ssl_track_get_first(IDL); \
+             (ROW); \
+             (ROW) = nbrec_sb_ssl_track_get_next(ROW))
+
+const struct nbrec_sb_ssl *nbrec_sb_ssl_table_track_get_first(const struct nbrec_sb_ssl_table *);
+#define NBREC_SB_SSL_TABLE_FOR_EACH_TRACKED(ROW, TABLE) \
+        for ((ROW) = nbrec_sb_ssl_table_track_get_first(TABLE); \
+             (ROW); \
+             (ROW) = nbrec_sb_ssl_track_get_next(ROW))
+
+
+/* Returns true if 'row' was inserted since the last change tracking reset. */
+static inline bool nbrec_sb_ssl_is_new(const struct nbrec_sb_ssl *row)
+{
+    return nbrec_sb_ssl_row_get_seqno(row, OVSDB_IDL_CHANGE_MODIFY) == 0;
+}
+
+/* Returns true if 'row' was deleted since the last change tracking reset. */
+static inline bool nbrec_sb_ssl_is_deleted(const struct nbrec_sb_ssl *row)
+{
+    return nbrec_sb_ssl_row_get_seqno(row, OVSDB_IDL_CHANGE_DELETE) > 0;
+}
+
+void nbrec_sb_ssl_index_destroy_row(const struct nbrec_sb_ssl *);
+
+struct nbrec_sb_ssl *nbrec_sb_ssl_index_find(struct ovsdb_idl_index *, const struct nbrec_sb_ssl *);
+
+int nbrec_sb_ssl_index_compare(
+    struct ovsdb_idl_index *, 
+    const struct nbrec_sb_ssl *, 
+    const struct nbrec_sb_ssl *);
+struct ovsdb_idl_cursor nbrec_sb_ssl_cursor_first(struct ovsdb_idl_index *);
+struct ovsdb_idl_cursor nbrec_sb_ssl_cursor_first_eq(
+    struct ovsdb_idl_index *, const struct nbrec_sb_ssl *);
+struct ovsdb_idl_cursor nbrec_sb_ssl_cursor_first_ge(
+    struct ovsdb_idl_index *, const struct nbrec_sb_ssl *);
+
+struct nbrec_sb_ssl *nbrec_sb_ssl_cursor_data(struct ovsdb_idl_cursor *);
+
+#define NBREC_SB_SSL_FOR_EACH_RANGE(ROW, FROM, TO, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_ssl_cursor_first_ge(INDEX, FROM); \
+             (cursor__.position \
+              && ((ROW) = nbrec_sb_ssl_cursor_data(&cursor__), \
+                  !(TO) || nbrec_sb_ssl_index_compare(INDEX, ROW, TO) <= 0)); \
+             ovsdb_idl_cursor_next(&cursor__))
+#define NBREC_SB_SSL_FOR_EACH_EQUAL(ROW, KEY, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_ssl_cursor_first_eq(INDEX, KEY); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_ssl_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next_eq(&cursor__), \
+                 true) \
+              : false); \
+            )
+#define NBREC_SB_SSL_FOR_EACH_BYINDEX(ROW, INDEX) \
+        for (struct ovsdb_idl_cursor cursor__ = nbrec_sb_ssl_cursor_first(INDEX); \
+             (cursor__.position \
+              ? ((ROW) = nbrec_sb_ssl_cursor_data(&cursor__), \
+                 ovsdb_idl_cursor_next(&cursor__), \
+                 true) \
+              : false); \
+            )
+
+void nbrec_sb_ssl_init(struct nbrec_sb_ssl *);
+void nbrec_sb_ssl_delete(const struct nbrec_sb_ssl *);
+struct nbrec_sb_ssl *nbrec_sb_ssl_insert(struct ovsdb_idl_txn *);
+bool nbrec_sb_ssl_is_updated(const struct nbrec_sb_ssl *, enum nbrec_sb_ssl_column_id);
+
+void nbrec_sb_ssl_verify_bootstrap_ca_cert(const struct nbrec_sb_ssl *);
+void nbrec_sb_ssl_verify_ca_cert(const struct nbrec_sb_ssl *);
+void nbrec_sb_ssl_verify_certificate(const struct nbrec_sb_ssl *);
+void nbrec_sb_ssl_verify_external_ids(const struct nbrec_sb_ssl *);
+void nbrec_sb_ssl_verify_private_key(const struct nbrec_sb_ssl *);
+void nbrec_sb_ssl_verify_ssl_ciphers(const struct nbrec_sb_ssl *);
+void nbrec_sb_ssl_verify_ssl_protocols(const struct nbrec_sb_ssl *);
+
+const struct ovsdb_datum *nbrec_sb_ssl_get_bootstrap_ca_cert(const struct nbrec_sb_ssl *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_ssl_get_ca_cert(const struct nbrec_sb_ssl *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_ssl_get_certificate(const struct nbrec_sb_ssl *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_ssl_get_external_ids(const struct nbrec_sb_ssl *, enum ovsdb_atomic_type key_type, enum ovsdb_atomic_type value_type);
+const struct ovsdb_datum *nbrec_sb_ssl_get_private_key(const struct nbrec_sb_ssl *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_ssl_get_ssl_ciphers(const struct nbrec_sb_ssl *, enum ovsdb_atomic_type key_type);
+const struct ovsdb_datum *nbrec_sb_ssl_get_ssl_protocols(const struct nbrec_sb_ssl *, enum ovsdb_atomic_type key_type);
+
+void nbrec_sb_ssl_set_bootstrap_ca_cert(const struct nbrec_sb_ssl *, bool bootstrap_ca_cert);
+void nbrec_sb_ssl_set_ca_cert(const struct nbrec_sb_ssl *, const char *ca_cert);
+void nbrec_sb_ssl_set_certificate(const struct nbrec_sb_ssl *, const char *certificate);
+void nbrec_sb_ssl_set_external_ids(const struct nbrec_sb_ssl *, const struct smap *);
+void nbrec_sb_ssl_set_private_key(const struct nbrec_sb_ssl *, const char *private_key);
+void nbrec_sb_ssl_set_ssl_ciphers(const struct nbrec_sb_ssl *, const char *ssl_ciphers);
+void nbrec_sb_ssl_set_ssl_protocols(const struct nbrec_sb_ssl *, const char *ssl_protocols);
+
+void nbrec_sb_ssl_add_clause_bootstrap_ca_cert(struct ovsdb_idl_condition *, enum ovsdb_function function, bool bootstrap_ca_cert);
+void nbrec_sb_ssl_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_ssl_add_clause_ca_cert(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *ca_cert);
+void nbrec_sb_ssl_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_ssl_add_clause_certificate(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *certificate);
+void nbrec_sb_ssl_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_ssl_update_external_ids_setkey(const struct nbrec_sb_ssl *,  const char *, const char *);
+void nbrec_sb_ssl_update_external_ids_delkey(const struct nbrec_sb_ssl *,  const char *);
+void nbrec_sb_ssl_add_clause_external_ids(struct ovsdb_idl_condition *, enum ovsdb_function function, const struct smap *);
+void nbrec_sb_ssl_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_ssl_add_clause_private_key(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *private_key);
+void nbrec_sb_ssl_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_ssl_add_clause_ssl_ciphers(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *ssl_ciphers);
+void nbrec_sb_ssl_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+void nbrec_sb_ssl_add_clause_ssl_protocols(struct ovsdb_idl_condition *, enum ovsdb_function function, const char *ssl_protocols);
+void nbrec_sb_ssl_set_condition(struct ovsdb_idl *, struct ovsdb_idl_condition *);
+
+struct nbrec_sb_ssl *nbrec_sb_ssl_index_init_row(struct ovsdb_idl_index *);
+void nbrec_sb_ssl_index_set_bootstrap_ca_cert(const struct nbrec_sb_ssl *,
+bool bootstrap_ca_cert);
+void nbrec_sb_ssl_index_set_ca_cert(const struct nbrec_sb_ssl *,
+const char *ca_cert);
+void nbrec_sb_ssl_index_set_certificate(const struct nbrec_sb_ssl *,
+const char *certificate);
+void nbrec_sb_ssl_index_set_external_ids(const struct nbrec_sb_ssl *,
+const struct smap *);
+void nbrec_sb_ssl_index_set_private_key(const struct nbrec_sb_ssl *,
+const char *private_key);
+void nbrec_sb_ssl_index_set_ssl_ciphers(const struct nbrec_sb_ssl *,
+const char *ssl_ciphers);
+void nbrec_sb_ssl_index_set_ssl_protocols(const struct nbrec_sb_ssl *,
+const char *ssl_protocols);
+
 /* SSL table. */
 struct nbrec_ssl {
 	struct ovsdb_idl_row header_;
@@ -3788,29 +7286,69 @@ enum nbrec_table_id {
     NBREC_TABLE_NB_GLOBAL,
     NBREC_TABLE_PORT_GROUP,
     NBREC_TABLE_QOS,
+    NBREC_TABLE_SB_ADDRESS_SET,
+    NBREC_TABLE_SB_CHASSIS,
+    NBREC_TABLE_SB_CONNECTION,
+    NBREC_TABLE_SB_DHCP_OPTIONS,
+    NBREC_TABLE_SB_DHCPV6_OPTIONS,
+    NBREC_TABLE_SB_DNS,
+    NBREC_TABLE_SB_DATAPATH_BINDING,
+    NBREC_TABLE_SB_ENCAP,
+    NBREC_TABLE_SB_GATEWAY_CHASSIS,
+    NBREC_TABLE_SB_GLOBAL,
+    NBREC_TABLE_SB_LOGICAL_FLOW,
+    NBREC_TABLE_SB_MAC_BINDING,
+    NBREC_TABLE_SB_METER,
+    NBREC_TABLE_SB_METER_BAND,
+    NBREC_TABLE_SB_MULTICAST_GROUP,
+    NBREC_TABLE_SB_PORT_BINDING,
+    NBREC_TABLE_SB_PORT_GROUP,
+    NBREC_TABLE_SB_RBAC_PERMISSION,
+    NBREC_TABLE_SB_RBAC_ROLE,
+    NBREC_TABLE_SB_SSL,
     NBREC_TABLE_SSL,
     NBREC_N_TABLES
 };
 
+#define nbrec_table_nat (nbrec_table_classes[NBREC_TABLE_NAT])
+#define nbrec_table_sb_dhcp_options (nbrec_table_classes[NBREC_TABLE_SB_DHCP_OPTIONS])
+#define nbrec_table_logical_router_static_route (nbrec_table_classes[NBREC_TABLE_LOGICAL_ROUTER_STATIC_ROUTE])
+#define nbrec_table_sb_rbac_permission (nbrec_table_classes[NBREC_TABLE_SB_RBAC_PERMISSION])
+#define nbrec_table_sb_global (nbrec_table_classes[NBREC_TABLE_SB_GLOBAL])
+#define nbrec_table_acl (nbrec_table_classes[NBREC_TABLE_ACL])
+#define nbrec_table_meter_band (nbrec_table_classes[NBREC_TABLE_METER_BAND])
+#define nbrec_table_sb_chassis (nbrec_table_classes[NBREC_TABLE_SB_CHASSIS])
+#define nbrec_table_logical_switch (nbrec_table_classes[NBREC_TABLE_LOGICAL_SWITCH])
+#define nbrec_table_gateway_chassis (nbrec_table_classes[NBREC_TABLE_GATEWAY_CHASSIS])
+#define nbrec_table_dhcp_options (nbrec_table_classes[NBREC_TABLE_DHCP_OPTIONS])
+#define nbrec_table_sb_dhcpv6_options (nbrec_table_classes[NBREC_TABLE_SB_DHCPV6_OPTIONS])
+#define nbrec_table_sb_connection (nbrec_table_classes[NBREC_TABLE_SB_CONNECTION])
+#define nbrec_table_sb_port_binding (nbrec_table_classes[NBREC_TABLE_SB_PORT_BINDING])
+#define nbrec_table_sb_datapath_binding (nbrec_table_classes[NBREC_TABLE_SB_DATAPATH_BINDING])
 #define nbrec_table_load_balancer (nbrec_table_classes[NBREC_TABLE_LOAD_BALANCER])
+#define nbrec_table_sb_ssl (nbrec_table_classes[NBREC_TABLE_SB_SSL])
+#define nbrec_table_qos (nbrec_table_classes[NBREC_TABLE_QOS])
 #define nbrec_table_logical_switch_port (nbrec_table_classes[NBREC_TABLE_LOGICAL_SWITCH_PORT])
+#define nbrec_table_sb_multicast_group (nbrec_table_classes[NBREC_TABLE_SB_MULTICAST_GROUP])
+#define nbrec_table_connection (nbrec_table_classes[NBREC_TABLE_CONNECTION])
+#define nbrec_table_sb_gateway_chassis (nbrec_table_classes[NBREC_TABLE_SB_GATEWAY_CHASSIS])
+#define nbrec_table_dns (nbrec_table_classes[NBREC_TABLE_DNS])
+#define nbrec_table_sb_port_group (nbrec_table_classes[NBREC_TABLE_SB_PORT_GROUP])
+#define nbrec_table_port_group (nbrec_table_classes[NBREC_TABLE_PORT_GROUP])
+#define nbrec_table_sb_encap (nbrec_table_classes[NBREC_TABLE_SB_ENCAP])
+#define nbrec_table_sb_meter (nbrec_table_classes[NBREC_TABLE_SB_METER])
 #define nbrec_table_address_set (nbrec_table_classes[NBREC_TABLE_ADDRESS_SET])
 #define nbrec_table_nb_global (nbrec_table_classes[NBREC_TABLE_NB_GLOBAL])
-#define nbrec_table_gateway_chassis (nbrec_table_classes[NBREC_TABLE_GATEWAY_CHASSIS])
-#define nbrec_table_nat (nbrec_table_classes[NBREC_TABLE_NAT])
-#define nbrec_table_meter_band (nbrec_table_classes[NBREC_TABLE_METER_BAND])
-#define nbrec_table_logical_router_static_route (nbrec_table_classes[NBREC_TABLE_LOGICAL_ROUTER_STATIC_ROUTE])
+#define nbrec_table_sb_meter_band (nbrec_table_classes[NBREC_TABLE_SB_METER_BAND])
+#define nbrec_table_sb_rbac_role (nbrec_table_classes[NBREC_TABLE_SB_RBAC_ROLE])
+#define nbrec_table_sb_logical_flow (nbrec_table_classes[NBREC_TABLE_SB_LOGICAL_FLOW])
+#define nbrec_table_sb_mac_binding (nbrec_table_classes[NBREC_TABLE_SB_MAC_BINDING])
 #define nbrec_table_logical_router_port (nbrec_table_classes[NBREC_TABLE_LOGICAL_ROUTER_PORT])
 #define nbrec_table_logical_router (nbrec_table_classes[NBREC_TABLE_LOGICAL_ROUTER])
 #define nbrec_table_meter (nbrec_table_classes[NBREC_TABLE_METER])
-#define nbrec_table_acl (nbrec_table_classes[NBREC_TABLE_ACL])
 #define nbrec_table_ssl (nbrec_table_classes[NBREC_TABLE_SSL])
-#define nbrec_table_connection (nbrec_table_classes[NBREC_TABLE_CONNECTION])
-#define nbrec_table_dns (nbrec_table_classes[NBREC_TABLE_DNS])
-#define nbrec_table_logical_switch (nbrec_table_classes[NBREC_TABLE_LOGICAL_SWITCH])
-#define nbrec_table_qos (nbrec_table_classes[NBREC_TABLE_QOS])
-#define nbrec_table_port_group (nbrec_table_classes[NBREC_TABLE_PORT_GROUP])
-#define nbrec_table_dhcp_options (nbrec_table_classes[NBREC_TABLE_DHCP_OPTIONS])
+#define nbrec_table_sb_dns (nbrec_table_classes[NBREC_TABLE_SB_DNS])
+#define nbrec_table_sb_address_set (nbrec_table_classes[NBREC_TABLE_SB_ADDRESS_SET])
 
 extern struct ovsdb_idl_table_class nbrec_table_classes[NBREC_N_TABLES];
 
