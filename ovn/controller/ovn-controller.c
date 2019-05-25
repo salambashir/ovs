@@ -648,25 +648,25 @@ main(int argc, char *argv[])
             = chassis_index_create(ovnnb_idl_loop.idl);
     struct ovsdb_idl_index *nbrec_multicast_group_by_name_datapath
             = ovsdb_idl_index_create2(ovnnb_idl_loop.idl,
-                                      &nbrec_multicast_group_col_name,
-                                      &nbrec_multicast_group_col_datapath);
+                                      &nbrec_sb_multicast_group_col_name,
+                                      &nbrec_sb_multicast_group_col_datapath);
     struct ovsdb_idl_index *nbrec_port_binding_by_name
             = ovsdb_idl_index_create1(ovnnb_idl_loop.idl,
-                                      &nbrec_port_binding_col_logical_port);
+                                      &nbrec_sb_port_binding_col_logical_port);
     struct ovsdb_idl_index *nbrec_port_binding_by_key
             = ovsdb_idl_index_create2(ovnnb_idl_loop.idl,
-                                      &nbrec_port_binding_col_tunnel_key,
-                                      &nbrec_port_binding_col_datapath);
+                                      &nbrec_sb_port_binding_col_tunnel_key,
+                                      &nbrec_sb_port_binding_col_datapath);
     struct ovsdb_idl_index *nbrec_port_binding_by_datapath
             = ovsdb_idl_index_create1(ovnnb_idl_loop.idl,
-                                      &nbrec_port_binding_col_datapath);
+                                      &nbrec_sb_port_binding_col_datapath);
     struct ovsdb_idl_index *nbrec_datapath_binding_by_key
             = ovsdb_idl_index_create1(ovnnb_idl_loop.idl,
-                                      &nbrec_datapath_binding_col_tunnel_key);
+                                      &nbrec_sb_datapath_binding_col_tunnel_key);
     struct ovsdb_idl_index *nbrec_mac_binding_by_lport_ip
             = ovsdb_idl_index_create2(ovnnb_idl_loop.idl,
-                                      &nbrec_mac_binding_col_logical_port,
-                                      &nbrec_mac_binding_col_ip);
+                                      &nbrec_sb_mac_binding_col_logical_port,
+                                      &nbrec_sb_mac_binding_col_ip);
     //siraj edit ends here
 
 
