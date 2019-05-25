@@ -8501,7 +8501,7 @@ nb_check_and_update_rbac(struct northd_context *ctx)
     struct rbac_perm_cfg *pcfg; //TODO??????????????????
 
     for (pcfg = rbac_perm_cfg; pcfg->table; pcfg++) {
-        pcfg->row = NULL;
+        pcfg->nb_row = NULL;
     }
 
     NBREC_SB_RBAC_PERMISSION_FOR_EACH_SAFE (nb_perm_row, nb_perm_next, ctx->ovnnb_idl) {
@@ -8523,7 +8523,7 @@ nb_check_and_update_rbac(struct northd_context *ctx)
     }
 
     for (pcfg = rbac_perm_cfg; pcfg->table; pcfg++) {
-        if (!pcfg->row) {
+        if (!pcfg->nb_row) {
             nb_ovn_rbac_create_perm(pcfg, ctx, nb_rbac_role);
         }
     }
