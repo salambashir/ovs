@@ -8246,7 +8246,6 @@ static const char *rbac_mac_binding_auth[] =
 static const char *rbac_mac_binding_update[] =
     {"logical_port", "ip", "mac", "datapath"};
 
-//TODO: NB????????????????????????????????
 static struct rbac_perm_cfg {
     const char *table;
     const char **auth;
@@ -8255,7 +8254,8 @@ static struct rbac_perm_cfg {
     const char **update;
     int n_update;
     const struct sbrec_rbac_permission *row;
-} rbac_perm_cfg[] = {
+    const struct nbrec_sb_rbac_permission *nb_row; //Salam
+} rbac_perm_cfg[] = { //TODO ???????????????? should add SB_<table>s also ??????????????
     {
         .table = "Chassis",
         .auth = rbac_chassis_auth,
@@ -8264,6 +8264,7 @@ static struct rbac_perm_cfg {
         .update = rbac_chassis_update,
         .n_update = ARRAY_SIZE(rbac_chassis_update),
         .row = NULL
+        .nb_row = NULL
     },{
         .table = "Encap",
         .auth = rbac_encap_auth,
@@ -8272,6 +8273,7 @@ static struct rbac_perm_cfg {
         .update = rbac_encap_update,
         .n_update = ARRAY_SIZE(rbac_encap_update),
         .row = NULL
+        .nb_row = NULL
     },{
         .table = "Port_Binding",
         .auth = rbac_port_binding_auth,
@@ -8280,6 +8282,7 @@ static struct rbac_perm_cfg {
         .update = rbac_port_binding_update,
         .n_update = ARRAY_SIZE(rbac_port_binding_update),
         .row = NULL
+        .nb_row = NULL
     },{
         .table = "MAC_Binding",
         .auth = rbac_mac_binding_auth,
@@ -8288,6 +8291,7 @@ static struct rbac_perm_cfg {
         .update = rbac_mac_binding_update,
         .n_update = ARRAY_SIZE(rbac_mac_binding_update),
         .row = NULL
+        .nb_row = NULL
     },{
         .table = NULL,
         .auth = NULL,
@@ -8296,6 +8300,7 @@ static struct rbac_perm_cfg {
         .update = NULL,
         .n_update = 0,
         .row = NULL
+        .nb_row = NULL
     }
 };
 
@@ -8404,7 +8409,7 @@ nb_ovn_rbac_validate_perm(const struct nbrec_sb_rbac_permission *perm)
     }
 
     /* Success, db state matches expected state */
-    pcfg->row = perm;
+    pcfg->nb_row = perm;
     return true;
 }
 
