@@ -1573,6 +1573,7 @@ tag_alloc_create_new_tag(struct hmap *tag_alloc_table,
 }
 
 
+//TODO: should also change tables in NB
 static void
 join_logical_ports(struct northd_context *ctx,
                    struct hmap *datapaths, struct hmap *ports,
@@ -1950,6 +1951,7 @@ get_nat_addresses(const struct ovn_port *op, size_t *n)
     return addresses;
 }
 
+//TODO: should also change tables in NB
 static bool
 gateway_chassis_equal(const struct nbrec_gateway_chassis *nb_gwc,
                       const struct sbrec_chassis *nb_gwc_c,
@@ -1973,6 +1975,7 @@ gateway_chassis_equal(const struct nbrec_gateway_chassis *nb_gwc,
                                           sb_gwc->chassis->name));
 }
 
+//TODO: should also change tables in NB
 static bool
 sbpb_gw_chassis_needs_update(
     struct ovsdb_idl_index *sbrec_chassis_by_name,
@@ -2052,6 +2055,7 @@ sbpb_gw_chassis_needs_update(
     return false;
 }
 
+//TODO: should also change tables in NB
 /* This functions translates the gw chassis on the nb database
  * to sb database entries, the only difference is that SB database
  * Gateway_Chassis table references the chassis directly instead
@@ -2104,6 +2108,7 @@ copy_gw_chassis_from_nbrp_to_sbpb(
     free(gw_chassis);
 }
 
+//TODO: should also change tables in NB
 static void
 ovn_port_update_sbrec(struct northd_context *ctx,
                       struct ovsdb_idl_index *sbrec_chassis_by_name,
@@ -2338,6 +2343,7 @@ ovn_port_update_sbrec(struct northd_context *ctx,
     }
 }
 
+//TODO: should also change tables in NB
 /* Remove mac_binding entries that refer to logical_ports which are
  * deleted. */
 static void
@@ -2508,6 +2514,7 @@ ovn_multicast_destroy(struct hmap *mcgroups, struct ovn_multicast *mc)
     }
 }
 
+//TODO: should also change tables in NB
 static void
 ovn_multicast_update_sbrec(const struct ovn_multicast *mc,
                            const struct sbrec_multicast_group *sb)
@@ -5036,6 +5043,7 @@ add_router_lb_flow(struct hmap *lflows, struct ovn_datapath *od,
 #define ND_RA_MIN_INTERVAL_MAX(max) ((max) * 3 / 4)
 #define ND_RA_MIN_INTERVAL_MIN 3
 
+//TODO: should also change tables in NB
 static void
 copy_ra_to_sb(struct ovn_port *op, const char *address_mode)
 {
@@ -6733,6 +6741,7 @@ build_lrouter_flows(struct hmap *datapaths, struct hmap *ports,
     ds_destroy(&actions);
 }
 
+//TODO: should also change tables in NB
 /* Updates the Logical_Flow and Multicast_Group tables in the OVN_SB database,
  * constructing their contents based on the OVN_NB database. */
 static void
@@ -6837,6 +6846,7 @@ build_lflows(struct northd_context *ctx, struct hmap *datapaths,
     hmap_destroy(&mcgroups);
 }
 
+//TODO: should also change tables in NB
 static void
 sync_address_set(struct northd_context *ctx, const char *name,
                  const char **addrs, size_t n_addrs,
@@ -7009,6 +7019,7 @@ band_cmp(const void *band1_, const void *band2_)
     }
 }
 
+//TODO: should also change tables in NB
 static bool
 bands_need_update(const struct nbrec_meter *nb_meter,
                   const struct sbrec_meter *sb_meter)
@@ -7123,6 +7134,7 @@ sync_meters(struct northd_context *ctx)
     shash_destroy(&sb_meters);
 }
 
+//TODO: should also change tables in NB?????????
 /*
  * struct 'dns_info' is used to sync the DNS records between OVN Northbound db
  * and Southbound db.
@@ -7151,6 +7163,7 @@ get_dns_info_from_hmap(struct hmap *dns_map, struct uuid *uuid)
     return NULL;
 }
 
+//TODO: should also change tables in NB
 static void
 sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
 {
@@ -7226,6 +7239,7 @@ sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
 
 
 
+//TODO: should also change tables in NB
 static void
 ovnnb_db_run(struct northd_context *ctx,
              struct ovsdb_idl_index *sbrec_chassis_by_name,
@@ -7595,6 +7609,7 @@ ovn_rbac_validate_perm(const struct sbrec_rbac_permission *perm)
     return true;
 }
 
+//TODO: should also change tables in NB
 static void
 ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
                      struct northd_context *ctx,
@@ -7683,6 +7698,7 @@ update_northbound_cfg(struct northd_context *ctx,
     }
 }
 
+//TODO: should also change tables in NB?????
 /* Handle a fairly small set of changes in the southbound database. */
 static void
 ovnsb_db_run(struct northd_context *ctx, struct ovsdb_idl_loop *sb_loop)
@@ -7778,6 +7794,7 @@ add_column_noalert(struct ovsdb_idl *idl,
     ovsdb_idl_omit_alert(idl, column);
 }
 
+//TODO: should also change tables in NB
 int
 main(int argc, char *argv[])
 {
