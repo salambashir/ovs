@@ -8263,7 +8263,7 @@ static struct rbac_perm_cfg {
         .insdel = true,
         .update = rbac_chassis_update,
         .n_update = ARRAY_SIZE(rbac_chassis_update),
-        .row = NULL
+        .row = NULL,
         .nb_row = NULL
     },{
         .table = "Encap",
@@ -8272,7 +8272,7 @@ static struct rbac_perm_cfg {
         .insdel = true,
         .update = rbac_encap_update,
         .n_update = ARRAY_SIZE(rbac_encap_update),
-        .row = NULL
+        .row = NULL,
         .nb_row = NULL
     },{
         .table = "Port_Binding",
@@ -8281,7 +8281,7 @@ static struct rbac_perm_cfg {
         .insdel = false,
         .update = rbac_port_binding_update,
         .n_update = ARRAY_SIZE(rbac_port_binding_update),
-        .row = NULL
+        .row = NULL,
         .nb_row = NULL
     },{
         .table = "MAC_Binding",
@@ -8290,7 +8290,7 @@ static struct rbac_perm_cfg {
         .insdel = true,
         .update = rbac_mac_binding_update,
         .n_update = ARRAY_SIZE(rbac_mac_binding_update),
-        .row = NULL
+        .row = NULL,
         .nb_row = NULL
     },{
         .table = NULL,
@@ -8299,7 +8299,7 @@ static struct rbac_perm_cfg {
         .insdel = false,
         .update = NULL,
         .n_update = 0,
-        .row = NULL
+        .row = NULL,
         .nb_row = NULL
     }
 };
@@ -8501,7 +8501,7 @@ nb_check_and_update_rbac(struct northd_context *ctx)
     struct rbac_perm_cfg *pcfg; //TODO??????????????????
 
     for (pcfg = rbac_perm_cfg; pcfg->table; pcfg++) {
-        pcfg->row = NULL;
+        pcfg->nb_row = NULL;
     }
 
     NBREC_SB_RBAC_PERMISSION_FOR_EACH_SAFE (nb_perm_row, nb_perm_next, ctx->ovnnb_idl) {
@@ -8523,7 +8523,7 @@ nb_check_and_update_rbac(struct northd_context *ctx)
     }
 
     for (pcfg = rbac_perm_cfg; pcfg->table; pcfg++) {
-        if (!pcfg->row) {
+        if (!pcfg->nb_row) {
             nb_ovn_rbac_create_perm(pcfg, ctx, nb_rbac_role);
         }
     }
