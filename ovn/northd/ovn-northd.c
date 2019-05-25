@@ -1971,7 +1971,6 @@ get_nat_addresses(const struct ovn_port *op, size_t *n)
     return addresses;
 }
 
-//TODO: should also change tables in NB
 static bool
 gateway_chassis_equal(const struct nbrec_gateway_chassis *nb_gwc,
                       const struct sbrec_chassis *nb_gwc_c,
@@ -2725,7 +2724,7 @@ nb_ovn_port_update_sbrec(struct northd_context *ctx,
     }
 }
 
-//TODO: should also change tables in NB
+//TODO: should also change tables in NB - V
 /* Remove mac_binding entries that refer to logical_ports which are
  * deleted. */
 static void
@@ -2735,6 +2734,13 @@ cleanup_mac_bindings(struct northd_context *ctx, struct hmap *ports)
     SBREC_MAC_BINDING_FOR_EACH_SAFE (b, n, ctx->ovnsb_idl) {
         if (!ovn_port_find(ports, b->logical_port)) {
             sbrec_mac_binding_delete(b);
+        }
+    }
+
+    const struct nbrec_sb_mac_binding *nb_b, *nb_n; //Salam
+    NBREC_SB_MAC_BINDING_FOR_EACH_SAFE (nb_b, nb_n, ctx->ovnnb_idl) { //Salam
+        if (!ovn_port_find(ports, nb_b->logical_port)) { //Salam
+            nbrec_sb_mac_binding_delete(nb_b); //Salam
         }
     }
 }
@@ -5445,7 +5451,6 @@ add_router_lb_flow(struct hmap *lflows, struct ovn_datapath *od,
 #define ND_RA_MIN_INTERVAL_MAX(max) ((max) * 3 / 4)
 #define ND_RA_MIN_INTERVAL_MIN 3
 
-//TODO: should also change tables in NB
 static void
 copy_ra_to_sb(struct ovn_port *op, const char *address_mode)
 {
@@ -5498,6 +5503,62 @@ copy_ra_to_sb(struct ovn_port *op, const char *address_mode)
     smap_add(&options, "ipv6_ra_src_eth", op->lrp_networks.ea_s);
 
     sbrec_port_binding_set_options(op->sb, &options);
+    smap_destroy(&options);
+}
+
+//Salam - all function
+static void
+nb_copy_ra_to_sb(struct ovn_port *op, const char *address_mode)
+{
+    struct smap options;
+    smap_clone(&options, &op->nb->options);
+
+    smap_add(&options, "ipv6_ra_send_periodic", "true");
+    smap_add(&options, "ipv6_ra_address_mode", address_mode);
+
+    int max_interval = smap_get_int(&op->nbrp->ipv6_ra_configs,
+            "max_interval", ND_RA_MAX_INTERVAL_DEFAULT);
+    if (max_interval > ND_RA_MAX_INTERVAL_MAX) {
+        max_interval = ND_RA_MAX_INTERVAL_MAX;
+    }
+    if (max_interval < ND_RA_MAX_INTERVAL_MIN) {
+        max_interval = ND_RA_MAX_INTERVAL_MIN;
+    }
+    smap_add_format(&options, "ipv6_ra_max_interval", "%d", max_interval);
+
+    int min_interval = smap_get_int(&op->nbrp->ipv6_ra_configs,
+            "min_interval", nd_ra_min_interval_default(max_interval));
+    if (min_interval > ND_RA_MIN_INTERVAL_MAX(max_interval)) {
+        min_interval = ND_RA_MIN_INTERVAL_MAX(max_interval);
+    }
+    if (min_interval < ND_RA_MIN_INTERVAL_MIN) {
+        min_interval = ND_RA_MIN_INTERVAL_MIN;
+    }
+    smap_add_format(&options, "ipv6_ra_min_interval", "%d", min_interval);
+
+    int mtu = smap_get_int(&op->nbrp->ipv6_ra_configs, "mtu", ND_MTU_DEFAULT);
+    /* RFC 2460 requires the MTU for IPv6 to be at least 1280 */
+    if (mtu && mtu >= 1280) {
+        smap_add_format(&options, "ipv6_ra_mtu", "%d", mtu);
+    }
+
+    struct ds s = DS_EMPTY_INITIALIZER;
+    for (int i = 0; i < op->lrp_networks.n_ipv6_addrs; ++i) {
+        struct ipv6_netaddr *addrs = &op->lrp_networks.ipv6_addrs[i];
+        if (in6_is_lla(&addrs->network)) {
+            smap_add(&options, "ipv6_ra_src_addr", addrs->addr_s);
+            continue;
+        }
+        ds_put_format(&s, "%s/%u ", addrs->network_s, addrs->plen);
+    }
+    /* Remove trailing space */
+    ds_chomp(&s, ' ');
+    smap_add(&options, "ipv6_ra_prefixes", ds_cstr(&s));
+    ds_destroy(&s);
+
+    smap_add(&options, "ipv6_ra_src_eth", op->lrp_networks.ea_s);
+
+    nbrec_sb_port_binding_set_options(op->nb, &options);
     smap_destroy(&options);
 }
 
@@ -6697,6 +6758,7 @@ build_lrouter_flows(struct hmap *datapaths, struct hmap *ports,
         if (smap_get_bool(&op->nbrp->ipv6_ra_configs, "send_periodic",
                           false)) {
             copy_ra_to_sb(op, address_mode);
+            nb_copy_ra_to_sb(op, address_mode); //Salam
         }
 
         ds_clear(&match);
@@ -7547,7 +7609,6 @@ band_cmp(const void *band1_, const void *band2_)
     }
 }
 
-//TODO: should also change tables in NB???????????????
 static bool
 bands_need_update(const struct nbrec_meter *nb_meter,
                   const struct sbrec_meter *sb_meter)
@@ -7842,7 +7903,7 @@ sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
 
 
 
-//TODO: should also change tables in NB
+//TODO: should also change tables in NB - V
 static void
 ovnnb_db_run(struct northd_context *ctx,
              struct ovsdb_idl_index *sbrec_chassis_by_name,
@@ -7879,7 +7940,7 @@ ovnnb_db_run(struct northd_context *ctx,
     HMAP_FOR_EACH_SAFE (port, next_port, key_node, &ports) {
         ovn_port_destroy(&ports, port);
     }
-    hmap_destroy(&ports); /////////////////////************* HERE HERE HERE
+    hmap_destroy(&ports);
 
     /* Sync ipsec configuration.
      * Copy nb_cfg from northbound to southbound database.
@@ -7898,6 +7959,17 @@ ovnnb_db_run(struct northd_context *ctx,
     sbrec_sb_global_set_nb_cfg(sb, nb->nb_cfg);
     sbrec_sb_global_set_options(sb, &nb->options);
     sb_loop->next_cfg = nb->nb_cfg;
+
+    const struct nbrec_sb_global *nb_sb = nbrec_sb_global_first(ctx->ovnnb_idl); //Salam
+    if (!nb_sb) { //Salam
+        nb_sb = nbrec_sb_global_insert(ctx->ovnnb_txn); //Salam
+    }
+    if (nb->ipsec != nb_sb->ipsec) { //Salam
+        nbrec_sb_global_set_ipsec(nb_sb, nb->ipsec); //Salam
+    }
+    nbrec_sb_global_set_nb_cfg(nb_sb, nb->nb_cfg); //Salam
+    nbrec_sb_global_set_options(nb_sb, &nb->options); //Salam
+    nb_sb_loop->next_cfg = nb->nb_cfg; //Salam
 
     const char *mac_addr_prefix = smap_get(&nb->options, "mac_prefix");
     if (mac_addr_prefix) {
@@ -8018,7 +8090,6 @@ static struct gen_opts_map supported_dhcpv6_opts[] = {
     DHCPV6_OPT_DNS_SERVER
 };
 
-//TODO: should also change tables in NB
 static void
 check_and_add_supported_dhcp_opts_to_sb_db(struct northd_context *ctx)
 {
@@ -8052,7 +8123,41 @@ check_and_add_supported_dhcp_opts_to_sb_db(struct northd_context *ctx)
     hmap_destroy(&dhcp_opts_to_add);
 }
 
-//TODO: should also change tables in NB
+//Salam - all function
+static void
+nb_check_and_add_supported_dhcp_opts_to_sb_db(struct northd_context *ctx)
+{
+
+    struct hmap nb_dhcp_opts_to_add = HMAP_INITIALIZER(&nb_dhcp_opts_to_add); 
+    for (size_t i = 0; (i < sizeof(supported_dhcp_opts) /
+                            sizeof(supported_dhcp_opts[0])); i++) { 
+        hmap_insert(&nb_dhcp_opts_to_add, &supported_dhcp_opts[i].hmap_node,
+                    dhcp_opt_hash(supported_dhcp_opts[i].name)); 
+    }
+
+    const struct nbrec_sb_dhcp_options *nb_opt_row, *nb_opt_row_next;
+    NBREC_SB_DHCP_OPTIONS_FOR_EACH_SAFE(nb_opt_row, nb_opt_row_next, ctx->ovnnb_idl) { 
+        struct gen_opts_map *dhcp_opt =
+            dhcp_opts_find(&nb_dhcp_opts_to_add, nb_opt_row->name);
+        if (dhcp_opt) {
+            hmap_remove(&nb_dhcp_opts_to_add, &dhcp_opt->hmap_node);
+        } else {
+            nbrec_sb_dhcp_options_delete(nb_opt_row);
+        }
+    }
+
+    struct gen_opts_map *opt;
+    HMAP_FOR_EACH (opt, hmap_node, &nb_dhcp_opts_to_add) {
+        struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_option =
+            nbrec_sb_dhcp_options_insert(ctx->ovnnb_txn);
+        nbrec_sb_dhcp_options_set_name(nbrec_sb_dhcp_option, opt->name);
+        nbrec_sb_dhcp_options_set_code(nbrec_sb_dhcp_option, opt->code);
+        nbrec_sb_dhcp_options_set_type(nbrec_sb_dhcp_option, opt->type);
+    }
+
+    hmap_destroy(&nb_dhcp_opts_to_add);
+}
+
 static void
 check_and_add_supported_dhcpv6_opts_to_sb_db(struct northd_context *ctx)
 {
@@ -8086,6 +8191,40 @@ check_and_add_supported_dhcpv6_opts_to_sb_db(struct northd_context *ctx)
     hmap_destroy(&dhcpv6_opts_to_add);
 }
 
+//Salam - all function
+static void
+nb_check_and_add_supported_dhcpv6_opts_to_sb_db(struct northd_context *ctx)
+{
+    struct hmap nb_dhcpv6_opts_to_add = HMAP_INITIALIZER(&nb_dhcpv6_opts_to_add);
+    for (size_t i = 0; (i < sizeof(supported_dhcpv6_opts) /
+                            sizeof(supported_dhcpv6_opts[0])); i++) {
+        hmap_insert(&nb_dhcpv6_opts_to_add, &supported_dhcpv6_opts[i].hmap_node,
+                    dhcp_opt_hash(supported_dhcpv6_opts[i].name));
+    }
+
+    const struct nbrec_sb_dhcpv6_options *nb_opt_row, *nb_opt_row_next;
+    NBREC_SB_DHCPV6_OPTIONS_FOR_EACH_SAFE(nb_opt_row, nb_opt_row_next, ctx->ovnnb_idl) {
+        struct gen_opts_map *dhcp_opt =
+            dhcp_opts_find(&nb_dhcpv6_opts_to_add, nb_opt_row->name);
+        if (dhcp_opt) {
+            hmap_remove(&nb_dhcpv6_opts_to_add, &dhcp_opt->hmap_node);
+        } else {
+            nbrec_sb_dhcpv6_options_delete(nb_opt_row);
+        }
+    }
+
+    struct gen_opts_map *opt;
+    HMAP_FOR_EACH(opt, hmap_node, &nb_dhcpv6_opts_to_add) {
+        struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_option =
+            nbrec_sb_dhcpv6_options_insert(ctx->ovnsb_txn);
+        nbrec_sb_dhcpv6_options_set_name(nbrec_sb_dhcpv6_option, opt->name);
+        nbrec_sb_dhcpv6_options_set_code(nbrec_sb_dhcpv6_option, opt->code);
+        nbrec_sb_dhcpv6_options_set_type(nbrec_sb_dhcpv6_option, opt->type);
+    }
+
+    hmap_destroy(&nb_dhcpv6_opts_to_add);
+}
+
 static const char *rbac_chassis_auth[] =
     {"name"};
 static const char *rbac_chassis_update[] =
@@ -8106,6 +8245,7 @@ static const char *rbac_mac_binding_auth[] =
 static const char *rbac_mac_binding_update[] =
     {"logical_port", "ip", "mac", "datapath"};
 
+//TODO: NB????????????????????????????????
 static struct rbac_perm_cfg {
     const char *table;
     const char **auth;
@@ -8212,7 +8352,61 @@ ovn_rbac_validate_perm(const struct sbrec_rbac_permission *perm)
     return true;
 }
 
-//TODO: should also change tables in NB
+//Salam - all function
+static bool
+nb_ovn_rbac_validate_perm(const struct nbrec_sb_rbac_permission *perm)
+{
+    struct rbac_perm_cfg *pcfg; //TODO?????????????
+    int i, j, n_found;
+
+    for (pcfg = rbac_perm_cfg; pcfg->table; pcfg++) {
+        if (!strcmp(perm->table, pcfg->table)) {
+            break;
+        }
+    }
+    if (!pcfg->table) {
+        return false;
+    }
+    if (perm->n_authorization != pcfg->n_auth ||
+        perm->n_update != pcfg->n_update) {
+        return false;
+    }
+    if (perm->insert_delete != pcfg->insdel) {
+        return false;
+    }
+    /* verify perm->authorization vs. pcfg->auth */
+    n_found = 0;
+    for (i = 0; i < pcfg->n_auth; i++) {
+        for (j = 0; j < perm->n_authorization; j++) {
+            if (!strcmp(pcfg->auth[i], perm->authorization[j])) {
+                n_found++;
+                break;
+            }
+        }
+    }
+    if (n_found != pcfg->n_auth) {
+        return false;
+    }
+
+    /* verify perm->update vs. pcfg->update */
+    n_found = 0;
+    for (i = 0; i < pcfg->n_update; i++) {
+        for (j = 0; j < perm->n_update; j++) {
+            if (!strcmp(pcfg->update[i], perm->update[j])) {
+                n_found++;
+                break;
+            }
+        }
+    }
+    if (n_found != pcfg->n_update) {
+        return false;
+    }
+
+    /* Success, db state matches expected state */
+    pcfg->row = perm;
+    return true;
+}
+
 static void
 ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
                      struct northd_context *ctx,
@@ -8233,7 +8427,27 @@ ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
                                               rbac_perm);
 }
 
-//TODO: should also change tables in NB
+//Salam - all function
+static void
+nb_ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
+                     struct northd_context *ctx,
+                     const struct nbrec_sb_rbac_role *rbac_role)
+{
+    struct nbrec_sb_rbac_permission *rbac_perm;
+
+    rbac_perm = nbrec_sb_rbac_permission_insert(ctx->ovnnb_txn);
+    nbrec_sb_rbac_permission_set_table(rbac_perm, pcfg->table);
+    nbrec_sb_rbac_permission_set_authorization(rbac_perm,
+                                            pcfg->auth,
+                                            pcfg->n_auth);
+    nbrec_sb_rbac_permission_set_insert_delete(rbac_perm, pcfg->insdel);
+    nbrec_sb_rbac_permission_set_update(rbac_perm,
+                                     pcfg->update,
+                                     pcfg->n_update);
+    nbrec_sb_rbac_role_update_permissions_setkey(rbac_role, pcfg->table,
+                                              rbac_perm);
+}
+
 static void
 check_and_update_rbac(struct northd_context *ctx)
 {
@@ -8271,6 +8485,44 @@ check_and_update_rbac(struct northd_context *ctx)
     }
 }
 
+//Salam - all function
+static void
+nb_check_and_update_rbac(struct northd_context *ctx)
+{
+    const struct nbrec_sb_rbac_role *nb_rbac_role = NULL;
+    const struct nbrec_sb_rbac_permission *nb_perm_row, *nb_perm_next;
+    const struct nbrec_sb_rbac_role *nb_role_row, *nb_role_row_next;
+    struct rbac_perm_cfg *pcfg; //TODO??????????????????
+
+    for (pcfg = rbac_perm_cfg; pcfg->table; pcfg++) {
+        pcfg->row = NULL;
+    }
+
+    NBREC_SB_RBAC_PERMISSION_FOR_EACH_SAFE (nb_perm_row, nb_perm_next, ctx->ovnnb_idl) {
+        if (!nb_ovn_rbac_validate_perm(nb_perm_row)) {
+            nbrec_sb_rbac_permission_delete(nb_perm_row);
+        }
+    }
+    NBREC_SB_RBAC_ROLE_FOR_EACH_SAFE (nb_role_row, nb_role_row_next, ctx->ovnnb_idl) {
+        if (strcmp(nb_role_row->name, "ovn-controller")) {
+            nbrec_sb_rbac_role_delete(nb_role_row);
+        } else {
+            nb_rbac_role = nb_role_row;
+        }
+    }
+
+    if (!nb_rbac_role) {
+        nb_rbac_role = nbrec_sb_rbac_role_insert(ctx->ovnnb_txn);
+        nbrec_sb_rbac_role_set_name(nb_rbac_role, "ovn-controller");
+    }
+
+    for (pcfg = rbac_perm_cfg; pcfg->table; pcfg++) {
+        if (!pcfg->row) {
+            nb_ovn_rbac_create_perm(pcfg, ctx, nb_rbac_role);
+        }
+    }
+}
+
 /* Updates the sb_cfg and hv_cfg columns in the northbound NB_Global table. */
 static void
 update_northbound_cfg(struct northd_context *ctx,
@@ -8301,7 +8553,6 @@ update_northbound_cfg(struct northd_context *ctx,
     }
 }
 
-//TODO: should also change tables in NB?????
 /* Handle a fairly small set of changes in the southbound database. */
 static void
 ovnsb_db_run(struct northd_context *ctx, struct ovsdb_idl_loop *sb_loop)
@@ -8397,7 +8648,6 @@ add_column_noalert(struct ovsdb_idl *idl,
     ovsdb_idl_omit_alert(idl, column);
 }
 
-//TODO: should also change tables in NB
 int
 main(int argc, char *argv[])
 {
@@ -8571,12 +8821,15 @@ main(int argc, char *argv[])
         }
 
         if (ovsdb_idl_has_lock(ovnsb_idl_loop.idl)) {
-            ovnnb_db_run(&ctx, sbrec_chassis_by_name, &ovnsb_idl_loop);//TODO?????
+            ovnnb_db_run(&ctx, sbrec_chassis_by_name, &ovnsb_idl_loop);
             ovnsb_db_run(&ctx, &ovnsb_idl_loop);
             if (ctx.ovnsb_txn) { 
-                check_and_add_supported_dhcp_opts_to_sb_db(&ctx);//TODO?????
-                check_and_add_supported_dhcpv6_opts_to_sb_db(&ctx);//TODO?????
-                check_and_update_rbac(&ctx);//TODO?????
+                check_and_add_supported_dhcp_opts_to_sb_db(&ctx);
+                nb_check_and_add_supported_dhcp_opts_to_sb_db(&ctx); //Salam
+                check_and_add_supported_dhcpv6_opts_to_sb_db(&ctx);
+                nb_check_and_add_supported_dhcpv6_opts_to_sb_db(&ctx); //Salam
+                check_and_update_rbac(&ctx);
+                nb_check_and_update_rbac(&ctx); //Salam
             }
         }
 
