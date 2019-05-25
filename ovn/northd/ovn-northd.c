@@ -2235,7 +2235,7 @@ nb_copy_gw_chassis_from_nbrp_to_sbpb(
         }
 
         const struct nbrec_sb_chassis *chassis =
-            chassis_lookup_by_name(nbrec_sb_chassis_by_name,
+            nb_chassis_lookup_by_name(nbrec_sb_chassis_by_name,
                                    lrp_gwc->chassis_name);
 
         gw_chassis = xrealloc(gw_chassis, (n_gwc + 1) * sizeof *gw_chassis);

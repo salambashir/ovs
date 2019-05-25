@@ -42,7 +42,7 @@ chassis_lookup_by_name(struct ovsdb_idl_index *sbrec_chassis_by_name,
 }
 
 //Salam - all function
-const struct sbrec_chassis *
+const struct nbrec_sb_chassis *
 nb_chassis_lookup_by_name(struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
                        const char *name)
 {
