@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "ovn-nb-idl.h": "c",
-        "ovn-sb-idl.h": "c"
-    }
-}
