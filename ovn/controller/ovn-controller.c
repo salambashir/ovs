@@ -44,6 +44,7 @@
 #include "ovn/lib/chassis-index.h"
 #include "ovn/lib/extend-table.h"
 #include "ovn/lib/ovn-sb-idl.h"
+#include "ovn/lib/ovn-nb-idl.h //siraj
 #include "ovn/lib/ovn-util.h"
 #include "patch.h"
 #include "physical.h"
@@ -579,19 +580,19 @@ main(int argc, char *argv[])
 
     /* Initialize group ids for loadbalancing. */
     struct ovn_extend_table group_table;
-    ovn_extend_table_init(&group_table);
+    ovn_extend_table_init(&group_table); //Siraj: should this be duplicated?
     unixctl_command_register("group-table-list", "", 0, 0,
                              group_table_list, &group_table);
 
     /* Initialize meter ids for QoS. */
     struct ovn_extend_table meter_table;
-    ovn_extend_table_init(&meter_table);
+    ovn_extend_table_init(&meter_table); //Siraj: should this be duplicated?
     unixctl_command_register("meter-table-list", "", 0, 0,
                              meter_table_list, &meter_table);
 
     daemonize_complete();
 
-    ofctrl_init(&group_table, &meter_table);
+    ofctrl_init(&group_table, &meter_table);  //siraj: should we care for OFctl too?
     pinctrl_init();
     lflow_init();
 
@@ -601,13 +602,22 @@ main(int argc, char *argv[])
     ctrl_register_ovs_idl(ovs_idl_loop.idl);
     ovsdb_idl_get_initial_snapshot(ovs_idl_loop.idl);
 
-    /* Configure OVN SB database. */
+    /* Configure OVN SB database. */  //siraj: should anything be changed here?
     struct ovsdb_idl_loop ovnsb_idl_loop = OVSDB_IDL_LOOP_INITIALIZER(
         ovsdb_idl_create_unconnected(&sbrec_idl_class, true));
     ovsdb_idl_set_leader_only(ovnsb_idl_loop.idl, false);
 
+    /* Configure OVN NB database. */  //siraj
+    struct ovsdb_idl_loop ovnnb_idl_loop = OVSDB_IDL_LOOP_INITIALIZER( //siraj
+            ovsdb_idl_create_unconnected(&nbrec_idl_class, true)); //siraj
+    ovsdb_idl_set_leader_only(ovnnb_idl_loop.idl, false); //siraj
+
+
     unixctl_command_register("connection-status", "", 0, 0,
                              ovn_controller_conn_show, ovnsb_idl_loop.idl);
+
+    unixctl_command_register("connection-status-NB", "", 0, 0, //siraj
+                             ovn_controller_conn_show, ovnnb_idl_loop.idl); //siraj
 
     struct ovsdb_idl_index *sbrec_chassis_by_name
         = chassis_index_create(ovnsb_idl_loop.idl);
@@ -633,8 +643,42 @@ main(int argc, char *argv[])
                                   &sbrec_mac_binding_col_logical_port,
                                   &sbrec_mac_binding_col_ip);
 
+    //siraj edit starts here
+    struct ovsdb_idl_index *nbrec_chassis_by_name
+            = chassis_index_create(ovnnb_idl_loop.idl);
+    struct ovsdb_idl_index *nbrec_multicast_group_by_name_datapath
+            = ovsdb_idl_index_create2(ovnnb_idl_loop.idl,
+                                      &nbrec_multicast_group_col_name,
+                                      &nbrec_multicast_group_col_datapath);
+    struct ovsdb_idl_index *nbrec_port_binding_by_name
+            = ovsdb_idl_index_create1(ovnnb_idl_loop.idl,
+                                      &nbrec_port_binding_col_logical_port);
+    struct ovsdb_idl_index *nbrec_port_binding_by_key
+            = ovsdb_idl_index_create2(ovnnb_idl_loop.idl,
+                                      &nbrec_port_binding_col_tunnel_key,
+                                      &nbrec_port_binding_col_datapath);
+    struct ovsdb_idl_index *nbrec_port_binding_by_datapath
+            = ovsdb_idl_index_create1(ovnnb_idl_loop.idl,
+                                      &nbrec_port_binding_col_datapath);
+    struct ovsdb_idl_index *nbrec_datapath_binding_by_key
+            = ovsdb_idl_index_create1(ovnnb_idl_loop.idl,
+                                      &nbrec_datapath_binding_col_tunnel_key);
+    struct ovsdb_idl_index *nbrec_mac_binding_by_lport_ip
+            = ovsdb_idl_index_create2(ovnnb_idl_loop.idl,
+                                      &nbrec_mac_binding_col_logical_port,
+                                      &nbrec_mac_binding_col_ip);
+    //siraj edit ends here
+
+
+
     ovsdb_idl_omit_alert(ovnsb_idl_loop.idl, &sbrec_chassis_col_nb_cfg);
     update_sb_monitors(ovnsb_idl_loop.idl, NULL, NULL, NULL);
+
+
+
+
+
+
 
     /* Initialize connection tracking zones. */
     struct simap ct_zones = SIMAP_INITIALIZER(&ct_zones);
@@ -658,13 +702,17 @@ main(int argc, char *argv[])
     restart = false;
     while (!exiting) {
         update_sb_db(ovs_idl_loop.idl, ovnsb_idl_loop.idl);
+        update_sb_db(ovs_idl_loop.idl, ovnnb_idl_loop.idl); //siraj
         update_ssl_config(ovsrec_ssl_table_get(ovs_idl_loop.idl));
 
         struct ovsdb_idl_txn *ovs_idl_txn = ovsdb_idl_loop_run(&ovs_idl_loop);
         struct ovsdb_idl_txn *ovnsb_idl_txn
             = ovsdb_idl_loop_run(&ovnsb_idl_loop);
 
-        if (ovsdb_idl_has_ever_connected(ovnsb_idl_loop.idl)) {
+        struct ovsdb_idl_txn *ovnnb_idl_txn //siraj
+                = ovsdb_idl_loop_run(&ovnnb_idl_loop); //siraj
+
+        if (ovsdb_idl_has_ever_connected(ovnsb_idl_loop.idl)) { //should this be duplicated?
             /* Contains "struct local_datapath" nodes. */
             struct hmap local_datapaths = HMAP_INITIALIZER(&local_datapaths);
 
@@ -869,8 +917,9 @@ main(int argc, char *argv[])
         }
 
         ovsdb_idl_loop_commit_and_wait(&ovnsb_idl_loop);
+        ovsdb_idl_loop_commit_and_wait(&ovnnb_idl_loop); //siraj
 
-        if (ovsdb_idl_loop_commit_and_wait(&ovs_idl_loop) == 1) {
+        if (ovsdb_idl_loop_commit_and_wait(&ovs_idl_loop) == 1) {  //siraj: Zone stuff
             struct shash_node *iter, *iter_next;
             SHASH_FOR_EACH_SAFE(iter, iter_next, &pending_ct_zones) {
                 struct ct_zone_pending_entry *ctzpe = iter->data;
