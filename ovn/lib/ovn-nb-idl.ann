@@ -26,4 +26,4 @@ def synthesize_integer_column(s, table, column, dependencies, expression):
 synthesize_integer_column(s, "SB_Logical_Flow", "hash",
                           ["logical_datapath", "table_id", "pipeline",
                            "priority", "match", "actions"],
-                          "nbrec_sb_logical_flow_hash(row)")
+                           "nbrec_sb_logical_flow_hash(row)")

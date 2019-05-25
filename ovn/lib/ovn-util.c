@@ -352,6 +352,20 @@ sbrec_logical_flow_hash(const struct sbrec_logical_flow *lf)
                                  lf->priority, lf->match, lf->actions);
 }
 
+//Salam - all function
+uint32_t
+nbrec_sb_logical_flow_hash(const struct nbrec_sb_logical_flow *lf)
+{
+    const struct nbrec_sb_datapath_binding *ld = lf->logical_datapath;
+    if (!ld) {
+        return 0;
+    }
+
+    return ovn_logical_flow_hash(&ld->header_.uuid,
+                                 lf->table_id, lf->pipeline,
+                                 lf->priority, lf->match, lf->actions);
+}
+
 uint32_t
 ovn_logical_flow_hash(const struct uuid *logical_datapath,
                       uint8_t table_id, const char *pipeline,
