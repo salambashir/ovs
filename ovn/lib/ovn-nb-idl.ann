@@ -13,7 +13,7 @@ s["hDecls"] = '#include "ovn/lib/ovn-util.h"'
 # Adds an integer column named 'column' to 'table' in 's'.  The column
 # values is calculated with 'expression' based on the values of the columns
 # named in the array 'dependencies'.
-def synthesize_integer_column(s, table, column, dependencies, expression):
+def synthesize_integer_column(s, table, column, dependencies, expression):  #Salam
     s["tables"][table]["columns"][column] = {
         "type": "integer",
         "extensions": {
@@ -26,4 +26,4 @@ def synthesize_integer_column(s, table, column, dependencies, expression):
 synthesize_integer_column(s, "SB_Logical_Flow", "hash",
                           ["logical_datapath", "table_id", "pipeline",
                            "priority", "match", "actions"],
-                           "nbrec_sb_logical_flow_hash(row)")
+                           "nbrec_sb_logical_flow_hash(row)")               #Salam
