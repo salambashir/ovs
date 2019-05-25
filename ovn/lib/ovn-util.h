@@ -76,7 +76,7 @@ const char *db_table_usage(struct ds *tables,
 bool ovn_is_known_nb_lsp_type(const char *type);
 
 uint32_t sbrec_logical_flow_hash(const struct sbrec_logical_flow *);
-uint32_t nbrec_sb_logical_flow_hash(const struct sbrec_logical_flow *); //Salam
+uint32_t nbrec_sb_logical_flow_hash(const struct nbrec_sb_logical_flow *); //Salam
 uint32_t ovn_logical_flow_hash(const struct uuid *logical_datapath,
                                uint8_t table_id, const char *pipeline,
                                uint16_t priority,
