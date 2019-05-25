@@ -1995,7 +1995,6 @@ gateway_chassis_equal(const struct nbrec_gateway_chassis *nb_gwc,
                                           sb_gwc->chassis->name));
 }
 
-//TODO: should also change tables in NB
 static bool
 sbpb_gw_chassis_needs_update(
     struct ovsdb_idl_index *sbrec_chassis_by_name,
@@ -2075,7 +2074,86 @@ sbpb_gw_chassis_needs_update(
     return false;
 }
 
-//TODO: should also change tables in NB - V *******************************************************duplicate
+//Salam - all function *************************************************
+static bool
+nb_sbpb_gw_chassis_needs_update(
+    struct ovsdb_idl_index *sbrec_chassis_by_name,
+    const struct sbrec_port_binding *port_binding,
+    const struct nbrec_logical_router_port *lrp)
+{
+    if (!lrp || !port_binding) {
+        return false;
+    }
+
+    /* These arrays are used to collect valid Gateway_Chassis and valid
+     * Chassis records from the Logical_Router_Port Gateway_Chassis list,
+     * we ignore the ones we can't match on the SBDB */
+    struct nbrec_gateway_chassis **lrp_gwc = xzalloc(lrp->n_gateway_chassis *
+                                                     sizeof *lrp_gwc);
+    const struct sbrec_chassis **lrp_gwc_c = xzalloc(lrp->n_gateway_chassis *
+                                               sizeof *lrp_gwc_c);
+
+    /* Count the number of gateway chassis chassis names from the logical
+     * router port that we are able to match on the southbound database */
+    int lrp_n_gateway_chassis = 0;
+    int n;
+    for (n = 0; n < lrp->n_gateway_chassis; n++) {
+
+        if (!lrp->gateway_chassis[n]->chassis_name) {
+            continue;
+        }
+
+        const struct sbrec_chassis *chassis =
+            chassis_lookup_by_name(sbrec_chassis_by_name,
+                                   lrp->gateway_chassis[n]->chassis_name);
+
+        lrp_gwc_c[lrp_n_gateway_chassis] = chassis;
+        lrp_gwc[lrp_n_gateway_chassis] = lrp->gateway_chassis[n];
+        lrp_n_gateway_chassis++;
+        if (!chassis) {
+            static struct vlog_rate_limit rl = VLOG_RATE_LIMIT_INIT(1, 1);
+            VLOG_WARN_RL(
+                &rl, "Chassis name %s referenced in NBDB via Gateway_Chassis "
+                     "on logical router port %s does not exist in SBDB",
+                     lrp->gateway_chassis[n]->chassis_name, lrp->name);
+        }
+    }
+
+    /* Basic check, different amount of Gateway_Chassis means that we
+     * need to update southbound database Port_Binding */
+    if (lrp_n_gateway_chassis != port_binding->n_gateway_chassis) {
+        free(lrp_gwc_c);
+        free(lrp_gwc);
+        return true;
+    }
+
+    for (n = 0; n < lrp_n_gateway_chassis; n++) {
+        int i;
+        /* For each of the valid gw chassis on the lrp, check if there's
+         * a match on the Port_Binding list, we assume order is not
+         * persisted */
+        for (i = 0; i < port_binding->n_gateway_chassis; i++) {
+            if (gateway_chassis_equal(lrp_gwc[n],
+                                      lrp_gwc_c[n],
+                                      port_binding->gateway_chassis[i])) {
+                break; /* we found a match */
+            }
+        }
+
+        /* if no Port_Binding gateway chassis matched for the entry... */
+        if (i == port_binding->n_gateway_chassis) {
+            free(lrp_gwc_c);
+            free(lrp_gwc);
+            return true; /* found no match for this gateway chassis on lrp */
+        }
+    }
+
+    /* no need for update, all ports matched */
+    free(lrp_gwc_c);
+    free(lrp_gwc);
+    return false;
+}
+
 /* This functions translates the gw chassis on the nb database
  * to sb database entries, the only difference is that SB database
  * Gateway_Chassis table references the chassis directly instead
@@ -2115,8 +2193,6 @@ copy_gw_chassis_from_nbrp_to_sbpb(
 
         struct sbrec_gateway_chassis *pb_gwc =
             sbrec_gateway_chassis_insert(ctx->ovnsb_txn);
-        struct nbrec_sb_gateway_chassis *nb_pb_gwc =
-            nbrec_sb_gateway_chassis_insert(ctx->ovnnb_txn); //Salam
 
         sbrec_gateway_chassis_set_name(pb_gwc, lrp_gwc->name);
         sbrec_gateway_chassis_set_priority(pb_gwc, lrp_gwc->priority);
@@ -2124,20 +2200,61 @@ copy_gw_chassis_from_nbrp_to_sbpb(
         sbrec_gateway_chassis_set_options(pb_gwc, &lrp_gwc->options);
         sbrec_gateway_chassis_set_external_ids(pb_gwc, &lrp_gwc->external_ids);
 
-        nbrec_sb_gateway_chassis_set_name(nb_pb_gwc, lrp_gwc->name); //Salam
-        nbrec_sb_gateway_chassis_set_priority(nb_pb_gwc, lrp_gwc->priority); //Salam
-        nbrec_sb_gateway_chassis_set_chassis(nb_pb_gwc, chassis); //Salam
-        nbrec_sb_gateway_chassis_set_options(nb_pb_gwc, &lrp_gwc->options); //Salam
-        nbrec_sb_gateway_chassis_set_external_ids(nb_pb_gwc, &lrp_gwc->external_ids); //Salam
-
         gw_chassis[n_gwc++] = pb_gwc;
     }
     sbrec_port_binding_set_gateway_chassis(port_binding, gw_chassis, n_gwc);
-    nbrec_sb_port_binding_set_gateway_chassis(port_binding, gw_chassis, n_gwc); //Salam - TODO should create new "gw_chassis"???
     free(gw_chassis);
 }
 
-//TODO: should also change tables in NB - V ***************************** duplicate
+//Salam - all function
+static void
+nb_copy_gw_chassis_from_nbrp_to_sbpb(
+        struct northd_context *ctx,
+        struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
+        const struct nbrec_logical_router_port *lrp,
+        const struct nbrec_sb_port_binding *port_binding) {
+
+    if (!lrp || !port_binding || !lrp->n_gateway_chassis) {
+        return;
+    }
+
+    struct nbrec_sb_gateway_chassis **gw_chassis = NULL;
+    int n_gwc = 0;
+    int n;
+
+    /* XXX: This can be improved. This code will generate a set of new
+     * Gateway_Chassis and push them all in a single transaction, instead
+     * this would be more optimal if we just add/update/remove the rows in
+     * the southbound db that need to change. We don't expect lots of
+     * changes to the Gateway_Chassis table, but if that proves to be wrong
+     * we should optimize this. */
+    for (n = 0; n < lrp->n_gateway_chassis; n++) {
+        struct nbrec_gateway_chassis *lrp_gwc = lrp->gateway_chassis[n];
+        if (!lrp_gwc->chassis_name) {
+            continue;
+        }
+
+        const struct nbrec_sb_chassis *chassis =
+            chassis_lookup_by_name(nbrec_sb_chassis_by_name,
+                                   lrp_gwc->chassis_name);
+
+        gw_chassis = xrealloc(gw_chassis, (n_gwc + 1) * sizeof *gw_chassis);
+
+        struct nbrec_sb_gateway_chassis *pb_gwc =
+            nbrec_sb_gateway_chassis_insert(ctx->ovnnb_txn);
+
+        nbrec_sb_gateway_chassis_set_name(pb_gwc, lrp_gwc->name);
+        nbrec_sb_gateway_chassis_set_priority(pb_gwc, lrp_gwc->priority);
+        nbrec_sb_gateway_chassis_set_chassis(pb_gwc, chassis);
+        nbrec_sb_gateway_chassis_set_options(pb_gwc, &lrp_gwc->options);
+        nbrec_sb_gateway_chassis_set_external_ids(pb_gwc, &lrp_gwc->external_ids);
+
+        gw_chassis[n_gwc++] = pb_gwc;
+    }
+    nbrec_sb_port_binding_set_gateway_chassis(port_binding, gw_chassis, n_gwc);
+    free(gw_chassis);
+}
+
 static void
 ovn_port_update_sbrec(struct northd_context *ctx,
                       struct ovsdb_idl_index *sbrec_chassis_by_name,
@@ -2145,20 +2262,16 @@ ovn_port_update_sbrec(struct northd_context *ctx,
                       struct hmap *chassis_qdisc_queues)
 {
     sbrec_port_binding_set_datapath(op->sb, op->od->sb);
-    nbrec_sb_port_binding_set_datapath(op->nb, op->od->nb); //Salam
     if (op->nbrp) {
         /* If the router is for l3 gateway, it resides on a chassis
          * and its port type is "l3gateway". */
         const char *chassis_name = smap_get(&op->od->nbr->options, "chassis");
         if (op->derived) {
             sbrec_port_binding_set_type(op->sb, "chassisredirect");
-            nbrec_sb_port_binding_set_type(op->nb, "chassisredirect"); //Salam
         } else if (chassis_name) {
             sbrec_port_binding_set_type(op->sb, "l3gateway");
-            nbrec_sb_port_binding_set_type(op->nb, "l3gateway"); //Salam 
         } else {
             sbrec_port_binding_set_type(op->sb, "patch");
-            nbrec_sb_port_binding_set_type(op->nb, "patch"); //Salam
         }
 
         struct smap new;
@@ -2203,8 +2316,6 @@ ovn_port_update_sbrec(struct northd_context *ctx,
                          * name */
                         struct sbrec_gateway_chassis *gw_chassis =
                             sbrec_gateway_chassis_insert(ctx->ovnsb_txn);
-                        struct nbrec_sb_gateway_chassis *nb_gw_chassis =
-                            nbrec_sb_gateway_chassis_insert(ctx->ovnnb_txn); //Salam
 
                         char *gwc_name = xasprintf("%s_%s", op->nbrp->name,
                                 chassis->name);
@@ -2220,14 +2331,6 @@ ovn_port_update_sbrec(struct northd_context *ctx,
                         sbrec_port_binding_set_gateway_chassis(op->sb,
                                                                &gw_chassis, 1);
 
-                        nbrec_sb_gateway_chassis_set_name(nb_gw_chassis, gwc_name); //Salam
-                        nbrec_sb_gateway_chassis_set_priority(nb_gw_chassis, 0); //Salam
-                        nbrec_sb_gateway_chassis_set_chassis(nb_gw_chassis, chassis); //Salam
-                        nbrec_sb_gateway_chassis_set_external_ids(nb_gw_chassis,
-                                &op->nbrp->external_ids); //Salam
-                        nbrec_sb_port_binding_set_gateway_chassis(op->nb,
-                                                               &nb_gw_chassis, 1); //Salam
-
                         free(gwc_name);
                     }
                 } else {
@@ -2237,8 +2340,6 @@ ovn_port_update_sbrec(struct northd_context *ctx,
                     if (op->sb->n_gateway_chassis) {
                         sbrec_port_binding_set_gateway_chassis(op->sb, NULL,
                                                                0);
-                        nbrec_sb_port_binding_set_gateway_chassis(op->nb, NULL,
-                                                               0); //Salam
                     }
                 }
             }
@@ -2252,14 +2353,10 @@ ovn_port_update_sbrec(struct northd_context *ctx,
             }
         }
         sbrec_port_binding_set_options(op->sb, &new);
-        nbrec_sb_port_binding_set_options(op->nb, &new); //Salam - TODO should create another "new"????
         smap_destroy(&new);
 
         sbrec_port_binding_set_parent_port(op->sb, NULL);
         sbrec_port_binding_set_tag(op->sb, NULL, 0);
-
-        nbrec_sb_port_binding_set_parent_port(op->nb, NULL); //Salam 
-        nbrec_sb_port_binding_set_tag(op->nb, NULL, 0); //Salam 
 
         struct ds s = DS_EMPTY_INITIALIZER;
         ds_put_cstr(&s, op->nbrp->mac);
@@ -2268,15 +2365,12 @@ ovn_port_update_sbrec(struct northd_context *ctx,
         }
         const char *addresses = ds_cstr(&s);
         sbrec_port_binding_set_mac(op->sb, &addresses, 1);
-        nbrec_sb_port_binding_set_mac(op->nb, &addresses, 1); //Salam - TODO should create another "s"????
         ds_destroy(&s);
 
         struct smap ids = SMAP_INITIALIZER(&ids);
         sbrec_port_binding_set_external_ids(op->sb, &ids);
-        nbrec_sb_port_binding_set_external_ids(op->nb, &ids); //Salam - TODO should create another "ids"????
 
         sbrec_port_binding_set_nat_addresses(op->sb, NULL, 0);
-        nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0); //Salam
     } else {
         if (strcmp(op->nbsp->type, "router")) {
             uint32_t queue_id = smap_get_int(
@@ -2300,11 +2394,9 @@ ovn_port_update_sbrec(struct northd_context *ctx,
                                 "qdisc_queue_id", "%d", queue_id);
             }
             sbrec_port_binding_set_options(op->sb, &options);
-            nbrec_sb_port_binding_set_options(op->nb, &options); //Salam - TODO should create another "options"????
             smap_destroy(&options);
             if (ovn_is_known_nb_lsp_type(op->nbsp->type)) {
                 sbrec_port_binding_set_type(op->sb, op->nbsp->type);
-                nbrec_sb_port_binding_set_type(op->nb, op->nbsp->type); //Salam 
             } else {
                 static struct vlog_rate_limit rl = VLOG_RATE_LIMIT_INIT(1, 1);
                 VLOG_WARN_RL(
@@ -2313,7 +2405,6 @@ ovn_port_update_sbrec(struct northd_context *ctx,
             }
 
             sbrec_port_binding_set_nat_addresses(op->sb, NULL, 0);
-            nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0); //Salam
         } else {
             const char *chassis = NULL;
             if (op->peer && op->peer->od && op->peer->od->nbr) {
@@ -2324,10 +2415,8 @@ ovn_port_update_sbrec(struct northd_context *ctx,
              * type "l3gateway". */
             if (chassis) {
                 sbrec_port_binding_set_type(op->sb, "l3gateway");
-                nbrec_sb_port_binding_set_type(op->nb, "l3gateway"); //Salam
             } else {
                 sbrec_port_binding_set_type(op->sb, "patch");
-                nbrec_sb_port_binding_set_type(op->nb, "patch"); //Salam
             }
 
             const char *router_port = smap_get(&op->nbsp->options,
@@ -2342,11 +2431,9 @@ ovn_port_update_sbrec(struct northd_context *ctx,
                     smap_add(&new, "l3gateway-chassis", chassis);
                 }
                 sbrec_port_binding_set_options(op->sb, &new);
-                nbrec_sb_port_binding_set_options(op->nb, &new); //Salam - TODO should make another "new" ?? 
                 smap_destroy(&new);
             } else {
                 sbrec_port_binding_set_options(op->sb, NULL);
-                nbrec_sb_port_binding_set_options(op->nb, NULL); //Salam
             }
 
             const char *nat_addresses = smap_get(&op->nbsp->options,
@@ -2359,19 +2446,15 @@ ovn_port_update_sbrec(struct northd_context *ctx,
                     if (n_nats) {
                         sbrec_port_binding_set_nat_addresses(op->sb,
                             (const char **) nats, n_nats);
-                        nbrec_sb_port_binding_set_nat_addresses(op->nb,
-                            (const char **) nats, n_nats); //Salam - TODO sohuld create another "nats" ???
                         for (size_t i = 0; i < n_nats; i++) {
                             free(nats[i]);
                         }
                         free(nats);
                     } else {
                         sbrec_port_binding_set_nat_addresses(op->sb, NULL, 0);
-                        nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0); //Salam 
                     }
                 } else {
                     sbrec_port_binding_set_nat_addresses(op->sb, NULL, 0);
-                    nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0); //Salam
                 }
             /* Only accept manual specification of ethernet address
              * followed by IPv4 addresses on type "l3gateway" ports. */
@@ -2382,28 +2465,19 @@ ovn_port_update_sbrec(struct northd_context *ctx,
                         VLOG_RATE_LIMIT_INIT(1, 1);
                     VLOG_WARN_RL(&rl, "Error extracting nat-addresses.");
                     sbrec_port_binding_set_nat_addresses(op->sb, NULL, 0);
-                    nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0); //Salam
                 } else {
                     sbrec_port_binding_set_nat_addresses(op->sb,
                                                          &nat_addresses, 1);
-                    nbrec_sb_port_binding_set_nat_addresses(op->nb,
-                                                         &nat_addresses, 1); //Salam - TODO should create new "laddrs"????
                     destroy_lport_addresses(&laddrs);
                 }
             } else {
                 sbrec_port_binding_set_nat_addresses(op->sb, NULL, 0);
-                nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0); //Salam
             }
         }
         sbrec_port_binding_set_parent_port(op->sb, op->nbsp->parent_name);
         sbrec_port_binding_set_tag(op->sb, op->nbsp->tag, op->nbsp->n_tag);
         sbrec_port_binding_set_mac(op->sb, (const char **) op->nbsp->addresses,
                                    op->nbsp->n_addresses);
-                                   
-        nbrec_sb_port_binding_set_parent_port(op->nb, op->nbsp->parent_name); //Salam 
-        nbrec_sb_port_binding_set_tag(op->nb, op->nbsp->tag, op->nbsp->n_tag); //Salam 
-        nbrec_sb_port_binding_set_mac(op->nb, (const char **) op->nbsp->addresses,
-                                   op->nbsp->n_addresses); //Salam 
 
         struct smap ids = SMAP_INITIALIZER(&ids);
         smap_clone(&ids, &op->nbsp->external_ids);
@@ -2412,7 +2486,241 @@ ovn_port_update_sbrec(struct northd_context *ctx,
             smap_add(&ids, "name", name);
         }
         sbrec_port_binding_set_external_ids(op->sb, &ids);
-        nbrec_sb_port_binding_set_external_ids(op->nb, &ids); //Salam - TODO should create another "ids" ???
+        smap_destroy(&ids);
+    }
+}
+
+//Salam - all function
+static void
+nb_ovn_port_update_sbrec(struct northd_context *ctx,
+                      struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
+                      const struct ovn_port *op,
+                      struct hmap *chassis_qdisc_queues)
+{
+    nbrec_sb_port_binding_set_datapath(op->nb, op->od->nb);
+    if (op->nbrp) {
+        /* If the router is for l3 gateway, it resides on a chassis
+         * and its port type is "l3gateway". */
+        const char *chassis_name = smap_get(&op->od->nbr->options, "chassis");
+        if (op->derived) {
+            nbrec_sb_port_binding_set_type(op->nb, "chassisredirect");
+        } else if (chassis_name) {
+            nbrec_sb_port_binding_set_type(op->nb, "l3gateway");
+        } else {
+            nbrec_sb_port_binding_set_type(op->nb, "patch");
+        }
+
+        struct smap new;
+        smap_init(&new);
+        if (op->derived) {
+            const char *redirect_chassis = smap_get(&op->nbrp->options,
+                                                    "redirect-chassis");
+            if (op->nbrp->n_gateway_chassis && redirect_chassis) {
+                static struct vlog_rate_limit rl = VLOG_RATE_LIMIT_INIT(1, 1);
+                VLOG_WARN_RL(
+                    &rl, "logical router port %s has both options:"
+                         "redirect-chassis and gateway_chassis populated "
+                         "redirect-chassis will be ignored in favour of "
+                         "gateway chassis", op->nbrp->name);
+            }
+
+            if (op->nbrp->n_gateway_chassis) {
+                if (nb_sbpb_gw_chassis_needs_update(nbrec_sb_chassis_by_name,
+                                                 op->sb, op->nbrp)) {
+                    nb_copy_gw_chassis_from_nbrp_to_sbpb(ctx,
+                                                      nbrec_sb_chassis_by_name,
+                                                      op->nbrp, op->nb);                                                
+                }
+
+            } else if (redirect_chassis) {
+                /* Handle ports that had redirect-chassis option attached
+                 * to them, and for backwards compatibility convert them
+                 * to a single Gateway_Chassis entry */
+                const struct nbrec_sb_chassis *chassis =
+                    nb_chassis_lookup_by_name(nbrec_sb_chassis_by_name,
+                                           redirect_chassis);
+                if (chassis) {
+                    /* If we found the chassis, and the gw chassis on record
+                     * differs from what we expect go ahead and update */
+                    if (op->nb->n_gateway_chassis != 1
+                        || !op->nb->gateway_chassis[0]->chassis
+                        || strcmp(op->nb->gateway_chassis[0]->chassis->name,
+                                  chassis->name)
+                        || op->nb->gateway_chassis[0]->priority != 0) {
+                        /* Construct a single Gateway_Chassis entry on the
+                         * Port_Binding attached to the redirect_chassis
+                         * name */
+                        struct nbrec_sb_gateway_chassis *gw_chassis =
+                            nbrec_sb_gateway_chassis_insert(ctx->ovnnb_txn);
+
+                        char *gwc_name = xasprintf("%s_%s", op->nbrp->name,
+                                chassis->name);
+
+                        /* XXX: Again, here, we could just update an existing
+                         * Gateway_Chassis, instead of creating a new one
+                         * and replacing it */
+                        nbrec_sb_gateway_chassis_set_name(gw_chassis, gwc_name);
+                        nbrec_sb_gateway_chassis_set_priority(gw_chassis, 0);
+                        nbrec_sb_gateway_chassis_set_chassis(gw_chassis, chassis);
+                        nbrec_sb_gateway_chassis_set_external_ids(gw_chassis,
+                                &op->nbrp->external_ids);
+                        nbrec_sb_port_binding_set_gateway_chassis(op->nb,
+                                                               &gw_chassis, 1);
+                        free(gwc_name);
+                    }
+                } else {
+                    VLOG_WARN("chassis name '%s' from redirect from logical "
+                              " router port '%s' redirect-chassis not found",
+                              redirect_chassis, op->nbrp->name);
+                    if (op->sb->n_gateway_chassis) {
+                        nbrec_sb_port_binding_set_gateway_chassis(op->nb, NULL,
+                                                               0);
+                    }
+                }
+            }
+            smap_add(&new, "distributed-port", op->nbrp->name);
+        } else {
+            if (op->peer) {
+                smap_add(&new, "peer", op->peer->key);
+            }
+            if (chassis_name) {
+                smap_add(&new, "l3gateway-chassis", chassis_name);
+            }
+        }
+        nbrec_sb_port_binding_set_options(op->nb, &new);
+        smap_destroy(&new);
+
+        nbrec_sb_port_binding_set_parent_port(op->nb, NULL);
+        nbrec_sb_port_binding_set_tag(op->nb, NULL, 0); 
+
+        struct ds s = DS_EMPTY_INITIALIZER;
+        ds_put_cstr(&s, op->nbrp->mac);
+        for (int i = 0; i < op->nbrp->n_networks; ++i) {
+            ds_put_format(&s, " %s", op->nbrp->networks[i]);
+        }
+        const char *addresses = ds_cstr(&s);
+        nbrec_sb_port_binding_set_mac(op->nb, &addresses, 1); 
+        ds_destroy(&s);
+
+        struct smap ids = SMAP_INITIALIZER(&ids);
+        nbrec_sb_port_binding_set_external_ids(op->nb, &ids); 
+
+        nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0); 
+    } else {
+        if (strcmp(op->nbsp->type, "router")) {
+            uint32_t queue_id = smap_get_int(
+                    &op->sb->options, "qdisc_queue_id", 0);
+            bool has_qos = port_has_qos_params(&op->nbsp->options);
+            struct smap options;
+
+            if (op->sb->chassis && has_qos && !queue_id) {
+                queue_id = allocate_chassis_queueid(chassis_qdisc_queues,
+                                                    op->sb->chassis);
+            } else if (!has_qos && queue_id) {
+                free_chassis_queueid(chassis_qdisc_queues,
+                                     op->sb->chassis,
+                                     queue_id);
+                queue_id = 0;
+            }
+
+            smap_clone(&options, &op->nbsp->options);
+            if (queue_id) {
+                smap_add_format(&options,
+                                "qdisc_queue_id", "%d", queue_id);
+            }
+            nbrec_sb_port_binding_set_options(op->nb, &options);
+            smap_destroy(&options);
+            if (ovn_is_known_nb_lsp_type(op->nbsp->type)) {
+                nbrec_sb_port_binding_set_type(op->nb, op->nbsp->type); 
+            } else {
+                static struct vlog_rate_limit rl = VLOG_RATE_LIMIT_INIT(1, 1);
+                VLOG_WARN_RL(
+                    &rl, "Unknown port type '%s' set on logical switch '%s'.",
+                    op->nbsp->type, op->nbsp->name);
+            }
+
+            nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0);
+        } else {
+            const char *chassis = NULL;
+            if (op->peer && op->peer->od && op->peer->od->nbr) {
+                chassis = smap_get(&op->peer->od->nbr->options, "chassis");
+            }
+
+            /* A switch port connected to a gateway router is also of
+             * type "l3gateway". */
+            if (chassis) {
+                nbrec_sb_port_binding_set_type(op->nb, "l3gateway"); 
+            } else {
+                nbrec_sb_port_binding_set_type(op->nb, "patch"); 
+            }
+
+            const char *router_port = smap_get(&op->nbsp->options,
+                                               "router-port");
+            if (router_port || chassis) {
+                struct smap new;
+                smap_init(&new);
+                if (router_port) {
+                    smap_add(&new, "peer", router_port);
+                }
+                if (chassis) {
+                    smap_add(&new, "l3gateway-chassis", chassis);
+                }
+                nbrec_sb_port_binding_set_options(op->nb, &new); 
+                smap_destroy(&new);
+            } else {
+                nbrec_sb_port_binding_set_options(op->nb, NULL);
+            }
+
+            const char *nat_addresses = smap_get(&op->nbsp->options,
+                                           "nat-addresses");
+            if (nat_addresses && !strcmp(nat_addresses, "router")) {
+                if (op->peer && op->peer->od
+                    && (chassis || op->peer->od->l3redirect_port)) {
+                    size_t n_nats;
+                    char **nats = get_nat_addresses(op->peer, &n_nats);
+                    if (n_nats) {
+                        nbrec_sb_port_binding_set_nat_addresses(op->nb,
+                            (const char **) nats, n_nats);
+                        for (size_t i = 0; i < n_nats; i++) {
+                            free(nats[i]);
+                        }
+                        free(nats);
+                    } else {
+                        nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0); 
+                    }
+                } else {
+                    nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0);
+                }
+            /* Only accept manual specification of ethernet address
+             * followed by IPv4 addresses on type "l3gateway" ports. */
+            } else if (nat_addresses && chassis) {
+                struct lport_addresses laddrs;
+                if (!extract_lsp_addresses(nat_addresses, &laddrs)) {
+                    static struct vlog_rate_limit rl =
+                        VLOG_RATE_LIMIT_INIT(1, 1);
+                    VLOG_WARN_RL(&rl, "Error extracting nat-addresses.");
+                    nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0);
+                } else {
+                    nbrec_sb_port_binding_set_nat_addresses(op->nb,
+                                                         &nat_addresses, 1);
+                    destroy_lport_addresses(&laddrs);
+                }
+            } else {
+                nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0);
+            }
+        }
+        nbrec_sb_port_binding_set_parent_port(op->nb, op->nbsp->parent_name); 
+        nbrec_sb_port_binding_set_tag(op->nb, op->nbsp->tag, op->nbsp->n_tag);  
+        nbrec_sb_port_binding_set_mac(op->nb, (const char **) op->nbsp->addresses,
+                                   op->nbsp->n_addresses);
+
+        struct smap ids = SMAP_INITIALIZER(&ids);
+        smap_clone(&ids, &op->nbsp->external_ids);
+        const char *name = smap_get(&ids, "neutron:port_name");
+        if (name && name[0]) {
+            smap_add(&ids, "name", name);
+        }
+        nbrec_sb_port_binding_set_external_ids(op->nb, &ids); 
         smap_destroy(&ids);
     }
 }
@@ -2461,6 +2769,8 @@ build_ports(struct northd_context *ctx,
         }
         ovn_port_update_sbrec(ctx, sbrec_chassis_by_name,
                               op, &chassis_qdisc_queues);
+        nb_ovn_port_update_sbrec(ctx, sbrec_chassis_by_name,
+                              op, &chassis_qdisc_queues); //Salam
 
         add_tnlid(&op->od->port_tnlids, op->sb->tunnel_key);
         if (op->sb->tunnel_key > op->od->port_key_hint) {
@@ -2479,6 +2789,8 @@ build_ports(struct northd_context *ctx,
         op->nb = nbrec_sb_port_binding_insert(ctx->ovnnb_txn); //Salam
         ovn_port_update_sbrec(ctx, sbrec_chassis_by_name, op,
                               &chassis_qdisc_queues);
+        nb_ovn_port_update_sbrec(ctx, sbrec_chassis_by_name, op,
+                              &chassis_qdisc_queues); //Salam
 
         sbrec_port_binding_set_logical_port(op->sb, op->key);
         nbrec_sb_port_binding_set_logical_port(op->nb, op->key); //Salam

@@ -39,3 +39,20 @@ chassis_lookup_by_name(struct ovsdb_idl_index *sbrec_chassis_by_name,
 
     return retval;
 }
+
+//Salam - all function
+const struct sbrec_chassis *
+nb_chassis_lookup_by_name(struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
+                       const char *name)
+{
+    struct nbrec_sb_chassis *target = nbrec_sb_chassis_index_init_row(
+        nbrec_sb_chassis_by_name);
+    nbrec_sb_chassis_set_name(target, name);
+
+    struct nbrec_sb_chassis *retval = nbrec_sb_chassis_index_find(
+        nbrec_sb_chassis_by_name, target);
+
+    nbrec_sb_chassis_index_destroy_row(target);
+
+    return retval;
+}
