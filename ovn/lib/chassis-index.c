@@ -15,6 +15,7 @@
 #include <config.h>
 #include "ovn/lib/chassis-index.h"
 #include "ovn/lib/ovn-sb-idl.h"
+#include "ovn/lib/ovn-nb-idl.h"
 
 struct ovsdb_idl_index *
 chassis_index_create(struct ovsdb_idl *idl)
