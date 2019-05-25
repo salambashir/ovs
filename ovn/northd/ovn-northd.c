@@ -2075,7 +2075,7 @@ sbpb_gw_chassis_needs_update(
     return false;
 }
 
-//TODO: should also change tables in NB - V
+//TODO: should also change tables in NB - V *******************************************************duplicate
 /* This functions translates the gw chassis on the nb database
  * to sb database entries, the only difference is that SB database
  * Gateway_Chassis table references the chassis directly instead
@@ -2137,7 +2137,7 @@ copy_gw_chassis_from_nbrp_to_sbpb(
     free(gw_chassis);
 }
 
-//TODO: should also change tables in NB - V
+//TODO: should also change tables in NB - V ***************************** duplicate
 static void
 ovn_port_update_sbrec(struct northd_context *ctx,
                       struct ovsdb_idl_index *sbrec_chassis_by_name,
@@ -2158,7 +2158,7 @@ ovn_port_update_sbrec(struct northd_context *ctx,
             nbrec_sb_port_binding_set_type(op->nb, "l3gateway"); //Salam 
         } else {
             sbrec_port_binding_set_type(op->sb, "patch");
-            nbrec_sb_port_binding_set_type(op->sb, "patch"); //Salam
+            nbrec_sb_port_binding_set_type(op->nb, "patch"); //Salam
         }
 
         struct smap new;
@@ -2382,7 +2382,7 @@ ovn_port_update_sbrec(struct northd_context *ctx,
                         VLOG_RATE_LIMIT_INIT(1, 1);
                     VLOG_WARN_RL(&rl, "Error extracting nat-addresses.");
                     sbrec_port_binding_set_nat_addresses(op->sb, NULL, 0);
-                    nbrec_sb-port_binding_set_nat_addresses(op->nb, NULL, 0); //Salam
+                    nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0); //Salam
                 } else {
                     sbrec_port_binding_set_nat_addresses(op->sb,
                                                          &nat_addresses, 1);
@@ -7014,6 +7014,7 @@ sync_address_set(struct northd_context *ctx, const char *name,
 }
 
 //Salam - all function
+static void
 nb_sync_address_set(struct northd_context *ctx, const char *name,
                  const char **addrs, size_t n_addrs,
                  struct shash *nb_sb_address_sets)
@@ -7175,7 +7176,7 @@ sync_port_groups(struct northd_context *ctx)
             sbrec_port_group_set_name(sb_port_group, nb_port_group->name);
         }
 
-        nb_sb_port_group = shash_find_and_delete(&nb_sb_port_group,
+        nb_sb_port_group = shash_find_and_delete(&nb_sb_port_groups,
                                                nb_port_group->name); //Salam
         if (!nb_sb_port_group) { //Salam
             nb_sb_port_group = nbrec_sb_port_group_insert(ctx->ovnnb_txn); //Salam
@@ -7463,8 +7464,8 @@ sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
         }
     }
 
-    const struct nbrec_sb_dns *nb_sbrec_dns, *next; //Salam 
-    NBREC_SB_DNS_FOR_EACH_SAFE (nb_sbrec_dns, next, ctx->ovnnb_idl) { //Salam - all loop
+    const struct nbrec_sb_dns *nb_sbrec_dns, *nb_next; //Salam 
+    NBREC_SB_DNS_FOR_EACH_SAFE (nb_sbrec_dns, nb_next, ctx->ovnnb_idl) { //Salam - all loop
         const char *nb_dns_uuid = smap_get(&nb_sbrec_dns->external_ids, "dns_id");
         struct uuid dns_uuid;
         if (!nb_dns_uuid || !uuid_from_string(&dns_uuid, nb_dns_uuid)) {
