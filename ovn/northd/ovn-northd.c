@@ -8646,6 +8646,7 @@ parse_options(int argc OVS_UNUSED, char *argv[] OVS_UNUSED)
     free(short_options);
 }
 
+
 static void
 add_column_noalert(struct ovsdb_idl *idl,
                    const struct ovsdb_idl_column *column)
