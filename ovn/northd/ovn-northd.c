@@ -8833,7 +8833,7 @@ main(int argc, char *argv[])
                 check_and_add_supported_dhcp_opts_to_sb_db(&ctx);
                 nb_check_and_add_supported_dhcp_opts_to_sb_db(&ctx); //Salam
                 check_and_add_supported_dhcpv6_opts_to_sb_db(&ctx);
-                //nb_check_and_add_supported_dhcpv6_opts_to_sb_db(&ctx); //Salam
+                nb_check_and_add_supported_dhcpv6_opts_to_sb_db(&ctx); //Salam
                 check_and_update_rbac(&ctx);
                 //nb_check_and_update_rbac(&ctx); //Salam
             }
