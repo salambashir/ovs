@@ -8357,7 +8357,7 @@ ovn_rbac_validate_perm(const struct sbrec_rbac_permission *perm)
     pcfg->row = perm;
     return true;
 }
-
+/*
 //Salam - all function - not used 
 static bool
 nb_ovn_rbac_validate_perm(const struct nbrec_sb_rbac_permission *perm)
@@ -8380,7 +8380,7 @@ nb_ovn_rbac_validate_perm(const struct nbrec_sb_rbac_permission *perm)
     if (perm->insert_delete != pcfg->insdel) {
         return false;
     }
-    /* verify perm->authorization vs. pcfg->auth */
+    // verify perm->authorization vs. pcfg->auth 
     n_found = 0;
     for (i = 0; i < pcfg->n_auth; i++) {
         for (j = 0; j < perm->n_authorization; j++) {
@@ -8394,7 +8394,7 @@ nb_ovn_rbac_validate_perm(const struct nbrec_sb_rbac_permission *perm)
         return false;
     }
 
-    /* verify perm->update vs. pcfg->update */
+    // verify perm->update vs. pcfg->update 
     n_found = 0;
     for (i = 0; i < pcfg->n_update; i++) {
         for (j = 0; j < perm->n_update; j++) {
@@ -8408,11 +8408,11 @@ nb_ovn_rbac_validate_perm(const struct nbrec_sb_rbac_permission *perm)
         return false;
     }
 
-    /* Success, db state matches expected state */
+    // Success, db state matches expected state 
     pcfg->nb_row = perm;
     return true;
 }
-
+*/
 static void
 ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
                      struct northd_context *ctx,
@@ -8432,7 +8432,7 @@ ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
     sbrec_rbac_role_update_permissions_setkey(rbac_role, pcfg->table,
                                               rbac_perm);
 }
-
+/*
 //Salam - all function - not used
 static void
 nb_ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
@@ -8453,7 +8453,7 @@ nb_ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
     nbrec_sb_rbac_role_update_permissions_setkey(rbac_role, pcfg->table,
                                               rbac_perm);
 }
-
+*/
 static void
 check_and_update_rbac(struct northd_context *ctx)
 {
@@ -8490,7 +8490,7 @@ check_and_update_rbac(struct northd_context *ctx)
         }
     }
 }
-
+/*
 //Salam - all function - not used
 static void
 nb_check_and_update_rbac(struct northd_context *ctx)
@@ -8528,7 +8528,7 @@ nb_check_and_update_rbac(struct northd_context *ctx)
         }
     }
 }
-
+*/
 /* Updates the sb_cfg and hv_cfg columns in the northbound NB_Global table. */
 static void
 update_northbound_cfg(struct northd_context *ctx,
