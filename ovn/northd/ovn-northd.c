@@ -8254,7 +8254,7 @@ static struct rbac_perm_cfg {
     const char **update;
     int n_update;
     const struct sbrec_rbac_permission *row;
-    //const struct nbrec_sb_rbac_permission *nb_row; //Salam
+    const struct nbrec_sb_rbac_permission *nb_row; //Salam
 } rbac_perm_cfg[] = {
     {
         .table = "Chassis",
@@ -8263,8 +8263,8 @@ static struct rbac_perm_cfg {
         .insdel = true,
         .update = rbac_chassis_update,
         .n_update = ARRAY_SIZE(rbac_chassis_update),
-        .row = NULL//,
-        //.nb_row = NULL
+        .row = NULL,
+        .nb_row = NULL
     },{
         .table = "Encap",
         .auth = rbac_encap_auth,
@@ -8272,8 +8272,8 @@ static struct rbac_perm_cfg {
         .insdel = true,
         .update = rbac_encap_update,
         .n_update = ARRAY_SIZE(rbac_encap_update),
-        .row = NULL//,
-        //.nb_row = NULL
+        .row = NULL,
+        .nb_row = NULL
     },{
         .table = "Port_Binding",
         .auth = rbac_port_binding_auth,
@@ -8281,8 +8281,8 @@ static struct rbac_perm_cfg {
         .insdel = false,
         .update = rbac_port_binding_update,
         .n_update = ARRAY_SIZE(rbac_port_binding_update),
-        .row = NULL//,
-        //.nb_row = NULL
+        .row = NULL,
+        .nb_row = NULL
     },{
         .table = "MAC_Binding",
         .auth = rbac_mac_binding_auth,
@@ -8290,8 +8290,8 @@ static struct rbac_perm_cfg {
         .insdel = true,
         .update = rbac_mac_binding_update,
         .n_update = ARRAY_SIZE(rbac_mac_binding_update),
-        .row = NULL//,
-        //.nb_row = NULL
+        .row = NULL,
+        .nb_row = NULL
     },{
         .table = NULL,
         .auth = NULL,
@@ -8299,8 +8299,8 @@ static struct rbac_perm_cfg {
         .insdel = false,
         .update = NULL,
         .n_update = 0,
-        .row = NULL//,
-        //.nb_row = NULL
+        .row = NULL,
+        .nb_row = NULL
     }
 };
 
@@ -8357,7 +8357,7 @@ ovn_rbac_validate_perm(const struct sbrec_rbac_permission *perm)
     pcfg->row = perm;
     return true;
 }
-/*
+
 //Salam - all function - not used 
 static bool
 nb_ovn_rbac_validate_perm(const struct nbrec_sb_rbac_permission *perm)
@@ -8412,7 +8412,7 @@ nb_ovn_rbac_validate_perm(const struct nbrec_sb_rbac_permission *perm)
     pcfg->nb_row = perm;
     return true;
 }
-*/
+
 static void
 ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
                      struct northd_context *ctx,
@@ -8432,7 +8432,7 @@ ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
     sbrec_rbac_role_update_permissions_setkey(rbac_role, pcfg->table,
                                               rbac_perm);
 }
-/*
+
 //Salam - all function - not used
 static void
 nb_ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
@@ -8453,7 +8453,7 @@ nb_ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
     nbrec_sb_rbac_role_update_permissions_setkey(rbac_role, pcfg->table,
                                               rbac_perm);
 }
-*/
+
 static void
 check_and_update_rbac(struct northd_context *ctx)
 {
@@ -8490,7 +8490,7 @@ check_and_update_rbac(struct northd_context *ctx)
         }
     }
 }
-/*
+
 //Salam - all function - not used
 static void
 nb_check_and_update_rbac(struct northd_context *ctx)
@@ -8528,7 +8528,7 @@ nb_check_and_update_rbac(struct northd_context *ctx)
         }
     }
 }
-*/
+
 /* Updates the sb_cfg and hv_cfg columns in the northbound NB_Global table. */
 static void
 update_northbound_cfg(struct northd_context *ctx,
@@ -8835,7 +8835,7 @@ main(int argc, char *argv[])
                 check_and_add_supported_dhcpv6_opts_to_sb_db(&ctx);
                 //nb_check_and_add_supported_dhcpv6_opts_to_sb_db(&ctx); //Salam
                 check_and_update_rbac(&ctx);
-                //nb_check_and_update_rbac(&ctx); //Salam
+                nb_check_and_update_rbac(&ctx); //Salam
             }
         }
 
