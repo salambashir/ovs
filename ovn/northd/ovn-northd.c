@@ -8191,8 +8191,8 @@ check_and_add_supported_dhcpv6_opts_to_sb_db(struct northd_context *ctx)
 
     hmap_destroy(&dhcpv6_opts_to_add);
 }
-
-//Salam - all function
+/*
+//Salam - all function - not used - need to fix
 static void
 nb_check_and_add_supported_dhcpv6_opts_to_sb_db(struct northd_context *ctx)
 {
@@ -8225,7 +8225,7 @@ nb_check_and_add_supported_dhcpv6_opts_to_sb_db(struct northd_context *ctx)
 
     hmap_destroy(&nb_dhcpv6_opts_to_add);
 }
-
+*/
 static const char *rbac_chassis_auth[] =
     {"name"};
 static const char *rbac_chassis_update[] =
@@ -8358,7 +8358,7 @@ ovn_rbac_validate_perm(const struct sbrec_rbac_permission *perm)
     return true;
 }
 
-//Salam - all function - not used 
+//Salam - all function
 static bool
 nb_ovn_rbac_validate_perm(const struct nbrec_sb_rbac_permission *perm)
 {
@@ -8433,7 +8433,7 @@ ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
                                               rbac_perm);
 }
 
-//Salam - all function - not used
+//Salam - all function
 static void
 nb_ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
                      struct northd_context *ctx,
@@ -8491,7 +8491,7 @@ check_and_update_rbac(struct northd_context *ctx)
     }
 }
 
-//Salam - all function - not used
+//Salam - all function
 static void
 nb_check_and_update_rbac(struct northd_context *ctx)
 {
