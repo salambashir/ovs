@@ -7970,7 +7970,7 @@ ovnnb_db_run(struct northd_context *ctx,
     }
     nbrec_sb_global_set_nb_cfg(nb_sb, nb->nb_cfg); //Salam
     nbrec_sb_global_set_options(nb_sb, &nb->options); //Salam
-    nb_loop->next_cfg = nb->nb_cfg; //Salam
+    //nb_loop->next_cfg = nb->nb_cfg; //Salam
 
     const char *mac_addr_prefix = smap_get(&nb->options, "mac_prefix");
     if (mac_addr_prefix) {
