@@ -7907,8 +7907,8 @@ sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
 static void
 ovnnb_db_run(struct northd_context *ctx,
              struct ovsdb_idl_index *sbrec_chassis_by_name,
-             struct ovsdb_idl_loop *sb_loop,
-             struct ovsdb_idl_loop *nb_loop) //Salam - added 4th param
+             struct ovsdb_idl_loop *sb_loop)//,
+             //struct ovsdb_idl_loop *nb_loop) //Salam - added 4th param
 {
     if (!ctx->ovnsb_txn || !ctx->ovnnb_txn) {
         return;
@@ -8827,7 +8827,7 @@ main(int argc, char *argv[])
         }
 
         if (ovsdb_idl_has_lock(ovnsb_idl_loop.idl)) {
-            ovnnb_db_run(&ctx, sbrec_chassis_by_name, &ovnsb_idl_loop, &ovnnb_idl_loop); //Salam - added 4th param
+            ovnnb_db_run(&ctx, sbrec_chassis_by_name, &ovnsb_idl_loop);//, &ovnnb_idl_loop); //Salam - added 4th param
             ovnsb_db_run(&ctx, &ovnsb_idl_loop);
             if (ctx.ovnsb_txn) { 
                 check_and_add_supported_dhcp_opts_to_sb_db(&ctx);
