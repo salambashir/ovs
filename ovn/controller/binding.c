@@ -539,20 +539,20 @@ consider_local_datapath(struct ovsdb_idl_txn *ovnsb_idl_txn,
                     VLOG_INFO("%s: Claiming %s",
                               binding_rec->logical_port, binding_rec->mac[i]);
                 }
-                sbrec_port_binding_set_chassis(binding_rec, chassis_rec);
+                sbrec_port_binding_set_chassis(binding_rec, chassis_rec); //TODO: Salam - change here!!
             }
             /* Check if the port encap binding, if any, has changed */
             struct sbrec_encap *encap_rec = sbrec_get_port_encap(
                                             chassis_rec, iface_rec);
             if (encap_rec && binding_rec->encap != encap_rec) {
-                sbrec_port_binding_set_encap(binding_rec, encap_rec);
+                sbrec_port_binding_set_encap(binding_rec, encap_rec); //TODO: Salam - change here!!
             }
         } else if (binding_rec->chassis == chassis_rec) {
             VLOG_INFO("Releasing lport %s from this chassis.",
                       binding_rec->logical_port);
             if (binding_rec->encap)
-                sbrec_port_binding_set_encap(binding_rec, NULL);
-            sbrec_port_binding_set_chassis(binding_rec, NULL);
+                sbrec_port_binding_set_encap(binding_rec, NULL); //TODO: Salam - change here!!
+            sbrec_port_binding_set_chassis(binding_rec, NULL); //TODO: Salam - change here!!
         } else if (our_chassis) {
             static struct vlog_rate_limit rl = VLOG_RATE_LIMIT_INIT(5, 1);
             VLOG_INFO_RL(&rl,
