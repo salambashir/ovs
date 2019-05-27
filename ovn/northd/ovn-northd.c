@@ -859,6 +859,7 @@ struct ovn_port {
     struct ovs_list list;       /* In list of similar records. */
 };
 
+//TODO??????????should also update nb attribute
 static struct ovn_port *
 ovn_port_create(struct hmap *ports, const char *key,
                 const struct nbrec_logical_switch_port *nbsp,

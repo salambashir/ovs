@@ -71,7 +71,7 @@ static unixctl_cb_func group_table_list;
 static unixctl_cb_func inject_pkt;
 static unixctl_cb_func ovn_controller_conn_show;
 
-static const char *ovnnb_db; //Salam
+//static const char *ovnnb_db; //Salam
 //static const char *ovnsb_db; //Salam
 
 #define DEFAULT_BRIDGE_NAME "br-int"
@@ -346,7 +346,7 @@ update_sb_db(struct ovsdb_idl *ovs_idl, struct ovsdb_idl *ovnsb_idl)
                                 "ovn-remote-probe-interval", default_interval);
     ovsdb_idl_set_probe_interval(ovnsb_idl, interval);
 }
-
+/*
 //Salam - all function
 static void
 update_nb_db(struct ovsdb_idl *ovnnb_idl)
@@ -356,16 +356,15 @@ update_nb_db(struct ovsdb_idl *ovnnb_idl)
     ovsdb_idl_set_remote(ovnnb_idl, remote, true);
 
     //TODO: should do something with the lines below ?????????
-    /* Set probe interval, based on user configuration and the remote. */
-    /*
-    int default_interval = (remote && !stream_or_pstream_needs_probes(remote)
-                            ? 0 : DEFAULT_PROBE_INTERVAL_MSEC);
-    int interval = smap_get_int(&cfg->external_ids,
-                                "ovn-remote-probe-interval", default_interval);
-    ovsdb_idl_set_probe_interval(ovnsb_idl, interval);
-    */
+    // Set probe interval, based on user configuration and the remote. 
+   
+    //int default_interval = (remote && !stream_or_pstream_needs_probes(remote)
+    //                        ? 0 : DEFAULT_PROBE_INTERVAL_MSEC);
+    //int interval = smap_get_int(&cfg->external_ids,
+    //                            "ovn-remote-probe-interval", default_interval);
+    //ovsdb_idl_set_probe_interval(ovnsb_idl, interval);
 }
-
+*/
 static void
 update_ct_zones(const struct sset *lports, const struct hmap *local_datapaths,
                 struct simap *ct_zones, unsigned long *ct_zone_bitmap,
@@ -631,10 +630,10 @@ main(int argc, char *argv[])
     //    ovsdb_idl_create(ovnnb_db, &nbrec_idl_class, true, true));          //Salam
     //ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_sb_cfg);  //Salam
     //ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_hv_cfg);  //Salam
-    struct ovsdb_idl_loop ovnnb_idl_loop = OVSDB_IDL_LOOP_INITIALIZER(      //Salam2
-        ovsdb_idl_create_unconnected(&nbrec_idl_class, true));              //Salam2
-    ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_sb_cfg);  //Salam2
-    ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_hv_cfg);  //Salam2
+    //struct ovsdb_idl_loop ovnnb_idl_loop = OVSDB_IDL_LOOP_INITIALIZER(      //Salam2
+    //    ovsdb_idl_create_unconnected(&nbrec_idl_class, true));              //Salam2
+    //ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_sb_cfg);  //Salam2
+    //ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_hv_cfg);  //Salam2
 
 
     /* Configure OVN SB database. */  
@@ -673,7 +672,7 @@ main(int argc, char *argv[])
                                   &sbrec_mac_binding_col_logical_port,
                                   &sbrec_mac_binding_col_ip);
 
-
+    /*
     struct ovsdb_idl_index *nbrec_sb_chassis_by_name
         = chassis_index_create(ovnnb_idl_loop.idl); //Salam
     struct ovsdb_idl_index *nbrec_sb_multicast_group_by_name_datapath
@@ -697,7 +696,7 @@ main(int argc, char *argv[])
         = ovsdb_idl_index_create2(ovnnb_idl_loop.idl,
                                   &nbrec_sb_mac_binding_col_logical_port,
                                   &nbrec_sb_mac_binding_col_ip); //Salam
-
+    */
 
     ovsdb_idl_omit_alert(ovnsb_idl_loop.idl, &sbrec_chassis_col_nb_cfg); //TODO???????????????????????
     update_sb_monitors(ovnsb_idl_loop.idl, NULL, NULL, NULL); //TODO???????????????????????
@@ -728,15 +727,15 @@ main(int argc, char *argv[])
     restart = false;
     while (!exiting) {
         update_sb_db(ovs_idl_loop.idl, ovnsb_idl_loop.idl);
-        update_nb_db(ovnnb_idl_loop.idl); //Salam
+        //update_nb_db(ovnnb_idl_loop.idl); //Salam
         update_ssl_config(ovsrec_ssl_table_get(ovs_idl_loop.idl));
 
         struct ovsdb_idl_txn *ovs_idl_txn = ovsdb_idl_loop_run(&ovs_idl_loop);
         struct ovsdb_idl_txn *ovnsb_idl_txn
             = ovsdb_idl_loop_run(&ovnsb_idl_loop);
 
-         struct ovsdb_idl_txn *ovnnb_idl_txn
-            = ovsdb_idl_loop_run(&ovnnb_idl_loop); //Salam
+        //struct ovsdb_idl_txn *ovnnb_idl_txn
+        //    = ovsdb_idl_loop_run(&ovnnb_idl_loop); //Salam
 
         if (ovsdb_idl_has_ever_connected(ovnsb_idl_loop.idl)) {  //TODO - should also check nb???????????????????
             /* Contains "struct local_datapath" nodes. */
@@ -1037,7 +1036,7 @@ parse_options(int argc, char *argv[])
 
     static struct option long_options[] = {
         //{"ovnsb-db", required_argument, NULL, 'd'}, //Salam
-        {"ovnnb-db", required_argument, NULL, 'D'}, //Salam
+        //{"ovnnb-db", required_argument, NULL, 'D'}, //Salam
         {"help", no_argument, NULL, 'h'},
         {"version", no_argument, NULL, 'V'},
         VLOG_LONG_OPTIONS,
@@ -1068,11 +1067,11 @@ parse_options(int argc, char *argv[])
          case 'd': //Salam
             ovnsb_db = optarg; //Salam
             break; //Salam
-*/
+
         case 'D': //Salam
             ovnnb_db = optarg; //Salam
             break; //Salam
-
+*/
         VLOG_OPTION_HANDLERS
         DAEMON_OPTION_HANDLERS
         STREAM_SSL_OPTION_HANDLERS
@@ -1096,11 +1095,11 @@ parse_options(int argc, char *argv[])
     if (!ovnsb_db) { //Salam
         ovnsb_db = default_sb_db(); //Salam
     } //Salam
-*/
+
     if (!ovnnb_db) { //Salam
         ovnnb_db = default_nb_db(); //Salam
     } //Salam
-
+*/
     free(short_options);
 
     argc -= optind;
