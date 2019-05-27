@@ -295,7 +295,7 @@ chassis_run(struct ovsdb_idl_txn *ovnsb_idl_txn,
     inited = true;
     return chassis_rec;
 }
-
+/*
 //Salam - all function TODO????????????????????????????????
 const struct nbrec_sb_chassis *
 nb_chassis_run(struct ovsdb_idl_txn *ovnnb_idl_txn,
@@ -380,7 +380,7 @@ nb_chassis_run(struct ovsdb_idl_txn *ovnnb_idl_txn,
             sbrec_chassis_set_hostname(chassis_rec, hostname);
         }
 
-        /* Determine new values for Chassis external-ids. */
+        // Determine new values for Chassis external-ids. 
         const char *chassis_bridge_mappings
             = get_bridge_mappings(&chassis_rec->external_ids);
         const char *chassis_datapath_type
@@ -390,7 +390,7 @@ nb_chassis_run(struct ovsdb_idl_txn *ovnnb_idl_txn,
         const char *chassis_cms_options
             = get_cms_options(&chassis_rec->external_ids);
 
-        /* If any of the external-ids should change, update them. */
+        // If any of the external-ids should change, update them. 
         if (strcmp(bridge_mappings, chassis_bridge_mappings) ||
             strcmp(datapath_type, chassis_datapath_type) ||
             strcmp(iface_types_str, chassis_iface_types) ||
@@ -406,14 +406,14 @@ nb_chassis_run(struct ovsdb_idl_txn *ovnnb_idl_txn,
             smap_destroy(&new_ids);
         }
 
-        /* Compare desired tunnels against those currently in the database. */
+        // Compare desired tunnels against those currently in the database. 
 
-        /*
-         * We walk through the types and the IP's rather than check for the
-         * combination since we create a mesh; if we create specific tunnel-
-         * type combinations, then we'd need to check for the type-remote-ip
-         * pair.
-         */
+        //
+        // We walk through the types and the IP's rather than check for the
+        // combination since we create a mesh; if we create specific tunnel-
+        // type combinations, then we'd need to check for the type-remote-ip
+        // pair.
+        //
         uint32_t cur_tunnels = 0;
         bool same = true;
         for (int i = 0; i < chassis_rec->n_encaps; i++) {
@@ -449,7 +449,7 @@ nb_chassis_run(struct ovsdb_idl_txn *ovnnb_idl_txn,
         }
 
         if (same) {
-            /* Nothing changed. */
+            // Nothing changed. 
             inited = true;
             ds_destroy(&iface_types);
             return chassis_rec;
@@ -517,6 +517,7 @@ nb_chassis_run(struct ovsdb_idl_txn *ovnnb_idl_txn,
     inited = true;
     return chassis_rec;
 }
+*/
 
 /* Returns true if the database is all cleaned up, false if more work is
  * required. */
