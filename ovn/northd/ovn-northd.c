@@ -425,7 +425,7 @@ struct ovn_datapath {
     const struct nbrec_logical_switch *nbs;  /* May be NULL. */
     const struct nbrec_logical_router *nbr;  /* May be NULL. */
     const struct sbrec_datapath_binding *sb; /* May be NULL. */
-    const struct nbrec_sb_datapath_binding *nb; /* May be NULL. */ // Salam
+    //const struct nbrec_sb_datapath_binding *nb; /* May be NULL. */ // Salam
 
     struct ovs_list list;       /* In list of similar records. */
 
@@ -675,7 +675,7 @@ ovn_datapath_update_external_ids(struct ovn_datapath *od)
         smap_add(&ids, "name2", name2);
     }
     sbrec_datapath_binding_set_external_ids(od->sb, &ids);
-    nbrec_sb_datapath_binding_set_external_ids(od->nb, &ids); //Salam - TODO: need to create new "ids"?????
+    //nbrec_sb_datapath_binding_set_external_ids(od->nb, &ids); //Salam - TODO: need to create new "ids"?????
     smap_destroy(&ids);
 }
 
@@ -793,7 +793,7 @@ build_datapaths(struct northd_context *ctx, struct hmap *datapaths)
         struct ovn_datapath *od;
         LIST_FOR_EACH (od, list, &both) {
             add_tnlid(&dp_tnlids, od->sb->tunnel_key);
-            add_tnlid(&dp_tnlids, od->nb->tunnel_key);//Salam
+            //add_tnlid(&dp_tnlids, od->nb->tunnel_key);//Salam
         }
 
         /* Add southbound record for each unmatched northbound record. */
@@ -804,10 +804,10 @@ build_datapaths(struct northd_context *ctx, struct hmap *datapaths)
             }
 
             od->sb = sbrec_datapath_binding_insert(ctx->ovnsb_txn);
-            od->nb = nbrec_sb_datapath_binding_insert(ctx->ovnnb_txn); //Salam
+            //od->nb = nbrec_sb_datapath_binding_insert(ctx->ovnnb_txn); //Salam
             ovn_datapath_update_external_ids(od);
             sbrec_datapath_binding_set_tunnel_key(od->sb, tunnel_key);
-            nbrec_sb_datapath_binding_set_tunnel_key(od->nb, tunnel_key); //Salam - TODO should allocate new "tunnel_key" ??
+            //nbrec_sb_datapath_binding_set_tunnel_key(od->nb, tunnel_key); //Salam - TODO should allocate new "tunnel_key" ??
         }
         destroy_tnlids(&dp_tnlids);
     }
@@ -2074,7 +2074,7 @@ sbpb_gw_chassis_needs_update(
     return false;
 }
 
-//Salam - all function *************************************************
+//Salam - all function - not used
 static bool
 nb_sbpb_gw_chassis_needs_update(
     struct ovsdb_idl_index *sbrec_chassis_by_name,
@@ -2206,7 +2206,7 @@ copy_gw_chassis_from_nbrp_to_sbpb(
     free(gw_chassis);
 }
 
-//Salam - all function
+//Salam - all function - not used
 static void
 nb_copy_gw_chassis_from_nbrp_to_sbpb(
         struct northd_context *ctx,
@@ -2489,7 +2489,7 @@ ovn_port_update_sbrec(struct northd_context *ctx,
         smap_destroy(&ids);
     }
 }
-
+/*
 //Salam - all function
 static void
 nb_ovn_port_update_sbrec(struct northd_context *ctx,
@@ -2499,8 +2499,8 @@ nb_ovn_port_update_sbrec(struct northd_context *ctx,
 {
     nbrec_sb_port_binding_set_datapath(op->nb, op->od->nb);
     if (op->nbrp) {
-        /* If the router is for l3 gateway, it resides on a chassis
-         * and its port type is "l3gateway". */
+        // If the router is for l3 gateway, it resides on a chassis
+        // and its port type is "l3gateway". 
         const char *chassis_name = smap_get(&op->od->nbr->options, "chassis");
         if (op->derived) {
             nbrec_sb_port_binding_set_type(op->nb, "chassisredirect");
@@ -2533,32 +2533,32 @@ nb_ovn_port_update_sbrec(struct northd_context *ctx,
                 }
 
             } else if (redirect_chassis) {
-                /* Handle ports that had redirect-chassis option attached
-                 * to them, and for backwards compatibility convert them
-                 * to a single Gateway_Chassis entry */
+                // Handle ports that had redirect-chassis option attached
+                // to them, and for backwards compatibility convert them
+                // to a single Gateway_Chassis entry
                 const struct nbrec_sb_chassis *chassis =
                     nb_chassis_lookup_by_name(nbrec_sb_chassis_by_name,
                                            redirect_chassis);
                 if (chassis) {
-                    /* If we found the chassis, and the gw chassis on record
-                     * differs from what we expect go ahead and update */
+                    // If we found the chassis, and the gw chassis on record
+                    // differs from what we expect go ahead and update 
                     if (op->nb->n_gateway_chassis != 1
                         || !op->nb->gateway_chassis[0]->chassis
                         || strcmp(op->nb->gateway_chassis[0]->chassis->name,
                                   chassis->name)
                         || op->nb->gateway_chassis[0]->priority != 0) {
-                        /* Construct a single Gateway_Chassis entry on the
-                         * Port_Binding attached to the redirect_chassis
-                         * name */
+                        // Construct a single Gateway_Chassis entry on the
+                        // Port_Binding attached to the redirect_chassis
+                        // name  
                         struct nbrec_sb_gateway_chassis *gw_chassis =
                             nbrec_sb_gateway_chassis_insert(ctx->ovnnb_txn);
 
                         char *gwc_name = xasprintf("%s_%s", op->nbrp->name,
                                 chassis->name);
 
-                        /* XXX: Again, here, we could just update an existing
-                         * Gateway_Chassis, instead of creating a new one
-                         * and replacing it */
+                        // XXX: Again, here, we could just update an existing
+                        // Gateway_Chassis, instead of creating a new one
+                        // and replacing it 
                         nbrec_sb_gateway_chassis_set_name(gw_chassis, gwc_name);
                         nbrec_sb_gateway_chassis_set_priority(gw_chassis, 0);
                         nbrec_sb_gateway_chassis_set_chassis(gw_chassis, chassis);
@@ -2646,8 +2646,8 @@ nb_ovn_port_update_sbrec(struct northd_context *ctx,
                 chassis = smap_get(&op->peer->od->nbr->options, "chassis");
             }
 
-            /* A switch port connected to a gateway router is also of
-             * type "l3gateway". */
+            // A switch port connected to a gateway router is also of
+            // type "l3gateway".  
             if (chassis) {
                 nbrec_sb_port_binding_set_type(op->nb, "l3gateway"); 
             } else {
@@ -2691,8 +2691,8 @@ nb_ovn_port_update_sbrec(struct northd_context *ctx,
                 } else {
                     nbrec_sb_port_binding_set_nat_addresses(op->nb, NULL, 0);
                 }
-            /* Only accept manual specification of ethernet address
-             * followed by IPv4 addresses on type "l3gateway" ports. */
+            // Only accept manual specification of ethernet address
+            // followed by IPv4 addresses on type "l3gateway" ports.  
             } else if (nat_addresses && chassis) {
                 struct lport_addresses laddrs;
                 if (!extract_lsp_addresses(nat_addresses, &laddrs)) {
@@ -2724,6 +2724,7 @@ nb_ovn_port_update_sbrec(struct northd_context *ctx,
         smap_destroy(&ids);
     }
 }
+*/
 
 //TODO: should also change tables in NB - V
 /* Remove mac_binding entries that refer to logical_ports which are
@@ -2776,8 +2777,8 @@ build_ports(struct northd_context *ctx,
         }
         ovn_port_update_sbrec(ctx, sbrec_chassis_by_name,
                               op, &chassis_qdisc_queues);
-        nb_ovn_port_update_sbrec(ctx, sbrec_chassis_by_name,
-                              op, &chassis_qdisc_queues); //Salam
+        //nb_ovn_port_update_sbrec(ctx, sbrec_chassis_by_name,
+        //                      op, &chassis_qdisc_queues); //Salam
 
         add_tnlid(&op->od->port_tnlids, op->sb->tunnel_key);
         if (op->sb->tunnel_key > op->od->port_key_hint) {
@@ -2793,16 +2794,16 @@ build_ports(struct northd_context *ctx,
         }
 
         op->sb = sbrec_port_binding_insert(ctx->ovnsb_txn);
-        op->nb = nbrec_sb_port_binding_insert(ctx->ovnnb_txn); //Salam
+        //op->nb = nbrec_sb_port_binding_insert(ctx->ovnnb_txn); //Salam
         ovn_port_update_sbrec(ctx, sbrec_chassis_by_name, op,
                               &chassis_qdisc_queues);
-        nb_ovn_port_update_sbrec(ctx, sbrec_chassis_by_name, op,
-                              &chassis_qdisc_queues); //Salam
+        //nb_ovn_port_update_sbrec(ctx, sbrec_chassis_by_name, op,
+        //                      &chassis_qdisc_queues); //Salam
 
         sbrec_port_binding_set_logical_port(op->sb, op->key);
-        nbrec_sb_port_binding_set_logical_port(op->nb, op->key); //Salam
+        //nbrec_sb_port_binding_set_logical_port(op->nb, op->key); //Salam
         sbrec_port_binding_set_tunnel_key(op->sb, tunnel_key);
-        nbrec_sb_port_binding_set_tunnel_key(op->nb, tunnel_key); //Salam
+        //nbrec_sb_port_binding_set_tunnel_key(op->nb, tunnel_key); //Salam
     }
 
     bool remove_mac_bindings = false;
@@ -2814,7 +2815,7 @@ build_ports(struct northd_context *ctx,
     LIST_FOR_EACH_SAFE(op, next, list, &sb_only) {
         ovs_list_remove(&op->list);
         sbrec_port_binding_delete(op->sb);
-        nbrec_sb_port_binding_delete(op->nb); //Salam
+        //nbrec_sb_port_binding_delete(op->nb); //Salam
         ovn_port_destroy(ports, op);
     }
     if (remove_mac_bindings) {
@@ -2928,14 +2929,15 @@ static void
 ovn_multicast_update_nbrec(const struct ovn_multicast *mc,
                            const struct nbrec_sb_multicast_group *nb)
 {
-    struct nbrec_sb_port_binding **ports = xmalloc(mc->n_ports * sizeof *ports);
-    for (size_t i = 0; i < mc->n_ports; i++) {
-        ports[i] = CONST_CAST(struct nbrec_sb_port_binding *, mc->ports[i]->nb);
-    }
-    nbrec_sb_multicast_group_set_ports(nb, ports, mc->n_ports);
-    free(ports);
+    //struct nbrec_sb_port_binding **ports = xmalloc(mc->n_ports * sizeof *ports);
+    //for (size_t i = 0; i < mc->n_ports; i++) {
+    //    ports[i] = CONST_CAST(struct nbrec_sb_port_binding *, mc->ports[i]->nb);
+    //}
+    //nbrec_sb_multicast_group_set_ports(nb, ports, mc->n_ports);
+    //free(ports);
 }
 
+
 /* Logical flow generation.
  *
  * This code generates the Logical_Flow table in the southbound database, as a
@@ -5507,6 +5509,7 @@ copy_ra_to_sb(struct ovn_port *op, const char *address_mode)
     smap_destroy(&options);
 }
 
+
 //Salam - all function
 static void
 nb_copy_ra_to_sb(struct ovn_port *op, const char *address_mode)
@@ -5538,7 +5541,7 @@ nb_copy_ra_to_sb(struct ovn_port *op, const char *address_mode)
     smap_add_format(&options, "ipv6_ra_min_interval", "%d", min_interval);
 
     int mtu = smap_get_int(&op->nbrp->ipv6_ra_configs, "mtu", ND_MTU_DEFAULT);
-    /* RFC 2460 requires the MTU for IPv6 to be at least 1280 */
+    // RFC 2460 requires the MTU for IPv6 to be at least 1280 
     if (mtu && mtu >= 1280) {
         smap_add_format(&options, "ipv6_ra_mtu", "%d", mtu);
     }
@@ -5552,7 +5555,7 @@ nb_copy_ra_to_sb(struct ovn_port *op, const char *address_mode)
         }
         ds_put_format(&s, "%s/%u ", addrs->network_s, addrs->plen);
     }
-    /* Remove trailing space */
+    // Remove trailing space 
     ds_chomp(&s, ' ');
     smap_add(&options, "ipv6_ra_prefixes", ds_cstr(&s));
     ds_destroy(&s);
@@ -5563,6 +5566,8 @@ nb_copy_ra_to_sb(struct ovn_port *op, const char *address_mode)
     smap_destroy(&options);
 }
 
+
+//TODO: should also update NB - V
 static void
 build_lrouter_flows(struct hmap *datapaths, struct hmap *ports,
                     struct hmap *lflows)
@@ -7241,7 +7246,7 @@ build_lflows(struct northd_context *ctx, struct hmap *datapaths,
             sbrec_logical_flow_delete(sbflow);
         }
     }
-
+    /*
     const struct nbrec_sb_logical_flow *nb_sbflow, *next_nb_sbflow; //Salam
     NBREC_SB_LOGICAL_FLOW_FOR_EACH_SAFE (nb_sbflow, next_nb_sbflow, ctx->ovnnb_idl) { //Salam - all loop
         struct ovn_datapath *od
@@ -7263,7 +7268,7 @@ build_lflows(struct northd_context *ctx, struct hmap *datapaths,
             nbrec_sb_logical_flow_delete(nb_sbflow);
         }
     }
-
+    */
     struct ovn_lflow *lflow, *next_lflow;
     HMAP_FOR_EACH_SAFE (lflow, next_lflow, hmap_node, &lflows) {
         const char *pipeline = ovn_stage_get_pipeline_name(lflow->stage);
@@ -7276,7 +7281,7 @@ build_lflows(struct northd_context *ctx, struct hmap *datapaths,
         sbrec_logical_flow_set_priority(sbflow, lflow->priority);
         sbrec_logical_flow_set_match(sbflow, lflow->match);
         sbrec_logical_flow_set_actions(sbflow, lflow->actions);
-
+        /*
         nb_sbflow = nbrec_sb_logical_flow_insert(ctx->ovnnb_txn); //Salam
         nbrec_sb_logical_flow_set_logical_datapath(nb_sbflow, lflow->od->nb); //Salam
         nbrec_sb_logical_flow_set_pipeline(nb_sbflow, pipeline); //Salam
@@ -7284,7 +7289,7 @@ build_lflows(struct northd_context *ctx, struct hmap *datapaths,
         nbrec_sb_logical_flow_set_priority(nb_sbflow, lflow->priority); //Salam
         nbrec_sb_logical_flow_set_match(nb_sbflow, lflow->match); //Salam
         nbrec_sb_logical_flow_set_actions(nb_sbflow, lflow->actions); //Salam
-
+        */
         /* Trim the source locator lflow->where, which looks something like
          * "ovn/northd/ovn-northd.c:1234", down to just the part following the
          * last slash, e.g. "ovn-northd.c:1234". */
@@ -7304,7 +7309,7 @@ build_lflows(struct northd_context *ctx, struct hmap *datapaths,
             smap_add(&ids, "stage-hint", lflow->stage_hint);
         }
         sbrec_logical_flow_set_external_ids(sbflow, &ids);
-        nbrec_sb_logical_flow_set_external_ids(nb_sbflow, &ids); //Salam - TODO should create another "ids" ??
+        //nbrec_sb_logical_flow_set_external_ids(nb_sbflow, &ids); //Salam - TODO should create another "ids" ??
         smap_destroy(&ids);
 
         ovn_lflow_destroy(&lflows, lflow);
@@ -7331,7 +7336,7 @@ build_lflows(struct northd_context *ctx, struct hmap *datapaths,
             sbrec_multicast_group_delete(sbmc);
         }
     }
-
+    /*
     const struct nbrec_sb_multicast_group *nb_sbmc, *next_nb_sbmc; //Salam 
     NBREC_SB_MULTICAST_GROUP_FOR_EACH_SAFE (nb_sbmc, next_nb_sbmc, ctx->ovnnb_idl) { //Salam - all loop
         struct ovn_datapath *od = ovn_datapath_from_nbrec(datapaths,
@@ -7351,7 +7356,7 @@ build_lflows(struct northd_context *ctx, struct hmap *datapaths,
             nbrec_sb_multicast_group_delete(nb_sbmc);
         }
     }
-
+    */
     struct ovn_multicast *mc, *next_mc;
     HMAP_FOR_EACH_SAFE (mc, next_mc, hmap_node, &mcgroups) {
         sbmc = sbrec_multicast_group_insert(ctx->ovnsb_txn);
@@ -7359,13 +7364,13 @@ build_lflows(struct northd_context *ctx, struct hmap *datapaths,
         sbrec_multicast_group_set_name(sbmc, mc->group->name);
         sbrec_multicast_group_set_tunnel_key(sbmc, mc->group->key);
         ovn_multicast_update_sbrec(mc, sbmc);
-
+        /*
         nb_sbmc = nbrec_sb_multicast_group_insert(ctx->ovnnb_txn); //Salam 
         nbrec_sb_multicast_group_set_datapath(nb_sbmc, mc->datapath->nb); //Salam 
         nbrec_sb_multicast_group_set_name(nb_sbmc, mc->group->name); //Salam 
         nbrec_sb_multicast_group_set_tunnel_key(nb_sbmc, mc->group->key); //Salam 
         ovn_multicast_update_nbrec(mc, nb_sbmc); //Salam 
-
+        */
         ovn_multicast_destroy(&mcgroups, mc);
     }
     hmap_destroy(&mcgroups);
@@ -7536,11 +7541,11 @@ sync_port_groups(struct northd_context *ctx)
         shash_add(&sb_port_groups, sb_port_group->name, sb_port_group);
     }
 
-    struct shash nb_sb_port_groups = SHASH_INITIALIZER(&nb_sb_port_groups); //Salam
-    const struct nbrec_sb_port_group *nb_sb_port_group; //Salam
-    NBREC_SB_PORT_GROUP_FOR_EACH (nb_sb_port_group, ctx->ovnnb_idl) { //Salam
-        shash_add(&nb_sb_port_groups, nb_sb_port_group->name, nb_sb_port_group); //Salam
-    }
+    //struct shash nb_sb_port_groups = SHASH_INITIALIZER(&nb_sb_port_groups); //Salam
+    //const struct nbrec_sb_port_group *nb_sb_port_group; //Salam
+    //NBREC_SB_PORT_GROUP_FOR_EACH (nb_sb_port_group, ctx->ovnnb_idl) { //Salam
+    //    shash_add(&nb_sb_port_groups, nb_sb_port_group->name, nb_sb_port_group); //Salam
+    //}
 
     const struct nbrec_port_group *nb_port_group;
     NBREC_PORT_GROUP_FOR_EACH (nb_port_group, ctx->ovnnb_idl) {
@@ -7551,12 +7556,12 @@ sync_port_groups(struct northd_context *ctx)
             sbrec_port_group_set_name(sb_port_group, nb_port_group->name);
         }
 
-        nb_sb_port_group = shash_find_and_delete(&nb_sb_port_groups,
-                                               nb_port_group->name); //Salam
-        if (!nb_sb_port_group) { //Salam
-            nb_sb_port_group = nbrec_sb_port_group_insert(ctx->ovnnb_txn); //Salam
-            nbrec_sb_port_group_set_name(nb_sb_port_group, nb_port_group->name); //Salam
-        }
+        //nb_sb_port_group = shash_find_and_delete(&nb_sb_port_groups,
+        //                                       nb_port_group->name); //Salam
+        //if (!nb_sb_port_group) { //Salam
+        //    nb_sb_port_group = nbrec_sb_port_group_insert(ctx->ovnnb_txn); //Salam
+        //    nbrec_sb_port_group_set_name(nb_sb_port_group, nb_port_group->name); //Salam
+        //}
 
         const char **nb_port_names = xcalloc(nb_port_group->n_ports,
                                              sizeof *nb_port_names);
@@ -7568,9 +7573,9 @@ sync_port_groups(struct northd_context *ctx)
                                    nb_port_names,
                                    nb_port_group->n_ports);
         
-        nbrec_sb_port_group_set_ports(nb_sb_port_group,
-                                   nb_port_names,
-                                   nb_port_group->n_ports); //Salam - TODO should create another "nb_port_names" ??
+        //nbrec_sb_port_group_set_ports(nb_sb_port_group,
+        //                           nb_port_names,
+        //                           nb_port_group->n_ports); //Salam - TODO should create another "nb_port_names" ??
 
         free(nb_port_names);
     }
@@ -7582,11 +7587,11 @@ sync_port_groups(struct northd_context *ctx)
     }
     shash_destroy(&sb_port_groups);
 
-    SHASH_FOR_EACH_SAFE (node, next, &nb_sb_port_groups) { //Salam
-        nbrec_sb_port_group_delete(node->data); //Salam
-        shash_delete(&nb_sb_port_groups, node); //Salam
-    }
-    shash_destroy(&nb_sb_port_groups); //Salam
+    //SHASH_FOR_EACH_SAFE (node, next, &nb_sb_port_groups) { //Salam
+    //    nbrec_sb_port_group_delete(node->data); //Salam
+    //    shash_delete(&nb_sb_port_groups, node); //Salam
+    //}
+    //shash_destroy(&nb_sb_port_groups); //Salam
 }
 
 struct band_entry {
@@ -7763,13 +7768,13 @@ struct dns_info {
     struct hmap_node hmap_node;
     const struct nbrec_dns *nb_dns; /* DNS record in the Northbound db. */
     const struct sbrec_dns *sb_dns; /* DNS record in the Soutbound db. */
-    const struct nbrec_sb_dns *nb_sb_dns; /* SB DNS record in the Northbound db. */ //Salam
+    //const struct nbrec_sb_dns *nb_sb_dns; /* SB DNS record in the Northbound db. */ //Salam
 
     /* Datapaths to which the DNS entry is associated with it. */
     const struct sbrec_datapath_binding **sbs;
-    const struct nbrec_sb_datapath_binding **nb_sbs; //salam
+    //const struct nbrec_sb_datapath_binding **nb_sbs; //salam
     size_t n_sbs;
-    size_t n_nb_sbs; //Salam
+    //size_t n_nb_sbs; //Salam
 };
 
 static inline struct dns_info *
@@ -7813,10 +7818,10 @@ sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
                                      dns_info->n_sbs * sizeof *dns_info->sbs);
             dns_info->sbs[dns_info->n_sbs - 1] = od->sb;
 
-            dns_info->n_nb_sbs++; //Salam
+            /*dns_info->n_nb_sbs++; //Salam
             dns_info->nb_sbs = xrealloc(dns_info->nb_sbs,
                                      dns_info->n_nb_sbs * sizeof *dns_info->nb_sbs); //Salam
-            dns_info->nb_sbs[dns_info->n_nb_sbs - 1] = od->nb; //Salam
+            dns_info->nb_sbs[dns_info->n_nb_sbs - 1] = od->nb; //Salam*/
         }
     }
 
@@ -7837,7 +7842,7 @@ sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
             sbrec_dns_delete(sbrec_dns);
         }
     }
-
+    /*
     const struct nbrec_sb_dns *nb_sbrec_dns, *nb_next; //Salam 
     NBREC_SB_DNS_FOR_EACH_SAFE (nb_sbrec_dns, nb_next, ctx->ovnnb_idl) { //Salam - all loop
         const char *nb_dns_uuid = smap_get(&nb_sbrec_dns->external_ids, "dns_id");
@@ -7855,7 +7860,7 @@ sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
             nbrec_sb_dns_delete(nb_sbrec_dns);
         }
     }
-
+    */
     struct dns_info *dns_info;
     HMAP_FOR_EACH_POP (dns_info, hmap_node, &dns_map) {
         if (!dns_info->sb_dns) {
@@ -7868,7 +7873,7 @@ sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
             sbrec_dns_set_external_ids(sbrec_dns, &external_ids);
             free(dns_id);
         }
-
+        /*
         if (!dns_info->nb_sb_dns) { //Salam - all condition
             nb_sbrec_dns = nbrec_sb_dns_insert(ctx->ovnnb_txn);
             dns_info->nb_sb_dns = nb_sbrec_dns;
@@ -7879,7 +7884,7 @@ sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
             nbrec_sb_dns_set_external_ids(nb_sbrec_dns, &external_ids);
             free(dns_id);
         }
-
+        */
         /* Set the datapaths and records. If nothing has changed, then
          * this will be a no-op.
          */
@@ -7888,15 +7893,15 @@ sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
             (struct sbrec_datapath_binding **)dns_info->sbs,
             dns_info->n_sbs);
         sbrec_dns_set_records(dns_info->sb_dns, &dns_info->nb_dns->records);
-
+        /*
         nbrec_sb_dns_set_datapaths(
             dns_info->nb_sb_dns,
             (struct nbrec_sb_datapath_binding **)dns_info->nb_sbs,
             dns_info->n_nb_sbs); //Salam
         nbrec_sb_dns_set_records(dns_info->nb_sb_dns, &dns_info->nb_dns->records); //Salam
-
+        */
         free(dns_info->sbs);
-        free(dns_info->nb_sbs);
+        //free(dns_info->nb_sbs); //Salam
         free(dns_info);
     }
     hmap_destroy(&dns_map);
@@ -7908,8 +7913,8 @@ sync_dns_entries(struct northd_context *ctx, struct hmap *datapaths)
 static void
 ovnnb_db_run(struct northd_context *ctx,
              struct ovsdb_idl_index *sbrec_chassis_by_name,
-             struct ovsdb_idl_loop *sb_loop)//,
-             //struct ovsdb_idl_loop *nb_loop) //Salam - added 4th param
+             struct ovsdb_idl_loop *sb_loop,
+             struct ovsdb_idl_loop *nb_loop) //Salam - added 4th param
 {
     if (!ctx->ovnsb_txn || !ctx->ovnnb_txn) {
         return;
@@ -7961,7 +7966,7 @@ ovnnb_db_run(struct northd_context *ctx,
     sbrec_sb_global_set_nb_cfg(sb, nb->nb_cfg);
     sbrec_sb_global_set_options(sb, &nb->options);
     sb_loop->next_cfg = nb->nb_cfg;
-
+    
     const struct nbrec_sb_global *nb_sb = nbrec_sb_global_first(ctx->ovnnb_idl); //Salam
     if (!nb_sb) { //Salam
         nb_sb = nbrec_sb_global_insert(ctx->ovnnb_txn); //Salam
@@ -7972,7 +7977,7 @@ ovnnb_db_run(struct northd_context *ctx,
     nbrec_sb_global_set_nb_cfg(nb_sb, nb->nb_cfg); //Salam
     nbrec_sb_global_set_options(nb_sb, &nb->options); //Salam
     //nb_loop->next_cfg = nb->nb_cfg; //Salam
-
+    
     const char *mac_addr_prefix = smap_get(&nb->options, "mac_prefix");
     if (mac_addr_prefix) {
         struct eth_addr addr;
@@ -8829,7 +8834,7 @@ main(int argc, char *argv[])
         }
 
         if (ovsdb_idl_has_lock(ovnsb_idl_loop.idl)) {
-            ovnnb_db_run(&ctx, sbrec_chassis_by_name, &ovnsb_idl_loop);//, &ovnnb_idl_loop); //Salam - added 4th param
+            ovnnb_db_run(&ctx, sbrec_chassis_by_name, &ovnsb_idl_loop, &ovnnb_idl_loop); //Salam - added 4th param
             ovnsb_db_run(&ctx, &ovnsb_idl_loop);
             if (ctx.ovnsb_txn) { 
                 check_and_add_supported_dhcp_opts_to_sb_db(&ctx);
