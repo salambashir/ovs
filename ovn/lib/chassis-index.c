@@ -20,23 +20,23 @@
 struct ovsdb_idl_index *
 chassis_index_create(struct ovsdb_idl *idl)
 {
-    return ovsdb_idl_index_create1(idl, &sbrec_chassis_col_name);
+    return ovsdb_idl_index_create1(idl, &nbrec_sb_chassis_col_name);
 }
 
 /* Finds and returns the chassis with the given 'name', or NULL if no such
  * chassis exists. */
-const struct sbrec_chassis *
-chassis_lookup_by_name(struct ovsdb_idl_index *sbrec_chassis_by_name,
+const struct nbrec_sb_chassis *
+chassis_lookup_by_name(struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
                        const char *name)
 {
-    struct sbrec_chassis *target = sbrec_chassis_index_init_row(
-        sbrec_chassis_by_name);
-    sbrec_chassis_set_name(target, name);
+    struct nbrec_sb_chassis *target = nbrec_sb_chassis_index_init_row(
+        nbrec_sb_chassis_by_name);
+    nbrec_sb_chassis_set_name(target, name);
 
-    struct sbrec_chassis *retval = sbrec_chassis_index_find(
-        sbrec_chassis_by_name, target);
+    struct nbrec_sb_chassis *retval = nbrec_sb_chassis_index_find(
+        nbrec_sb_chassis_by_name, target);
 
-    sbrec_chassis_index_destroy_row(target);
+    nbrec_sb_chassis_index_destroy_row(target);
 
     return retval;
 }

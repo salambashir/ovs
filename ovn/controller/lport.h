@@ -19,10 +19,10 @@
 #include <stdint.h>
 
 struct ovsdb_idl_index;
-struct sbrec_chassis;
-struct sbrec_datapath_binding;
-struct sbrec_multicast_group;
-struct sbrec_port_binding;
+struct nbrec_sb_chassis;
+struct nbrec_sb_datapath_binding;
+struct nbrec_sb_multicast_group;
+struct nbrec_sb_port_binding;
 
 
 /* Database indexes.
@@ -33,20 +33,20 @@ struct sbrec_port_binding;
  * instead we define our own indexes.
  */
 
-const struct sbrec_port_binding *lport_lookup_by_name(
-    struct ovsdb_idl_index *sbrec_port_binding_by_name,
+const struct nbrec_sb_port_binding *lport_lookup_by_name(
+    struct ovsdb_idl_index *nbrec_sb_port_binding_by_name,
     const char *name);
 
-const struct sbrec_port_binding *lport_lookup_by_key(
-    struct ovsdb_idl_index *sbrec_datapath_binding_by_key,
-    struct ovsdb_idl_index *sbrec_port_binding_by_key,
+const struct nbrec_sb_port_binding *lport_lookup_by_key(
+    struct ovsdb_idl_index *nbrec_sb_datapath_binding_by_key,
+    struct ovsdb_idl_index *nbrec_sb_port_binding_by_key,
     uint64_t dp_key, uint64_t port_key);
 
-const struct sbrec_datapath_binding *datapath_lookup_by_key(
-    struct ovsdb_idl_index *sbrec_datapath_binding_by_key, uint64_t dp_key);
+const struct nbrec_sb_datapath_binding *datapath_lookup_by_key(
+    struct ovsdb_idl_index *nbrec_sb_datapath_binding_by_key, uint64_t dp_key);
 
-const struct sbrec_multicast_group *mcgroup_lookup_by_dp_name(
-    struct ovsdb_idl_index *sbrec_multicast_group_by_name_datapath,
-    const struct sbrec_datapath_binding *, const char *name);
+const struct nbrec_sb_multicast_group *mcgroup_lookup_by_dp_name(
+    struct ovsdb_idl_index *nbrec_sb_multicast_group_by_name_datapath,
+    const struct nbrec_sb_datapath_binding *, const char *name);
 
 #endif /* ovn/lport.h */

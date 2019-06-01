@@ -23,9 +23,9 @@
 
 struct ovsdb_idl;
 struct ovsdb_idl_index;
-struct sbrec_chassis;
-struct sbrec_gateway_chassis;
-struct sbrec_port_binding;
+struct nbrec_sb_chassis;
+struct nbrec_sb_gateway_chassis;
+struct nbrec_sb_port_binding;
 struct sset;
 
 
@@ -38,19 +38,19 @@ struct sset;
  */
 struct gateway_chassis {
     struct ovs_list node;
-    const struct sbrec_gateway_chassis *db; /* sbrec row for the gwc */
+    const struct nbrec_sb_gateway_chassis *db; /* nbrec_sb row for the gwc */
     bool virtual_gwc; /* db entry not from SBDB, but from redirect-chassis */
 };
 
 /* Gets, and orders by priority/name the list of Gateway_Chassis */
 struct ovs_list *gateway_chassis_get_ordered(
-    struct ovsdb_idl_index *sbrec_chassis_by_name,
-    const struct sbrec_port_binding *binding);
+    struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
+    const struct nbrec_sb_port_binding *binding);
 
 /* Checks if an specific chassis is contained in the gateway_chassis
  * list */
 bool gateway_chassis_contains(const struct ovs_list *gateway_chassis,
-                              const struct sbrec_chassis *chassis);
+                              const struct nbrec_sb_chassis *chassis);
 
 /* Destroy a gateway_chassis list from memory */
 void gateway_chassis_destroy(struct ovs_list *list);
@@ -58,14 +58,14 @@ void gateway_chassis_destroy(struct ovs_list *list);
 /* Checks if a chassis is referenced in the port_binding gateway_chassis
  * list or redirect-chassis option (backwards compatibility) */
 bool gateway_chassis_in_pb_contains(
-        const struct sbrec_port_binding *binding,
-        const struct sbrec_chassis *chassis);
+        const struct nbrec_sb_port_binding *binding,
+        const struct nbrec_sb_chassis *chassis);
 
 /* Returns true if the local chassis is the active gateway among a set
  * of gateway_chassis.  Return false if the local chassis is currently a
  * backup in a set of multiple gateway_chassis. */
 bool gateway_chassis_is_active(
         const struct ovs_list *gateway_chassis,
-        const struct sbrec_chassis *local_chassis,
+        const struct nbrec_sb_chassis *local_chassis,
         const struct sset *active_tunnels);
 #endif /* ovn/controller/gchassis.h */

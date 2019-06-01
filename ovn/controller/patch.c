@@ -136,10 +136,10 @@ static void
 add_bridge_mappings(struct ovsdb_idl_txn *ovs_idl_txn,
                     const struct ovsrec_bridge_table *bridge_table,
                     const struct ovsrec_open_vswitch_table *ovs_table,
-                    const struct sbrec_port_binding_table *port_binding_table,
+                    const struct nbrec_sb_port_binding_table *port_binding_table,
                     const struct ovsrec_bridge *br_int,
                     struct shash *existing_ports,
-                    const struct sbrec_chassis *chassis)
+                    const struct nbrec_sb_chassis *chassis)
 {
     /* Get ovn-bridge-mappings. */
     const char *mappings_cfg = "";
@@ -178,8 +178,8 @@ add_bridge_mappings(struct ovsdb_idl_txn *ovs_idl_txn,
     }
     free(start);
 
-    const struct sbrec_port_binding *binding;
-    SBREC_PORT_BINDING_TABLE_FOR_EACH (binding, port_binding_table) {
+    const struct nbrec_sb_port_binding *binding;
+    NBREC_SB_PORT_BINDING_TABLE_FOR_EACH (binding, port_binding_table) {
         const char *patch_port_id;
         if (!strcmp(binding->type, "localnet")) {
             patch_port_id = "ovn-localnet-port";
@@ -230,9 +230,9 @@ patch_run(struct ovsdb_idl_txn *ovs_idl_txn,
           const struct ovsrec_bridge_table *bridge_table,
           const struct ovsrec_open_vswitch_table *ovs_table,
           const struct ovsrec_port_table *port_table,
-          const struct sbrec_port_binding_table *port_binding_table,
+          const struct nbrec_sb_port_binding_table *port_binding_table,
           const struct ovsrec_bridge *br_int,
-          const struct sbrec_chassis *chassis)
+          const struct nbrec_sb_chassis *chassis)
 {
     if (!ovs_idl_txn) {
         return;

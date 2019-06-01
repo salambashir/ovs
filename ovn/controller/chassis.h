@@ -23,16 +23,16 @@ struct ovsdb_idl_index;
 struct ovsdb_idl_txn;
 struct ovsrec_bridge;
 struct ovsrec_open_vswitch_table;
-struct sbrec_chassis;
-struct sbrec_chassis_table;
+struct nbrec_sb_chassis;
+struct nbrec_sb_chassis_table;
 
 void chassis_register_ovs_idl(struct ovsdb_idl *);
-const struct sbrec_chassis *chassis_run(
+const struct nbrec_sb_chassis *chassis_run(
     struct ovsdb_idl_txn *ovnsb_idl_txn,
-    struct ovsdb_idl_index *sbrec_chassis_by_name,
+    struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
     const struct ovsrec_open_vswitch_table *,
     const char *chassis_id, const struct ovsrec_bridge *br_int);
 bool chassis_cleanup(struct ovsdb_idl_txn *ovnsb_idl_txn,
-                     const struct sbrec_chassis *);
+                     const struct nbrec_sb_chassis *);
 
 #endif /* ovn/chassis.h */

@@ -26,27 +26,27 @@ struct ovsdb_idl_txn;
 struct ovsrec_bridge;
 struct ovsrec_port_table;
 struct ovsrec_qos_table;
-struct sbrec_chassis;
-struct sbrec_port_binding_table;
+struct nbrec_sb_chassis;
+struct nbrec_sb_port_binding_table;
 struct sset;
 
 void binding_register_ovs_idl(struct ovsdb_idl *);
 void binding_run(struct ovsdb_idl_txn *ovnsb_idl_txn,
                  struct ovsdb_idl_txn *ovs_idl_txn,
-                 struct ovsdb_idl_index *sbrec_chassis_by_name,
-                 struct ovsdb_idl_index *sbrec_datapath_binding_by_key,
-                 struct ovsdb_idl_index *sbrec_port_binding_by_datapath,
-                 struct ovsdb_idl_index *sbrec_port_binding_by_name,
+                 struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
+                 struct ovsdb_idl_index *nbrec_sb_datapath_binding_by_key,
+                 struct ovsdb_idl_index *nbrec_sb_port_binding_by_datapath,
+                 struct ovsdb_idl_index *nbrec_sb_port_binding_by_name,
                  const struct ovsrec_port_table *,
                  const struct ovsrec_qos_table *,
-                 const struct sbrec_port_binding_table *,
+                 const struct nbrec_sb_port_binding_table *,
                  const struct ovsrec_bridge *br_int,
-                 const struct sbrec_chassis *,
+                 const struct nbrec_sb_chassis *,
                  const struct sset *active_tunnels,
                  struct hmap *local_datapaths,
                  struct sset *local_lports, struct sset *local_lport_ids);
 bool binding_cleanup(struct ovsdb_idl_txn *ovnsb_idl_txn,
-                     const struct sbrec_port_binding_table *,
-                     const struct sbrec_chassis *);
+                     const struct nbrec_sb_port_binding_table *,
+                     const struct nbrec_sb_chassis *);
 
 #endif /* ovn/binding.h */

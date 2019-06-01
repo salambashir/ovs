@@ -19,6 +19,7 @@
 
 #include "simap.h"
 #include "ovn/lib/ovn-sb-idl.h"
+#include "ovn/lib/ovn-nb-idl.h"
 
 struct ovsrec_bridge_table;
 
@@ -51,15 +52,15 @@ struct ct_zone_pending_entry {
  * The 'hmap_node''s hash value is 'datapath->tunnel_key'. */
 struct local_datapath {
     struct hmap_node hmap_node;
-    const struct sbrec_datapath_binding *datapath;
+    const struct nbrec_sb_datapath_binding *datapath;
 
     /* The localnet port in this datapath, if any (at most one is allowed). */
-    const struct sbrec_port_binding *localnet_port;
+    const struct nbrec_sb_port_binding *localnet_port;
 
     /* True if this datapath contains an l3gateway port located on this
      * hypervisor. */
     bool has_local_l3gateway;
-    const struct sbrec_datapath_binding **peer_dps;
+    const struct nbrec_sb_datapath_binding **peer_dps;
     size_t n_peer_dps;
 };
 
@@ -69,7 +70,7 @@ struct local_datapath *get_local_datapath(const struct hmap *,
 const struct ovsrec_bridge *get_bridge(const struct ovsrec_bridge_table *,
                                        const char *br_name);
 
-struct sbrec_encap *preferred_encap(const struct sbrec_chassis *);
+struct nbrec_sb_encap *preferred_encap(const struct nbrec_sb_chassis *);
 
 /* Must be a bit-field ordered from most-preferred (higher number) to
  * least-preferred (lower number). */

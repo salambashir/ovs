@@ -20,10 +20,10 @@ struct ovsdb_idl;
 
 struct ovsdb_idl_index *chassis_index_create(struct ovsdb_idl *);
 
-const struct sbrec_chassis *chassis_lookup_by_name(
-    struct ovsdb_idl_index *sbrec_chassis_by_name, const char *name);
+const struct nbrec_sb_chassis *chassis_lookup_by_name(
+    struct ovsdb_idl_index *nbrec_sb_chassis_by_name, const char *name);
 
 const struct nbrec_sb_chassis *nb_chassis_lookup_by_name(
-    struct ovsdb_idl_index *sbrec_chassis_by_name, const char *name); //Salam
+    struct ovsdb_idl_index *nbrec_sb_chassis_by_name, const char *name); //Salam
     
     #endif /* ovn/lib/chassis-index.h */

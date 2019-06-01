@@ -21,6 +21,7 @@
 #include "openvswitch/vlog.h"
 #include "ovn/lib/chassis-index.h"
 #include "ovn/lib/ovn-sb-idl.h"
+#include "ovn/lib/ovn-nb-idl.h"
 
 VLOG_DEFINE_THIS_MODULE(gchassis);
 
@@ -39,11 +40,11 @@ compare_chassis_prio_(const void *a_, const void *b_)
 }
 
 struct ovs_list*
-gateway_chassis_get_ordered(struct ovsdb_idl_index *sbrec_chassis_by_name,
-                            const struct sbrec_port_binding *binding)
+gateway_chassis_get_ordered(struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
+                            const struct nbrec_sb_port_binding *binding)
 {
     const char *redir_chassis_str;
-    const struct sbrec_chassis *redirect_chassis = NULL;
+    const struct nbrec_sb_chassis *redirect_chassis = NULL;
 
     /* XXX: redirect-chassis SBDB option handling is supported for backwards
      * compatibility with N-1 version of ovn-northd. This support can
@@ -52,7 +53,7 @@ gateway_chassis_get_ordered(struct ovsdb_idl_index *sbrec_chassis_by_name,
     redir_chassis_str = smap_get(&binding->options, "redirect-chassis");
 
     if (redir_chassis_str) {
-        redirect_chassis = chassis_lookup_by_name(sbrec_chassis_by_name,
+        redirect_chassis = chassis_lookup_by_name(nbrec_sb_chassis_by_name,
                                                   redir_chassis_str);
         if (!redirect_chassis) {
             static struct vlog_rate_limit rl = VLOG_RATE_LIMIT_INIT(1, 1);
@@ -85,12 +86,12 @@ gateway_chassis_get_ordered(struct ovsdb_idl_index *sbrec_chassis_by_name,
          * of gateway_chassis being populated or redirect-chassis option
          * being used */
         gateway_chassis = xmalloc(sizeof *gateway_chassis);
-        struct sbrec_gateway_chassis *gwc =
+        struct nbrec_sb_gateway_chassis *gwc =
             xzalloc(sizeof *gateway_chassis->db);
-        sbrec_gateway_chassis_init(gwc);
+        nbrec_sb_gateway_chassis_init(gwc);
         gwc->name = xasprintf("%s_%s", binding->logical_port,
                                        redirect_chassis->name);
-        gwc->chassis = CONST_CAST(struct sbrec_chassis *, redirect_chassis);
+        gwc->chassis = CONST_CAST(struct nbrec_sb_chassis *, redirect_chassis);
         gateway_chassis->db = gwc;
         gateway_chassis->virtual_gwc = true;
         n++;
@@ -112,7 +113,7 @@ gateway_chassis_get_ordered(struct ovsdb_idl_index *sbrec_chassis_by_name,
 
 bool
 gateway_chassis_contains(const struct ovs_list *gateway_chassis,
-                         const struct sbrec_chassis *chassis) {
+                         const struct nbrec_sb_chassis *chassis) {
     struct gateway_chassis *chassis_item;
     if (gateway_chassis) {
         LIST_FOR_EACH (chassis_item, node, gateway_chassis) {
@@ -139,7 +140,7 @@ gateway_chassis_destroy(struct ovs_list *list)
     LIST_FOR_EACH (chassis_item, node, list) {
         if (chassis_item->virtual_gwc) {
             free(chassis_item->db->name);
-            free(CONST_CAST(struct sbrec_gateway_chassis *, chassis_item->db));
+            free(CONST_CAST(struct nbrec_sb_gateway_chassis *, chassis_item->db));
         }
     }
 
@@ -148,8 +149,8 @@ gateway_chassis_destroy(struct ovs_list *list)
 }
 
 bool
-gateway_chassis_in_pb_contains(const struct sbrec_port_binding *binding,
-                               const struct sbrec_chassis *chassis)
+gateway_chassis_in_pb_contains(const struct nbrec_sb_port_binding *binding,
+                               const struct nbrec_sb_chassis *chassis)
 {
     if (!binding || !chassis) {
         return false;
@@ -178,7 +179,7 @@ gateway_chassis_in_pb_contains(const struct sbrec_port_binding *binding,
 
 bool
 gateway_chassis_is_active(const struct ovs_list *gateway_chassis,
-                          const struct sbrec_chassis *local_chassis,
+                          const struct nbrec_sb_chassis *local_chassis,
                           const struct sset *active_tunnels)
 {
     struct gateway_chassis *gwc;

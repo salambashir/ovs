@@ -22,6 +22,7 @@
 #include "lib/vswitch-idl.h"
 #include "openvswitch/vlog.h"
 #include "ovn/lib/ovn-sb-idl.h"
+#include "ovn/lib/ovn-nb-idl.h"
 #include "ovn-controller.h"
 
 VLOG_DEFINE_THIS_MODULE(encaps);
@@ -79,8 +80,8 @@ tunnel_create_name(struct tunnel_ctx *tc, const char *chassis_id)
 }
 
 static void
-tunnel_add(struct tunnel_ctx *tc, const struct sbrec_sb_global *sbg,
-           const char *new_chassis_id, const struct sbrec_encap *encap)
+tunnel_add(struct tunnel_ctx *tc, const struct nbrec_sb_global *sbg,
+           const char *new_chassis_id, const struct nbrec_sb_encap *encap)
 {
     struct smap options = SMAP_INITIALIZER(&options);
     smap_add(&options, "remote_ip", encap->ip);
@@ -151,10 +152,10 @@ exit:
     smap_destroy(&options);
 }
 
-struct sbrec_encap *
-preferred_encap(const struct sbrec_chassis *chassis_rec)
+struct nbrec_sb_encap *
+preferred_encap(const struct nbrec_sb_chassis *chassis_rec)
 {
-    struct sbrec_encap *best_encap = NULL;
+    struct nbrec_sb_encap *best_encap = NULL;
     uint32_t best_type = 0;
 
     for (int i = 0; i < chassis_rec->n_encaps; i++) {
@@ -173,9 +174,9 @@ preferred_encap(const struct sbrec_chassis *chassis_rec)
  * as there are VTEP of that type (differentiated by remote_ip) on that chassis.
  */
 static int
-chassis_tunnel_add(const struct sbrec_chassis *chassis_rec, const struct sbrec_sb_global *sbg, struct tunnel_ctx *tc)
+chassis_tunnel_add(const struct nbrec_sb_chassis *chassis_rec, const struct nbrec_sb_global *sbg, struct tunnel_ctx *tc)
 {
-    struct sbrec_encap *encap = preferred_encap(chassis_rec);
+    struct nbrec_sb_encap *encap = preferred_encap(chassis_rec);
     int tuncnt = 0;
 
     if (!encap) {
@@ -199,15 +200,15 @@ void
 encaps_run(struct ovsdb_idl_txn *ovs_idl_txn,
            const struct ovsrec_bridge_table *bridge_table,
            const struct ovsrec_bridge *br_int,
-           const struct sbrec_chassis_table *chassis_table,
+           const struct nbrec_sb_chassis_table *chassis_table,
            const char *chassis_id,
-           const struct sbrec_sb_global *sbg)
+           const struct nbrec_sb_global *sbg)
 {
     if (!ovs_idl_txn || !br_int) {
         return;
     }
 
-    const struct sbrec_chassis *chassis_rec;
+    const struct nbrec_sb_chassis *chassis_rec;
     const struct ovsrec_bridge *br;
 
     struct tunnel_ctx tc = {
@@ -249,7 +250,7 @@ encaps_run(struct ovsdb_idl_txn *ovs_idl_txn,
         }
     }
 
-    SBREC_CHASSIS_TABLE_FOR_EACH (chassis_rec, chassis_table) {
+    NBREC_SB_CHASSIS_TABLE_FOR_EACH (chassis_rec, chassis_table) {
         if (strcmp(chassis_rec->name, chassis_id)) {
             /* Create tunnels to the other chassis. */
             if (chassis_tunnel_add(chassis_rec, sbg, &tc) == 0) {
