@@ -698,8 +698,9 @@ main(int argc, char *argv[])
                                   &nbrec_sb_mac_binding_col_ip); //Salam
     
 
-    ovsdb_idl_omit_alert(ovnsb_idl_loop.idl, &sbrec_chassis_col_nb_cfg); //TODO???????????????????????
-    update_sb_monitors(ovnsb_idl_loop.idl, NULL, NULL, NULL); //TODO???????????????????????
+    ovsdb_idl_omit_alert(ovnsb_idl_loop.idl, &sbrec_chassis_col_nb_cfg); 
+    ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_sb_chassis_col_nb_cfg); //Salam
+    update_sb_monitors(ovnnb_idl_loop.idl, NULL, NULL, NULL); //Salam
 
 
     /* Initialize connection tracking zones. */
@@ -727,17 +728,17 @@ main(int argc, char *argv[])
     restart = false;
     while (!exiting) {
         update_sb_db(ovs_idl_loop.idl, ovnsb_idl_loop.idl);
-        //update_nb_db(ovnnb_idl_loop.idl); //Salam
+        
         update_ssl_config(ovsrec_ssl_table_get(ovs_idl_loop.idl));
 
         struct ovsdb_idl_txn *ovs_idl_txn = ovsdb_idl_loop_run(&ovs_idl_loop);
         struct ovsdb_idl_txn *ovnsb_idl_txn
             = ovsdb_idl_loop_run(&ovnsb_idl_loop);
 
-        //struct ovsdb_idl_txn *ovnnb_idl_txn
-        //    = ovsdb_idl_loop_run(&ovnnb_idl_loop); //Salam
+        struct ovsdb_idl_txn *ovnnb_idl_txn
+            = ovsdb_idl_loop_run(&ovnnb_idl_loop); //Salam
 
-        if (ovsdb_idl_has_ever_connected(ovnsb_idl_loop.idl)) {  //TODO - should also check nb???????????????????
+        if (ovsdb_idl_has_ever_connected(ovnnb_idl_loop.idl)) {  //Salam
             /* Contains "struct local_datapath" nodes. */
             struct hmap local_datapaths = HMAP_INITIALIZER(&local_datapaths);
 
@@ -760,10 +761,10 @@ main(int argc, char *argv[])
                 = get_chassis_id(ovsrec_open_vswitch_table_get(
                                      ovs_idl_loop.idl));
 
-            const struct nbrec_sb_chassis *chassis = NULL; //TODO?????????????????
+            const struct nbrec_sb_chassis *chassis = NULL; //Salam
             if (chassis_id) {
                 chassis = chassis_run(
-                    ovnsb_idl_txn, nbrec_sb_chassis_by_name,
+                    ovnnb_idl_txn, nbrec_sb_chassis_by_name,
                     ovsrec_open_vswitch_table_get(ovs_idl_loop.idl),
                     chassis_id, br_int); //TODO?????????????????
                 encaps_run(
@@ -783,7 +784,7 @@ main(int argc, char *argv[])
                     bfd_calculate_active_tunnels(br_int, &active_tunnels);
                 }
 
-                binding_run(ovnsb_idl_txn, ovs_idl_txn, nbrec_sb_chassis_by_name,
+                binding_run(ovnnb_idl_txn, ovs_idl_txn, nbrec_sb_chassis_by_name,
                             nbrec_sb_datapath_binding_by_key,
                             nbrec_sb_port_binding_by_datapath,
                             nbrec_sb_port_binding_by_name,
@@ -797,11 +798,11 @@ main(int argc, char *argv[])
             if (br_int && chassis) {
                 struct shash addr_sets = SHASH_INITIALIZER(&addr_sets);
                 addr_sets_init(nbrec_sb_address_set_table_get(ovnnb_idl_loop.idl),
-                               &addr_sets); //TODO?????????????????
+                               &addr_sets); //Salam
                 struct shash port_groups = SHASH_INITIALIZER(&port_groups);
                 port_groups_init(
                     nbrec_sb_port_group_table_get(ovnnb_idl_loop.idl),
-                    &port_groups); //TODO?????????????????
+                    &port_groups); //Salam
 
                 patch_run(ovs_idl_txn,
                           ovsrec_bridge_table_get(ovs_idl_loop.idl),
@@ -813,7 +814,7 @@ main(int argc, char *argv[])
                 enum mf_field_id mff_ovn_geneve = ofctrl_run(
                     br_int, &pending_ct_zones);
 
-                pinctrl_run(ovnsb_idl_txn, nbrec_sb_chassis_by_name,
+                pinctrl_run(ovnnb_idl_txn, nbrec_sb_chassis_by_name,
                             nbrec_sb_datapath_binding_by_key,
                             nbrec_sb_port_binding_by_datapath,
                             nbrec_sb_port_binding_by_key,
@@ -872,11 +873,11 @@ main(int argc, char *argv[])
                         ofctrl_put(&flow_table, &pending_ct_zones,
                                    nbrec_sb_meter_table_get(ovnnb_idl_loop.idl),
                                    get_nb_cfg(nbrec_sb_global_table_get(
-                                                  ovnnb_idl_loop.idl))); //TODO?????????????????
+                                                  ovnnb_idl_loop.idl))); //Salam
 
                         hmap_destroy(&flow_table);
                     }
-                    if (ovnsb_idl_txn) { //TODO?????????????????
+                    if (ovnnb_idl_txn) { //TODO?????????????????
                         int64_t cur_cfg = ofctrl_get_cur_cfg();
                         if (cur_cfg && cur_cfg != chassis->nb_cfg) {
                             nbrec_sb_chassis_set_nb_cfg(chassis, cur_cfg); //TODO?????????????????
@@ -897,8 +898,8 @@ main(int argc, char *argv[])
                     free(pending_pkt.flow_s);
                 }
 
-                update_sb_monitors(ovnsb_idl_loop.idl, chassis,
-                                   &local_lports, &local_datapaths);  //TODO?????????????????
+                update_sb_monitors(ovnnb_idl_loop.idl, chassis,
+                                   &local_lports, &local_datapaths);  //Salam
 
                 expr_const_sets_destroy(&addr_sets);
                 shash_destroy(&addr_sets);
@@ -930,7 +931,7 @@ main(int argc, char *argv[])
 
             if (br_int) {
                 ofctrl_wait();
-                pinctrl_wait(ovnsb_idl_txn); //TODO?????????????????
+                pinctrl_wait(ovnnb_idl_txn); //Salam
             }
         }
 
@@ -941,7 +942,7 @@ main(int argc, char *argv[])
             poll_immediate_wake();
         }
 
-        ovsdb_idl_loop_commit_and_wait(&ovnsb_idl_loop); //TODO?????????????????
+        ovsdb_idl_loop_commit_and_wait(&ovnnb_idl_loop); //Salam
 
         if (ovsdb_idl_loop_commit_and_wait(&ovs_idl_loop) == 1) { 
             struct shash_node *iter, *iter_next;
@@ -963,14 +964,17 @@ main(int argc, char *argv[])
     if (!restart) {
         bool done = !ovsdb_idl_has_ever_connected(ovnsb_idl_loop.idl); //TODO?????????????????
         while (!done) {
-            update_sb_db(ovs_idl_loop.idl, ovnsb_idl_loop.idl); //TODO: update_nb_db()??????????????????????
+            update_sb_db(ovs_idl_loop.idl, ovnsb_idl_loop.idl); 
             update_ssl_config(ovsrec_ssl_table_get(ovs_idl_loop.idl));
 
             struct ovsdb_idl_txn *ovs_idl_txn
                 = ovsdb_idl_loop_run(&ovs_idl_loop);
             struct ovsdb_idl_txn *ovnsb_idl_txn
-                = ovsdb_idl_loop_run(&ovnsb_idl_loop); //TODO?????????????????
-
+                = ovsdb_idl_loop_run(&ovnsb_idl_loop); 
+            
+            struct ovsdb_idl_txn *ovnnb_idl_txn
+                = ovsdb_idl_loop_run(&ovnnb_idl_loop); //Salam
+            
             const struct ovsrec_bridge_table *bridge_table
                 = ovsrec_bridge_table_get(ovs_idl_loop.idl);
             const struct ovsrec_open_vswitch_table *ovs_table
@@ -990,14 +994,15 @@ main(int argc, char *argv[])
 
             /* Run all of the cleanup functions, even if one of them returns
              * false. We're done if all of them return true. */
-            done = binding_cleanup(ovnsb_idl_txn, port_binding_table, chassis); //TODO?????????????????
-            done = chassis_cleanup(ovnsb_idl_txn, chassis) && done; //TODO?????????????????
+            done = binding_cleanup(ovnnb_idl_txn, port_binding_table, chassis); //TODO?????????????????
+            done = chassis_cleanup(ovnnb_idl_txn, chassis) && done; //TODO?????????????????
             done = encaps_cleanup(ovs_idl_txn, br_int) && done; //TODO?????????????????
             if (done) {
                 poll_immediate_wake();
             }
 
             ovsdb_idl_loop_commit_and_wait(&ovnsb_idl_loop);
+            ovsdb_idl_loop_commit_and_wait(&ovnnb_idl_loop); //Salam
             ovsdb_idl_loop_commit_and_wait(&ovs_idl_loop);
             poll_block();
         }
@@ -1016,6 +1021,7 @@ main(int argc, char *argv[])
 
     ovsdb_idl_loop_destroy(&ovs_idl_loop);
     ovsdb_idl_loop_destroy(&ovnsb_idl_loop);
+    ovsdb_idl_loop_destroy(&ovnnb_idl_loop); //Salam
 
     free(ovs_remote);
     service_stop();
