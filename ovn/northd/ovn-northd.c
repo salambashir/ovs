@@ -6840,15 +6840,15 @@ sync_address_set(struct northd_context *ctx, const char *name,
                  const char **addrs, size_t n_addrs,
                  struct shash *sb_address_sets)
 {
-    const struct nbrec_sb_address_set *sb_address_set;
+    const struct sbrec_address_set *sb_address_set;
     sb_address_set = shash_find_and_delete(sb_address_sets,
                                            name);
     if (!sb_address_set) {
-        sb_address_set = nbrec_sb_address_set_insert(ctx->ovnnb_txn);
-        nbrec_sb_address_set_set_name(sb_address_set, name);
+        sb_address_set = sbrec_address_set_insert(ctx->ovnsb_txn);
+        sbrec_address_set_set_name(sb_address_set, name);
     }
 
-    nbrec_sb_address_set_set_addresses(sb_address_set,
+    sbrec_address_set_set_addresses(sb_address_set,
                                     addrs, n_addrs);
 }
 
@@ -6885,8 +6885,8 @@ sync_address_sets(struct northd_context *ctx)
 {
     struct shash sb_address_sets = SHASH_INITIALIZER(&sb_address_sets);
 
-    const struct nbrec_sb_address_set *sb_address_set;
-    NBREC_SB_ADDRESS_SET_FOR_EACH (sb_address_set, ctx->ovnnb_idl) {
+    const struct sbrec_address_set *sb_address_set;
+    SBREC_ADDRESS_SET_FOR_EACH (sb_address_set, ctx->ovnsb_idl) {
         shash_add(&sb_address_sets, sb_address_set->name, sb_address_set);
     }
 
@@ -6935,7 +6935,7 @@ sync_address_sets(struct northd_context *ctx)
 
     struct shash_node *node, *next;
     SHASH_FOR_EACH_SAFE (node, next, &sb_address_sets) {
-        nbrec_sb_address_set_delete(node->data);
+        sbrec_address_set_delete(node->data);
         shash_delete(&sb_address_sets, node);
     }
     shash_destroy(&sb_address_sets);
@@ -6950,8 +6950,8 @@ sync_port_groups(struct northd_context *ctx)
 {
     struct shash sb_port_groups = SHASH_INITIALIZER(&sb_port_groups);
 
-    const struct nbrec_sb_port_group *sb_port_group;
-    NBREC_SB_PORT_GROUP_FOR_EACH (sb_port_group, ctx->ovnnb_idl) {
+    const struct sbrec_port_group *sb_port_group;
+    SBREC_PORT_GROUP_FOR_EACH (sb_port_group, ctx->ovnsb_idl) {
         shash_add(&sb_port_groups, sb_port_group->name, sb_port_group);
     }
 
@@ -6960,8 +6960,8 @@ sync_port_groups(struct northd_context *ctx)
         sb_port_group = shash_find_and_delete(&sb_port_groups,
                                                nb_port_group->name);
         if (!sb_port_group) {
-            sb_port_group = nbrec_sb_port_group_insert(ctx->ovnnb_txn);
-            nbrec_sb_port_group_set_name(sb_port_group, nb_port_group->name);
+            sb_port_group = sbrec_port_group_insert(ctx->ovnsb_txn);
+            sbrec_port_group_set_name(sb_port_group, nb_port_group->name);
         }
 
         const char **nb_port_names = xcalloc(nb_port_group->n_ports,
@@ -6970,7 +6970,7 @@ sync_port_groups(struct northd_context *ctx)
         for (i = 0; i < nb_port_group->n_ports; i++) {
             nb_port_names[i] = nb_port_group->ports[i]->name;
         }
-        nbrec_sb_port_group_set_ports(sb_port_group,
+        sbrec_port_group_set_ports(sb_port_group,
                                    nb_port_names,
                                    nb_port_group->n_ports);
         free(nb_port_names);
@@ -6978,7 +6978,7 @@ sync_port_groups(struct northd_context *ctx)
 
     struct shash_node *node, *next;
     SHASH_FOR_EACH_SAFE (node, next, &sb_port_groups) {
-        nbrec_sb_port_group_delete(node->data);
+        sbrec_port_group_delete(node->data);
         shash_delete(&sb_port_groups, node);
     }
     shash_destroy(&sb_port_groups);
@@ -7007,7 +7007,7 @@ band_cmp(const void *band1_, const void *band2_)
 
 static bool
 bands_need_update(const struct nbrec_meter *nb_meter,
-                  const struct nbrec_sb_meter *sb_meter)
+                  const struct sbrec_meter *sb_meter)
 {
     if (nb_meter->n_bands != sb_meter->n_bands) {
         return true;
@@ -7017,7 +7017,7 @@ bands_need_update(const struct nbrec_meter *nb_meter,
      * check. */
     if (nb_meter->n_bands == 1) {
         struct nbrec_meter_band *nb_band = nb_meter->bands[0];
-        struct nbrec_sb_meter_band *sb_band = sb_meter->bands[0];
+        struct sbrec_meter_band *sb_band = sb_meter->bands[0];
 
         return !(nb_band->rate == sb_band->rate
                  && nb_band->burst_size == sb_band->burst_size
@@ -7040,7 +7040,7 @@ bands_need_update(const struct nbrec_meter *nb_meter,
     struct band_entry *sb_bands;
     sb_bands = xmalloc(sizeof *sb_bands * sb_meter->n_bands);
     for (size_t i = 0; i < sb_meter->n_bands; i++) {
-        struct nbrec_sb_meter_band *sb_band = sb_meter->bands[i];
+        struct sbrec_meter_band *sb_band = sb_meter->bands[i];
 
         sb_bands[i].rate = sb_band->rate;
         sb_bands[i].burst_size = sb_band->burst_size;
@@ -7074,8 +7074,8 @@ sync_meters(struct northd_context *ctx)
 {
     struct shash sb_meters = SHASH_INITIALIZER(&sb_meters);
 
-    const struct nbrec_sb_meter *sb_meter;
-    NBREC_SB_METER_FOR_EACH (sb_meter, ctx->ovnnb_idl) {
+    const struct sbrec_meter *sb_meter;
+    SBREC_METER_FOR_EACH (sb_meter, ctx->ovnsb_idl) {
         shash_add(&sb_meters, sb_meter->name, sb_meter);
     }
 
@@ -7085,34 +7085,34 @@ sync_meters(struct northd_context *ctx)
 
         sb_meter = shash_find_and_delete(&sb_meters, nb_meter->name);
         if (!sb_meter) {
-            sb_meter = nbrec_sb_meter_insert(ctx->ovnnb_txn);
-            nbrec_sb_meter_set_name(sb_meter, nb_meter->name);
+            sb_meter = sbrec_meter_insert(ctx->ovnsb_txn);
+            sbrec_meter_set_name(sb_meter, nb_meter->name);
             new_sb_meter = true;
         }
 
         if (new_sb_meter || bands_need_update(nb_meter, sb_meter)) {
-            struct nbrec_sb_meter_band **sb_bands;
+            struct sbrec_meter_band **sb_bands;
             sb_bands = xcalloc(nb_meter->n_bands, sizeof *sb_bands);
             for (size_t i = 0; i < nb_meter->n_bands; i++) {
                 const struct nbrec_meter_band *nb_band = nb_meter->bands[i];
 
-                sb_bands[i] = nbrec_sb_meter_band_insert(ctx->ovnnb_txn);
+                sb_bands[i] = sbrec_meter_band_insert(ctx->ovnsb_txn);
 
-                nbrec_sb_meter_band_set_action(sb_bands[i], nb_band->action);
-                nbrec_sb_meter_band_set_rate(sb_bands[i], nb_band->rate);
-                nbrec_sb_meter_band_set_burst_size(sb_bands[i],
+                sbrec_meter_band_set_action(sb_bands[i], nb_band->action);
+                sbrec_meter_band_set_rate(sb_bands[i], nb_band->rate);
+                sbrec_meter_band_set_burst_size(sb_bands[i],
                                                 nb_band->burst_size);
             }
-            nbrec_sb_meter_set_bands(sb_meter, sb_bands, nb_meter->n_bands);
+            sbrec_meter_set_bands(sb_meter, sb_bands, nb_meter->n_bands);
             free(sb_bands);
         }
 
-        nbrec_sb_meter_set_unit(sb_meter, nb_meter->unit);
+        sbrec_meter_set_unit(sb_meter, nb_meter->unit);
     }
 
     struct shash_node *node, *next;
     SHASH_FOR_EACH_SAFE (node, next, &sb_meters) {
-        nbrec_sb_meter_delete(node->data);
+        sbrec_meter_delete(node->data);
         shash_delete(&sb_meters, node);
     }
     shash_destroy(&sb_meters);
@@ -7266,15 +7266,15 @@ ovnnb_db_run(struct northd_context *ctx,
     if (!nb) {
         nb = nbrec_nb_global_insert(ctx->ovnnb_txn);
     }
-    const struct nbrec_sb_global *sb = nbrec_sb_global_first(ctx->ovnnb_idl);
+    const struct sbrec_sb_global *sb = sbrec_sb_global_first(ctx->ovnsb_idl);
     if (!sb) {
-        sb = nbrec_sb_global_insert(ctx->ovnnb_txn);
+        sb = sbrec_sb_global_insert(ctx->ovnsb_txn);
     }
     if (nb->ipsec != sb->ipsec) {
-        nbrec_sb_global_set_ipsec(sb, nb->ipsec);
+        sbrec_sb_global_set_ipsec(sb, nb->ipsec);
     }
-    nbrec_sb_global_set_nb_cfg(sb, nb->nb_cfg);
-    nbrec_sb_global_set_options(sb, &nb->options);
+    sbrec_sb_global_set_nb_cfg(sb, nb->nb_cfg);
+    sbrec_sb_global_set_options(sb, &nb->options);
     sb_loop->next_cfg = nb->nb_cfg;
 
     const char *mac_addr_prefix = smap_get(&nb->options, "mac_prefix");
@@ -7406,24 +7406,24 @@ check_and_add_supported_dhcp_opts_to_sb_db(struct northd_context *ctx)
                     dhcp_opt_hash(supported_dhcp_opts[i].name));
     }
 
-    const struct nbrec_sb_dhcp_options *opt_row, *opt_row_next;
-    NBREC_SB_DHCP_OPTIONS_FOR_EACH_SAFE(opt_row, opt_row_next, ctx->ovnnb_idl) {
+    const struct sbrec_dhcp_options *opt_row, *opt_row_next;
+    SBREC_DHCP_OPTIONS_FOR_EACH_SAFE(opt_row, opt_row_next, ctx->ovnsb_idl) {
         struct gen_opts_map *dhcp_opt =
             dhcp_opts_find(&dhcp_opts_to_add, opt_row->name);
         if (dhcp_opt) {
             hmap_remove(&dhcp_opts_to_add, &dhcp_opt->hmap_node);
         } else {
-            nbrec_sb_dhcp_options_delete(opt_row);
+            sbrec_dhcp_options_delete(opt_row);
         }
     }
 
     struct gen_opts_map *opt;
     HMAP_FOR_EACH (opt, hmap_node, &dhcp_opts_to_add) {
-        struct nbrec_sb_dhcp_options *nbrec_sb_dhcp_option =
-            nbrec_sb_dhcp_options_insert(ctx->ovnnb_txn);
-        nbrec_sb_dhcp_options_set_name(nbrec_sb_dhcp_option, opt->name);
-        nbrec_sb_dhcp_options_set_code(nbrec_sb_dhcp_option, opt->code);
-        nbrec_sb_dhcp_options_set_type(nbrec_sb_dhcp_option, opt->type);
+        struct sbrec_dhcp_options *sbrec_dhcp_option =
+            sbrec_dhcp_options_insert(ctx->ovnsb_txn);
+        sbrec_dhcp_options_set_name(sbrec_dhcp_option, opt->name);
+        sbrec_dhcp_options_set_code(sbrec_dhcp_option, opt->code);
+        sbrec_dhcp_options_set_type(sbrec_dhcp_option, opt->type);
     }
 
     hmap_destroy(&dhcp_opts_to_add);
@@ -7439,24 +7439,24 @@ check_and_add_supported_dhcpv6_opts_to_sb_db(struct northd_context *ctx)
                     dhcp_opt_hash(supported_dhcpv6_opts[i].name));
     }
 
-    const struct nbrec_sb_dhcpv6_options *opt_row, *opt_row_next;
-    NBREC_SB_DHCPV6_OPTIONS_FOR_EACH_SAFE(opt_row, opt_row_next, ctx->ovnnb_idl) {
+    const struct sbrec_dhcpv6_options *opt_row, *opt_row_next;
+    SBREC_DHCPV6_OPTIONS_FOR_EACH_SAFE(opt_row, opt_row_next, ctx->ovnsb_idl) {
         struct gen_opts_map *dhcp_opt =
             dhcp_opts_find(&dhcpv6_opts_to_add, opt_row->name);
         if (dhcp_opt) {
             hmap_remove(&dhcpv6_opts_to_add, &dhcp_opt->hmap_node);
         } else {
-            nbrec_sb_dhcpv6_options_delete(opt_row);
+            sbrec_dhcpv6_options_delete(opt_row);
         }
     }
 
     struct gen_opts_map *opt;
     HMAP_FOR_EACH(opt, hmap_node, &dhcpv6_opts_to_add) {
-        struct nbrec_sb_dhcpv6_options *nbrec_sb_dhcpv6_option =
-            nbrec_sb_dhcpv6_options_insert(ctx->ovnnb_txn);
-        nbrec_sb_dhcpv6_options_set_name(nbrec_sb_dhcpv6_option, opt->name);
-        nbrec_sb_dhcpv6_options_set_code(nbrec_sb_dhcpv6_option, opt->code);
-        nbrec_sb_dhcpv6_options_set_type(nbrec_sb_dhcpv6_option, opt->type);
+        struct sbrec_dhcpv6_options *sbrec_dhcpv6_option =
+            sbrec_dhcpv6_options_insert(ctx->ovnsb_txn);
+        sbrec_dhcpv6_options_set_name(sbrec_dhcpv6_option, opt->name);
+        sbrec_dhcpv6_options_set_code(sbrec_dhcpv6_option, opt->code);
+        sbrec_dhcpv6_options_set_type(sbrec_dhcpv6_option, opt->type);
     }
 
     hmap_destroy(&dhcpv6_opts_to_add);
@@ -7489,7 +7489,7 @@ static struct rbac_perm_cfg {
     bool insdel;
     const char **update;
     int n_update;
-    const struct nbrec_sb_rbac_permission *row;
+    const struct sbrec_rbac_permission *row;
 } rbac_perm_cfg[] = {
     {
         .table = "Chassis",
@@ -7535,7 +7535,7 @@ static struct rbac_perm_cfg {
 };
 
 static bool
-ovn_rbac_validate_perm(const struct nbrec_sb_rbac_permission *perm)
+ovn_rbac_validate_perm(const struct sbrec_rbac_permission *perm)
 {
     struct rbac_perm_cfg *pcfg;
     int i, j, n_found;
@@ -7591,51 +7591,51 @@ ovn_rbac_validate_perm(const struct nbrec_sb_rbac_permission *perm)
 static void
 ovn_rbac_create_perm(struct rbac_perm_cfg *pcfg,
                      struct northd_context *ctx,
-                     const struct nbrec_sb_rbac_role *rbac_role)
+                     const struct sbrec_rbac_role *rbac_role)
 {
-    struct nbrec_sb_rbac_permission *rbac_perm;
+    struct sbrec_rbac_permission *rbac_perm;
 
-    rbac_perm = nbrec_sb_rbac_permission_insert(ctx->ovnnb_txn);
-    nbrec_sb_rbac_permission_set_table(rbac_perm, pcfg->table);
-    nbrec_sb_rbac_permission_set_authorization(rbac_perm,
+    rbac_perm = sbrec_rbac_permission_insert(ctx->ovnsb_txn);
+    sbrec_rbac_permission_set_table(rbac_perm, pcfg->table);
+    sbrec_rbac_permission_set_authorization(rbac_perm,
                                             pcfg->auth,
                                             pcfg->n_auth);
-    nbrec_sb_rbac_permission_set_insert_delete(rbac_perm, pcfg->insdel);
-    nbrec_sb_rbac_permission_set_update(rbac_perm,
+    sbrec_rbac_permission_set_insert_delete(rbac_perm, pcfg->insdel);
+    sbrec_rbac_permission_set_update(rbac_perm,
                                      pcfg->update,
                                      pcfg->n_update);
-    nbrec_sb_rbac_role_update_permissions_setkey(rbac_role, pcfg->table,
+    sbrec_rbac_role_update_permissions_setkey(rbac_role, pcfg->table,
                                               rbac_perm);
 }
 
 static void
 check_and_update_rbac(struct northd_context *ctx)
 {
-    const struct nbrec_sb_rbac_role *rbac_role = NULL;
-    const struct nbrec_sb_rbac_permission *perm_row, *perm_next;
-    const struct nbrec_sb_rbac_role *role_row, *role_row_next;
+    const struct sbrec_rbac_role *rbac_role = NULL;
+    const struct sbrec_rbac_permission *perm_row, *perm_next;
+    const struct sbrec_rbac_role *role_row, *role_row_next;
     struct rbac_perm_cfg *pcfg;
 
     for (pcfg = rbac_perm_cfg; pcfg->table; pcfg++) {
         pcfg->row = NULL;
     }
 
-    NBREC_SB_RBAC_PERMISSION_FOR_EACH_SAFE (perm_row, perm_next, ctx->ovnnb_idl) {
+    SBREC_RBAC_PERMISSION_FOR_EACH_SAFE (perm_row, perm_next, ctx->ovnsb_idl) {
         if (!ovn_rbac_validate_perm(perm_row)) {
-            nbrec_sb_rbac_permission_delete(perm_row);
+            sbrec_rbac_permission_delete(perm_row);
         }
     }
-    NBREC_SB_RBAC_ROLE_FOR_EACH_SAFE (role_row, role_row_next, ctx->ovnnb_idl) {
+    SBREC_RBAC_ROLE_FOR_EACH_SAFE (role_row, role_row_next, ctx->ovnsb_idl) {
         if (strcmp(role_row->name, "ovn-controller")) {
-            nbrec_sb_rbac_role_delete(role_row);
+            sbrec_rbac_role_delete(role_row);
         } else {
             rbac_role = role_row;
         }
     }
 
     if (!rbac_role) {
-        rbac_role = nbrec_sb_rbac_role_insert(ctx->ovnnb_txn);
-        nbrec_sb_rbac_role_set_name(rbac_role, "ovn-controller");
+        rbac_role = sbrec_rbac_role_insert(ctx->ovnsb_txn);
+        sbrec_rbac_role_set_name(rbac_role, "ovn-controller");
     }
 
     for (pcfg = rbac_perm_cfg; pcfg->table; pcfg++) {

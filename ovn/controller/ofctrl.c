@@ -847,11 +847,11 @@ add_meter_string(struct ovn_extend_table_info *m_desired,
 
 static void
 add_meter(struct ovn_extend_table_info *m_desired,
-          const struct nbrec_sb_meter_table *meter_table,
+          const struct sbrec_meter_table *meter_table,
           struct ovs_list *msgs)
 {
-    const struct nbrec_sb_meter *sb_meter;
-    NBREC_SB_METER_TABLE_FOR_EACH (sb_meter, meter_table) {
+    const struct sbrec_meter *sb_meter;
+    SBREC_METER_TABLE_FOR_EACH (sb_meter, meter_table) {
         if (!strcmp(m_desired->name, sb_meter->name)) {
             break;
         }
@@ -878,7 +878,7 @@ add_meter(struct ovn_extend_table_info *m_desired,
     mm.meter.bands = xcalloc(mm.meter.n_bands, sizeof *mm.meter.bands);
 
     for (size_t i = 0; i < sb_meter->n_bands; i++) {
-        struct nbrec_sb_meter_band *sb_band = sb_meter->bands[i];
+        struct sbrec_meter_band *sb_band = sb_meter->bands[i];
         struct ofputil_meter_band *mm_band = &mm.meter.bands[i];
 
         if (!strcmp(sb_band->action, "drop")) {
@@ -928,7 +928,7 @@ ofctrl_can_put(void)
  * This should be called after ofctrl_run() within the main loop. */
 void
 ofctrl_put(struct hmap *flow_table, struct shash *pending_ct_zones,
-           const struct nbrec_sb_meter_table *meter_table, int64_t nb_cfg)
+           const struct sbrec_meter_table *meter_table, int64_t nb_cfg)
 {
     if (!ofctrl_can_put()) {
         ovn_flow_table_clear(flow_table);
