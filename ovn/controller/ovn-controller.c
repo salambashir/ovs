@@ -696,7 +696,7 @@ main(int argc, char *argv[])
         = ovsdb_idl_index_create2(ovnnb_idl_loop.idl,
                                   &nbrec_sb_mac_binding_col_logical_port,
                                   &nbrec_sb_mac_binding_col_ip); //Salam
-    
+     
 
     ovsdb_idl_omit_alert(ovnsb_idl_loop.idl, &sbrec_chassis_col_nb_cfg); //Siraj
     ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_sb_chassis_col_nb_cfg); //Salam
