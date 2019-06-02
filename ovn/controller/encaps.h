@@ -23,7 +23,7 @@ struct ovsdb_idl_txn;
 struct ovsrec_bridge;
 struct ovsrec_bridge_table;
 struct nbrec_sb_chassis_table;
-struct nbrec_sb_global;
+struct sbrec_sb_global;
 struct ovsrec_open_vswitch_table;
 
 void encaps_register_ovs_idl(struct ovsdb_idl *);
@@ -32,7 +32,7 @@ void encaps_run(struct ovsdb_idl_txn *ovs_idl_txn,
                 const struct ovsrec_bridge *br_int,
                 const struct nbrec_sb_chassis_table *,
                 const char *chassis_id,
-                const struct nbrec_sb_global *);
+                const struct sbrec_sb_global *);
 
 bool encaps_cleanup(struct ovsdb_idl_txn *ovs_idl_txn,
                     const struct ovsrec_bridge *br_int);

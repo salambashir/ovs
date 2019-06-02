@@ -257,7 +257,7 @@ bfd_run(struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
         const struct ovsrec_interface_table *interface_table,
         const struct ovsrec_bridge *br_int,
         const struct nbrec_sb_chassis *chassis_rec,
-        const struct nbrec_sb_global_table *sb_global_table,
+        const struct sbrec_sb_global_table *sb_global_table,
         const struct hmap *local_datapaths)
 {
 
@@ -289,8 +289,8 @@ bfd_run(struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
         }
     }
 
-    const struct nbrec_sb_global *sb
-        = nbrec_sb_global_table_first(sb_global_table);
+    const struct sbrec_sb_global *sb
+        = sbrec_sb_global_table_first(sb_global_table);
     struct smap bfd = SMAP_INITIALIZER(&bfd);
     smap_add(&bfd, "enable", "true");
 

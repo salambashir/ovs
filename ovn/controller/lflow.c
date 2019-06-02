@@ -145,8 +145,8 @@ add_logical_flows(
     struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
     struct ovsdb_idl_index *nbrec_sb_multicast_group_by_name_datapath,
     struct ovsdb_idl_index *nbrec_sb_port_binding_by_name,
-    const struct nbrec_sb_dhcp_options_table *dhcp_options_table,
-    const struct nbrec_sb_dhcpv6_options_table *dhcpv6_options_table,
+    const struct sbrec_dhcp_options_table *dhcp_options_table,
+    const struct sbrec_dhcpv6_options_table *dhcpv6_options_table,
     const struct nbrec_sb_logical_flow_table *logical_flow_table,
     const struct hmap *local_datapaths,
     const struct nbrec_sb_chassis *chassis,
@@ -163,15 +163,15 @@ add_logical_flows(
 
     struct hmap dhcp_opts = HMAP_INITIALIZER(&dhcp_opts);
     struct hmap dhcpv6_opts = HMAP_INITIALIZER(&dhcpv6_opts);
-    const struct nbrec_sb_dhcp_options *dhcp_opt_row;
-    NBREC_SB_DHCP_OPTIONS_TABLE_FOR_EACH (dhcp_opt_row, dhcp_options_table) {
+    const struct sbrec_dhcp_options *dhcp_opt_row;
+    SBREC_DHCP_OPTIONS_TABLE_FOR_EACH (dhcp_opt_row, dhcp_options_table) {
         dhcp_opt_add(&dhcp_opts, dhcp_opt_row->name, dhcp_opt_row->code,
                      dhcp_opt_row->type);
     }
 
 
-    const struct nbrec_sb_dhcpv6_options *dhcpv6_opt_row;
-    NBREC_SB_DHCPV6_OPTIONS_TABLE_FOR_EACH (dhcpv6_opt_row,
+    const struct sbrec_dhcpv6_options *dhcpv6_opt_row;
+    SBREC_DHCPV6_OPTIONS_TABLE_FOR_EACH (dhcpv6_opt_row,
                                          dhcpv6_options_table) {
        dhcp_opt_add(&dhcpv6_opts, dhcpv6_opt_row->name, dhcpv6_opt_row->code,
                     dhcpv6_opt_row->type);
@@ -464,8 +464,8 @@ void
 lflow_run(struct ovsdb_idl_index *nbrec_sb_chassis_by_name,
           struct ovsdb_idl_index *nbrec_sb_multicast_group_by_name_datapath,
           struct ovsdb_idl_index *nbrec_sb_port_binding_by_name,
-          const struct nbrec_sb_dhcp_options_table *dhcp_options_table,
-          const struct nbrec_sb_dhcpv6_options_table *dhcpv6_options_table,
+          const struct sbrec_dhcp_options_table *dhcp_options_table,
+          const struct sbrec_dhcpv6_options_table *dhcpv6_options_table,
           const struct nbrec_sb_logical_flow_table *logical_flow_table,
           const struct nbrec_sb_mac_binding_table *mac_binding_table,
           const struct nbrec_sb_chassis *chassis,

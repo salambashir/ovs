@@ -80,7 +80,7 @@ tunnel_create_name(struct tunnel_ctx *tc, const char *chassis_id)
 }
 
 static void
-tunnel_add(struct tunnel_ctx *tc, const struct nbrec_sb_global *sbg,
+tunnel_add(struct tunnel_ctx *tc, const struct sbrec_sb_global *sbg,
            const char *new_chassis_id, const struct nbrec_sb_encap *encap)
 {
     struct smap options = SMAP_INITIALIZER(&options);
@@ -174,7 +174,7 @@ preferred_encap(const struct nbrec_sb_chassis *chassis_rec)
  * as there are VTEP of that type (differentiated by remote_ip) on that chassis.
  */
 static int
-chassis_tunnel_add(const struct nbrec_sb_chassis *chassis_rec, const struct nbrec_sb_global *sbg, struct tunnel_ctx *tc)
+chassis_tunnel_add(const struct nbrec_sb_chassis *chassis_rec, const struct sbrec_sb_global *sbg, struct tunnel_ctx *tc)
 {
     struct nbrec_sb_encap *encap = preferred_encap(chassis_rec);
     int tuncnt = 0;
@@ -202,7 +202,7 @@ encaps_run(struct ovsdb_idl_txn *ovs_idl_txn,
            const struct ovsrec_bridge *br_int,
            const struct nbrec_sb_chassis_table *chassis_table,
            const char *chassis_id,
-           const struct nbrec_sb_global *sbg)
+           const struct sbrec_sb_global *sbg)
 {
     if (!ovs_idl_txn || !br_int) {
         return;
