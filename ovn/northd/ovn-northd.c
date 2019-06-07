@@ -7943,7 +7943,7 @@ main(int argc, char *argv[])
         }
 
         if (ovsdb_idl_has_lock(ovnsb_idl_loop.idl)) {
-            ovnnb_db_run(&ctx, nbrec_sb_chassis_by_name, &ovnsb_idl_loop);
+            ovnnb_db_run(&ctx, nbrec_sb_chassis_by_name, &ovnsb_idl_loop); //TODO: should change 3rd param to nb?????
             ovnsb_db_run(&ctx, &ovnsb_idl_loop);
             if (ctx.ovnsb_txn) {
                 check_and_add_supported_dhcp_opts_to_sb_db(&ctx);

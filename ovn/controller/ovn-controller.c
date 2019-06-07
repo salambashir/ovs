@@ -346,7 +346,7 @@ update_sb_db(struct ovsdb_idl *ovs_idl, struct ovsdb_idl *ovnsb_idl)
                                 "ovn-remote-probe-interval", default_interval);
     ovsdb_idl_set_probe_interval(ovnsb_idl, interval);
 }
-/*
+
 //Salam - all function
 static void
 update_nb_db(struct ovsdb_idl *ovnnb_idl)
@@ -364,7 +364,7 @@ update_nb_db(struct ovsdb_idl *ovnnb_idl)
     //                            "ovn-remote-probe-interval", default_interval);
     //ovsdb_idl_set_probe_interval(ovnsb_idl, interval);
 }
-*/
+
 static void
 update_ct_zones(const struct sset *lports, const struct hmap *local_datapaths,
                 struct simap *ct_zones, unsigned long *ct_zone_bitmap,
@@ -626,14 +626,14 @@ main(int argc, char *argv[])
 
     //Salam - connecting NB
     //TODO: should do like how the SB is done ?!!!
-    struct ovsdb_idl_loop ovnnb_idl_loop = OVSDB_IDL_LOOP_INITIALIZER(      //Salam
-        ovsdb_idl_create(ovnnb_db, &nbrec_idl_class, true, true));          //Salam
-    ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_sb_cfg);  //Salam
-    ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_hv_cfg);  //Salam
-    //struct ovsdb_idl_loop ovnnb_idl_loop = OVSDB_IDL_LOOP_INITIALIZER(      //Salam2
-    //    ovsdb_idl_create_unconnected(&nbrec_idl_class, true));              //Salam2
-    //ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_sb_cfg);  //Salam2
-    //ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_hv_cfg);  //Salam2
+    //struct ovsdb_idl_loop ovnnb_idl_loop = OVSDB_IDL_LOOP_INITIALIZER(      //Salam
+    //    ovsdb_idl_create(ovnnb_db, &nbrec_idl_class, true, true));          //Salam
+    //ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_sb_cfg);  //Salam
+    //ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_hv_cfg);  //Salam
+    struct ovsdb_idl_loop ovnnb_idl_loop = OVSDB_IDL_LOOP_INITIALIZER(      //Salam2
+        ovsdb_idl_create_unconnected(&nbrec_idl_class, true));              //Salam2
+    ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_sb_cfg);  //Salam2
+    ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_nb_global_col_hv_cfg);  //Salam2
 
 
     // Configure OVN SB database.  //Siraj
@@ -644,10 +644,10 @@ main(int argc, char *argv[])
     //struct ovsdb_idl_loop ovnsb_idl_loop = OVSDB_IDL_LOOP_INITIALIZER(  //Salam
     //    ovsdb_idl_create(ovnsb_db, &sbrec_idl_class, false, true));     //Salam
     //ovsdb_idl_set_leader_only(ovnsb_idl_loop.idl, false);               //Salam
-    
+    */
     unixctl_command_register("connection-status", "", 0, 0,
                              ovn_controller_conn_show, ovnsb_idl_loop.idl);
-         
+    /*
     struct ovsdb_idl_index *sbrec_chassis_by_name
         = chassis_index_create(ovnsb_idl_loop.idl);
     struct ovsdb_idl_index *sbrec_multicast_group_by_name_datapath
@@ -700,6 +700,7 @@ main(int argc, char *argv[])
 
     ovsdb_idl_omit_alert(ovnsb_idl_loop.idl, &sbrec_chassis_col_nb_cfg); //Siraj
     ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_sb_chassis_col_nb_cfg); //Salam
+    //update_sb_monitors(ovnsb_idl_loop.idl, NULL, NULL, NULL);
     update_sb_monitors(ovnnb_idl_loop.idl, NULL, NULL, NULL); //Salam
 
 
@@ -728,6 +729,7 @@ main(int argc, char *argv[])
     restart = false;
     while (!exiting) {
         update_sb_db(ovs_idl_loop.idl, ovnsb_idl_loop.idl); //Siraj
+        update_nb_db(ovnnb_idl_loop.idl); //Salam
         
         update_ssl_config(ovsrec_ssl_table_get(ovs_idl_loop.idl));
 
@@ -738,7 +740,8 @@ main(int argc, char *argv[])
         struct ovsdb_idl_txn *ovnnb_idl_txn
             = ovsdb_idl_loop_run(&ovnnb_idl_loop); //Salam
 
-        if (ovsdb_idl_has_ever_connected(ovnnb_idl_loop.idl)) {  //Salam
+        if (ovsdb_idl_has_ever_connected(ovnnb_idl_loop.idl) 
+            && ovsdb_idl_has_ever_connected(ovnsb_idl_loop.idl)) { //Salam - TODO original was sb - should be both ????
             /* Contains "struct local_datapath" nodes. */
             struct hmap local_datapaths = HMAP_INITIALIZER(&local_datapaths);
 
@@ -931,6 +934,7 @@ main(int argc, char *argv[])
 
             if (br_int) {
                 ofctrl_wait();
+                pinctrl_wait(ovnsb_idl_txn);
                 pinctrl_wait(ovnnb_idl_txn); //Salam
             }
         }
@@ -942,6 +946,7 @@ main(int argc, char *argv[])
             poll_immediate_wake();
         }
 
+        ovsdb_idl_loop_commit_and_wait(&ovnsb_idl_loop);
         ovsdb_idl_loop_commit_and_wait(&ovnnb_idl_loop); //Salam
 
         if (ovsdb_idl_loop_commit_and_wait(&ovs_idl_loop) == 1) { 
@@ -962,9 +967,11 @@ main(int argc, char *argv[])
 
     /* It's time to exit.  Clean up the databases if we are not restarting */
     if (!restart) {
-        bool done = !ovsdb_idl_has_ever_connected(ovnnb_idl_loop.idl); //Siraj
+        bool done = !ovsdb_idl_has_ever_connected(ovnsb_idl_loop.idl); //TODO should be both ????
+        done = !ovsdb_idl_has_ever_connected(ovnnb_idl_loop.idl); //Salam
         while (!done) {
             update_sb_db(ovs_idl_loop.idl, ovnsb_idl_loop.idl); //Siraj
+            update_nb_db(ovnnb_idl_loop.idl); //Salam
             update_ssl_config(ovsrec_ssl_table_get(ovs_idl_loop.idl));
 
             struct ovsdb_idl_txn *ovs_idl_txn
@@ -1001,7 +1008,7 @@ main(int argc, char *argv[])
                 poll_immediate_wake();
             }
 
-            ovsdb_idl_loop_commit_and_wait(&ovnsb_idl_loop); //Siraj
+            ovsdb_idl_loop_commit_and_wait(&ovnsb_idl_loop);
             ovsdb_idl_loop_commit_and_wait(&ovnnb_idl_loop); //Salam
             ovsdb_idl_loop_commit_and_wait(&ovs_idl_loop);
             poll_block();
@@ -1020,7 +1027,7 @@ main(int argc, char *argv[])
     ovn_extend_table_destroy(&meter_table);
 
     ovsdb_idl_loop_destroy(&ovs_idl_loop);
-    //ovsdb_idl_loop_destroy(&ovnsb_idl_loop);
+    ovsdb_idl_loop_destroy(&ovnsb_idl_loop);
     ovsdb_idl_loop_destroy(&ovnnb_idl_loop); //Salam
 
     free(ovs_remote);
