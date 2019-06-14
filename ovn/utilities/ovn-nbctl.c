@@ -12,6 +12,11 @@
  * limitations under the License.
  */
 
+
+
+#include "openvswitch/ofp-actions.h"
+#include "colors.h"
+#include "openvswitch/ofp-flow.h"
 #include <config.h>
 
 #include <getopt.h>
@@ -281,6 +286,326 @@ main_loop(const char *args, struct ctl_command *commands, size_t n_commands,
 
     return NULL;
 }
+
+
+
+enum {
+    PL_INGRESS,
+    PL_EGRESS,
+};
+
+/* Help ensure we catch any future pipeline values */
+static int
+pipeline_encode(const char *pl)
+{
+    if (!strcmp(pl, "ingress")) {
+        return PL_INGRESS;
+    } else if (!strcmp(pl, "egress")) {
+        return PL_EGRESS;
+    }
+
+    OVS_NOT_REACHED();
+}
+
+
+static char *
+parse_partial_uuid(char *s)
+{
+    /* Accept a full or partial UUID. */
+    if (uuid_is_partial_string(s)) {
+        return s;
+    }
+
+    /* Accept a full or partial UUID prefixed by 0x, since "ovs-ofctl
+     * dump-flows" prints cookies prefixed by 0x. */
+    if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')
+        && uuid_is_partial_string(s + 2)) {
+        return s + 2;
+    }
+
+    /* Not a (partial) UUID. */
+    return NULL;
+}
+
+static const char *
+strip_leading_zero(const char *s)
+{
+    return s + strspn(s, "0");
+}
+
+static bool
+is_partial_uuid_match(const struct uuid *uuid, const char *match)
+{
+    char uuid_s[UUID_LEN + 1];
+    snprintf(uuid_s, sizeof uuid_s, UUID_FMT, UUID_ARGS(uuid));
+
+    /* We strip leading zeros because we want to accept cookie values derived
+     * from UUIDs, and cookie values are printed without leading zeros because
+     * they're just numbers. */
+    const char *s1 = strip_leading_zero(uuid_s);
+    const char *s2 = strip_leading_zero(match);
+
+    return !strncmp(s1, s2, strlen(s2));
+}
+
+static char *
+default_ovs(void)
+{
+    return xasprintf("unix:%s/br-int.mgmt", ovs_rundir());
+}
+
+
+static int
+lflow_cmp(const void *lf1_, const void *lf2_)
+{
+    const struct nbrec_sb_logical_flow *const *lf1p = lf1_;
+    const struct nbrec_sb_logical_flow *const *lf2p = lf2_;
+    const struct nbrec_sb_logical_flow *lf1 = *lf1p;
+    const struct nbrec_sb_logical_flow *lf2 = *lf2p;
+
+    int pl1 = pipeline_encode(lf1->pipeline);
+    int pl2 = pipeline_encode(lf2->pipeline);
+
+#define CMP(expr) \
+    do { \
+        int res; \
+        res = (expr); \
+        if (res) { \
+            return res; \
+        } \
+    } while (0)
+
+    CMP(uuid_compare_3way(&lf1->logical_datapath->header_.uuid,
+                          &lf2->logical_datapath->header_.uuid));
+    CMP(pl1 - pl2);
+    CMP(lf1->table_id > lf2->table_id ? 1 :
+            (lf1->table_id < lf2->table_id ? -1 : 0));
+    CMP(lf1->priority > lf2->priority ? -1 :
+            (lf1->priority < lf2->priority ? 1 : 0));
+    CMP(strcmp(lf1->match, lf2->match));
+
+#undef CMP
+
+    return 0;
+}
+
+static struct vconn *
+nbctl_open_vconn(struct shash *options)
+{
+    struct shash_node *ovs = shash_find(options, "--ovs");
+    if (!ovs) {
+        return NULL;
+    }
+
+    char *remote = ovs->data ? xstrdup(ovs->data) : default_ovs();
+    struct vconn *vconn;
+    int retval = vconn_open_block(remote, 1 << OFP13_VERSION, 0, -1, &vconn);
+    if (retval) {
+        VLOG_WARN("%s: connection failed (%s)", remote, ovs_strerror(retval));
+    }
+    free(remote);
+    return vconn;
+}
+
+
+
+
+static void
+nbctl_dump_openflow(struct vconn *vconn, const struct uuid *uuid, bool stats)
+{
+    struct ofputil_flow_stats_request fsr = {
+        .cookie = htonll(uuid->parts[0]),
+        .cookie_mask = OVS_BE64_MAX,
+        .out_port = OFPP_ANY,
+        .out_group = OFPG_ANY,
+        .table_id = OFPTT_ALL,
+    };
+
+    struct ofputil_flow_stats *fses;
+    size_t n_fses;
+    int error = vconn_dump_flows(vconn, &fsr, OFPUTIL_P_OF13_OXM,
+                                 &fses, &n_fses);
+    if (error) {
+        VLOG_WARN("%s: error obtaining flow stats (%s)",
+                  vconn_get_name(vconn), ovs_strerror(error));
+        return;
+    }
+
+    if (n_fses) {
+        struct ds s = DS_EMPTY_INITIALIZER;
+        for (size_t i = 0; i < n_fses; i++) {
+            const struct ofputil_flow_stats *fs = &fses[i];
+
+            ds_clear(&s);
+            if (stats) {
+                ofputil_flow_stats_format(&s, fs, NULL, NULL, true);
+            } else {
+                ds_put_format(&s, "%stable=%s%"PRIu8" ",
+                              colors.special, colors.end, fs->table_id);
+                match_format(&fs->match, NULL, &s, OFP_DEFAULT_PRIORITY);
+                if (ds_last(&s) != ' ') {
+                    ds_put_char(&s, ' ');
+                }
+
+                ds_put_format(&s, "%sactions=%s", colors.actions, colors.end);
+                struct ofpact_format_params fp = { .s = &s };
+                ofpacts_format(fs->ofpacts, fs->ofpacts_len, &fp);
+            }
+            printf("    %s\n", ds_cstr(&s));
+        }
+        ds_destroy(&s);
+    }
+
+    for (size_t i = 0; i < n_fses; i++) {
+        free(CONST_CAST(struct ofpact *, fses[i].ofpacts));
+    }
+    free(fses);
+}
+
+
+
+static void
+cmd_lflow_list(struct ctl_context *ctx)
+{
+    const struct nbrec_sb_datapath_binding *datapath = NULL;
+    if (ctx->argc > 1) {
+        const struct ovsdb_idl_row *row;
+        char *error = ctl_get_row(ctx, &nbrec_table_sb_datapath_binding,
+                                  ctx->argv[1], false, &row);
+        if (error) {
+            ctl_fatal("%s", error);
+        }
+
+        datapath = (const struct nbrec_sb_datapath_binding *)row;
+        if (datapath) {
+            ctx->argc--;
+            ctx->argv++;
+        }
+    }
+
+    for (size_t i = 1; i < ctx->argc; i++) {
+        char *s = parse_partial_uuid(ctx->argv[i]);
+        if (!s) {
+            ctl_fatal("%s is not a UUID or the beginning of a UUID",
+                      ctx->argv[i]);
+        }
+        ctx->argv[i] = s;
+    }
+
+    struct vconn *vconn = nbctl_open_vconn(&ctx->options);
+    bool stats = shash_find(&ctx->options, "--stats") != NULL;
+
+    const struct nbrec_sb_logical_flow **lflows = NULL;
+    size_t n_flows = 0;
+    size_t n_capacity = 0;
+    const struct nbrec_sb_logical_flow *lflow;
+    NBREC_SB_LOGICAL_FLOW_FOR_EACH (lflow, ctx->idl) {
+        if (datapath && lflow->logical_datapath != datapath) {
+            continue;
+        }
+
+        if (n_flows == n_capacity) {
+            lflows = x2nrealloc(lflows, &n_capacity, sizeof *lflows);
+        }
+        lflows[n_flows] = lflow;
+        n_flows++;
+    }
+
+    if (n_flows) {
+        qsort(lflows, n_flows, sizeof *lflows, lflow_cmp);
+    }
+
+    bool print_uuid = shash_find(&ctx->options, "--uuid") != NULL;
+
+    const struct nbrec_sb_logical_flow *prev = NULL;
+    for (size_t i = 0; i < n_flows; i++) {
+        lflow = lflows[i];
+
+        /* Figure out whether to print this particular flow.  By default, we
+         * print all flows, but if any UUIDs were listed on the command line
+         * then we only print the matching ones. */
+        bool include;
+        if (ctx->argc > 1) {
+            include = false;
+            for (size_t j = 1; j < ctx->argc; j++) {
+                if (is_partial_uuid_match(&lflow->header_.uuid,
+                                          ctx->argv[j])) {
+                    include = true;
+                    break;
+                }
+            }
+        } else {
+            include = true;
+        }
+        if (!include) {
+            continue;
+        }
+
+        /* Print a header line for this datapath or pipeline, if we haven't
+         * already done so. */
+        if (!prev
+            || prev->logical_datapath != lflow->logical_datapath
+            || strcmp(prev->pipeline, lflow->pipeline)) {
+            printf("Datapath:");
+
+            const struct smap *ids = &lflow->logical_datapath->external_ids;
+            const char *name = smap_get(ids, "name");
+            const char *name2 = smap_get(ids, "name2");
+            if (name && name2) {
+                printf(" \"%s\" aka \"%s\"", name, name2);
+            } else if (name || name2) {
+                printf(" \"%s\"", name ? name : name2);
+            }
+            printf(" ("UUID_FMT")  Pipeline: %s\n",
+                   UUID_ARGS(&lflow->logical_datapath->header_.uuid),
+                   lflow->pipeline);
+        }
+
+        /* Print the flow. */
+        printf("  ");
+        if (print_uuid) {
+            printf("uuid=0x%08"PRIx32", ", lflow->header_.uuid.parts[0]);
+        }
+        printf("table=%-2"PRId64"(%-19s), priority=%-5"PRId64
+               ", match=(%s), action=(%s)\n",
+               lflow->table_id,
+               smap_get_def(&lflow->external_ids, "stage-name", ""),
+               lflow->priority, lflow->match, lflow->actions);
+        if (vconn) {
+            nbctl_dump_openflow(vconn, &lflow->header_.uuid, stats);
+        }
+        prev = lflow;
+    }
+
+    vconn_close(vconn);
+    free(lflows);
+}
+
+
+static void
+pre_get_info(struct ctl_context *ctx)
+{
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_chassis_col_name);
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_chassis_col_encaps);
+
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_encap_col_type);
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_encap_col_ip);
+
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_port_binding_col_logical_port);
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_port_binding_col_chassis);
+
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_logical_flow_col_logical_datapath);
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_logical_flow_col_pipeline);
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_logical_flow_col_actions);
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_logical_flow_col_priority);
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_logical_flow_col_table_id);
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_logical_flow_col_match);
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_logical_flow_col_external_ids);
+
+    ovsdb_idl_add_column(ctx->idl, &nbrec_sb_datapath_binding_col_external_ids);
+}
+
+
 
 /* All options that affect the main loop and are not external. */
 #define MAIN_LOOP_OPTION_ENUMS                  \
@@ -5229,6 +5554,11 @@ static const struct ctl_command_syntax nbctl_commands[] = {
     {"pg-add", 1, INT_MAX, "", NULL, cmd_pg_add, NULL, "", RW },
     {"pg-set-ports", 2, INT_MAX, "", NULL, cmd_pg_set_ports, NULL, "", RW },
     {"pg-del", 1, 1, "", NULL, cmd_pg_del, NULL, "", RW },
+
+    /* Logical flow commands */
+    {"lflow-list", 0, INT_MAX, "[DATAPATH] [LFLOW...]",
+     pre_get_info, cmd_lflow_list, NULL,
+     "--uuid,--ovs?,--stats", RO},
 
     {NULL, 0, 0, NULL, NULL, NULL, NULL, "", RO},
 };
