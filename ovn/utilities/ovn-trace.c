@@ -39,6 +39,7 @@
 #include "ovn/lib/logical-fields.h"
 #include "ovn/lib/ovn-l7.h"
 #include "ovn/lib/ovn-sb-idl.h"
+#include "ovn/lib/ovn-nb-idl.h"
 #include "ovn/lib/ovn-util.h"
 #include "ovsdb-idl.h"
 #include "openvswitch/poll-loop.h"
@@ -52,14 +53,14 @@ VLOG_DEFINE_THIS_MODULE(ovntrace);
 
 /* --db: The database server to contact. */
 static const char *db;
-
+static const char *nbdb;
 /* --unixctl-path: Path to use for unixctl server, for "monitor" and "snoop"
      commands. */
 static char *unixctl_path;
 
 /* The southbound database. */
 static struct ovsdb_idl *ovnsb_idl;
-
+static struct ovsdb_idl *ovnnb_idl;
 /* --detailed: Show a detailed, table-by-table trace. */
 static bool detailed;
 
@@ -132,17 +133,33 @@ main(int argc, char *argv[])
     }
     ovnsb_idl = ovsdb_idl_create(db, &sbrec_idl_class, true, false);
 
+    ovnnb_idl = ovsdb_idl_create(nbdb, &nbrec_idl_class, true, false);
+    /*
+    struct ovsdb_idl_loop ovnnb_idl_loop = OVSDB_IDL_LOOP_INITIALIZER(      
+        ovsdb_idl_create_unconnected(&nbrec_idl_class, true));  
+    ovnnb_idl = ovnnb_idl_loop.idl;      
+    ovsdb_idl_omit_alert(ovnnb_idl, &nbrec_nb_global_col_sb_cfg);  //Salam2
+    ovsdb_idl_omit_alert(ovnnb_idl, &nbrec_nb_global_col_hv_cfg);  //Salam2
+    ovsdb_idl_omit_alert(ovnnb_idl_loop.idl, &nbrec_sb_chassis_col_nb_cfg);
+    */
+
     bool already_read = false;
     for (;;) {
         ovsdb_idl_run(ovnsb_idl);
+        ovsdb_idl_run(ovnnb_idl);
         unixctl_server_run(server);
         if (!ovsdb_idl_is_alive(ovnsb_idl)) {
             int retval = ovsdb_idl_get_last_error(ovnsb_idl);
             ovs_fatal(0, "%s: database connection failed (%s)",
                       db, ovs_retval_to_string(retval));
         }
+        if (!ovsdb_idl_is_alive(ovnnb_idl)) {
+            int retval = ovsdb_idl_get_last_error(ovnnb_idl);
+            ovs_fatal(0, "%s: database connection failed (%s)",
+                      nbdb, ovs_retval_to_string(retval));
+        }
 
-        if (ovsdb_idl_has_ever_connected(ovnsb_idl)) {
+        if (ovsdb_idl_has_ever_connected(ovnsb_idl) && ovsdb_idl_has_ever_connected(ovnnb_idl)) {
             if (!already_read) {
                 already_read = true;
                 read_db();
@@ -161,6 +178,7 @@ main(int argc, char *argv[])
             break;
         }
         ovsdb_idl_wait(ovnsb_idl);
+        ovsdb_idl_wait(ovnnb_idl);
         unixctl_server_wait(server);
         poll_block();
     }
@@ -307,7 +325,7 @@ parse_options(int argc, char *argv[])
 
         case 'V':
             ovs_print_version(0, 0);
-            printf("DB Schema %s\n", sbrec_get_db_version());
+            printf("SB DB Schema %s\n NB DB Schema %s\n", sbrec_get_db_version(), nbrec_get_db_version);
             exit(EXIT_SUCCESS);
 
         DAEMON_OPTION_HANDLERS
@@ -322,7 +340,9 @@ parse_options(int argc, char *argv[])
         }
     }
     free(short_options);
-
+    if (!nbdb){
+    nbdb = default_nb_db();
+    }
     if (!db) {
         db = default_sb_db();
     }
@@ -571,8 +591,8 @@ static void
 read_datapaths(void)
 {
     hmap_init(&datapaths);
-    const struct sbrec_datapath_binding *sbdb;
-    SBREC_DATAPATH_BINDING_FOR_EACH (sbdb, ovnsb_idl) {
+    const struct nbrec_sb_datapath_binding *sbdb;
+    NBREC_SB_DATAPATH_BINDING_FOR_EACH (sbdb, ovnnb_idl) {
         struct ovntrace_datapath *dp = xzalloc(sizeof *dp);
         const struct smap *ids = &sbdb->external_ids;
 
@@ -605,8 +625,8 @@ static void
 read_ports(void)
 {
     shash_init(&ports);
-    const struct sbrec_port_binding *sbpb;
-    SBREC_PORT_BINDING_FOR_EACH (sbpb, ovnsb_idl) {
+    const struct nbrec_sb_port_binding *sbpb;
+    NBREC_SB_PORT_BINDING_FOR_EACH (sbpb, ovnnb_idl) {
         const char *port_name = sbpb->logical_port;
         struct ovntrace_datapath *dp
             = ovntrace_datapath_find_by_sb_uuid(&sbpb->datapath->header_.uuid);
@@ -657,7 +677,7 @@ read_ports(void)
         }
     }
 
-    SBREC_PORT_BINDING_FOR_EACH (sbpb, ovnsb_idl) {
+    NBREC_SB_PORT_BINDING_FOR_EACH (sbpb, ovnnb_idl) {
         if (!strcmp(sbpb->type, "chassisredirect")) {
             struct ovntrace_port *port
                 = shash_find_data(&ports, sbpb->logical_port);
@@ -690,8 +710,8 @@ compare_port(const void *a_, const void *b_)
 static void
 read_mcgroups(void)
 {
-    const struct sbrec_multicast_group *sbmg;
-    SBREC_MULTICAST_GROUP_FOR_EACH (sbmg, ovnsb_idl) {
+    const struct nbrec_sb_multicast_group *sbmg;
+    NBREC_SB_MULTICAST_GROUP_FOR_EACH (sbmg, ovnnb_idl) {
         struct ovntrace_datapath *dp
             = ovntrace_datapath_find_by_sb_uuid(&sbmg->datapath->header_.uuid);
         if (!dp) {
@@ -837,9 +857,9 @@ read_flows(void)
 {
     ovn_init_symtab(&symtab);
 
-    const struct sbrec_logical_flow *sblf;
-    SBREC_LOGICAL_FLOW_FOR_EACH (sblf, ovnsb_idl) {
-        const struct sbrec_datapath_binding *sbdb = sblf->logical_datapath;
+    const struct nbrec_sb_logical_flow *sblf;
+    NBREC_SB_LOGICAL_FLOW_FOR_EACH (sblf, ovnnb_idl) {
+        const struct nbrec_sb_datapath_binding *sbdb = sblf->logical_datapath;
         struct ovntrace_datapath *dp
             = ovntrace_datapath_find_by_sb_uuid(&sbdb->header_.uuid);
         if (!dp) {
@@ -946,8 +966,8 @@ read_gen_opts(void)
 static void
 read_mac_bindings(void)
 {
-    const struct sbrec_mac_binding *sbmb;
-    SBREC_MAC_BINDING_FOR_EACH (sbmb, ovnsb_idl) {
+    const struct nbrec_sb_mac_binding *sbmb;
+    NBREC_SB_MAC_BINDING_FOR_EACH (sbmb, ovnnb_idl) {
         const struct ovntrace_port *port = shash_find_data(
             &ports, sbmb->logical_port);
         if (!port) {

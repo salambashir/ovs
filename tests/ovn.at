@@ -1665,20 +1665,20 @@ get_lsp_uuid () {
 # explictly
 
 # For Chassis hv1
-AT_CHECK_UNQUOTED([ovn-sbctl  --column encap list port_binding lp11], [0], [dnl
-encap               : [[]]
-])
-AT_CHECK_UNQUOTED([ovn-sbctl  --column encap list port_binding lp12], [0], [dnl
-encap               : [[]]
-])
+#AT_CHECK_UNQUOTED([ovn-nbctl  --column encap list sb_port_binding lp11], [0], [dnl
+#encap               : [[]]
+#])
+#AT_CHECK_UNQUOTED([ovn-nbctl  --column encap list sb_port_binding lp12], [0], [dnl
+#encap               : [[]]
+#])
 
 # For Chassis hv2
-AT_CHECK_UNQUOTED([ovn-sbctl  --column encap list port_binding lp21], [0], [dnl
-encap               : [[]]
-])
-AT_CHECK_UNQUOTED([ovn-sbctl  --column encap list port_binding lp22], [0], [dnl
-encap               : [[]]
-])
+#AT_CHECK_UNQUOTED([ovn-nbctl  --column encap list sb_port_binding lp21], [0], [dnl   
+#encap               : [[]]
+#])
+#AT_CHECK_UNQUOTED([ovn-nbctl  --column encap list sb_port_binding lp22], [0], [dnl
+#encap               : [[]]
+#])
 
 # Bind the ports to the encap-ip
 for i in 1 2; do
@@ -1694,26 +1694,26 @@ sleep 1
 # ports to be bound to geneve tunnels.
 
 # For Chassis 1
-encap_rec=`ovn-sbctl --data=bare --no-heading --column _uuid find encap chassis_name=hv1 type=geneve ip=192.168.0.1`
+#encap_rec=`ovn-sbctl --data=bare --no-heading --column _uuid find encap chassis_name=hv1 type=geneve ip=192.168.0.1`
 
-AT_CHECK_UNQUOTED([ovn-sbctl  --column encap list port_binding lp11], [0], [dnl
-encap               : ${encap_rec}
-])
+#AT_CHECK_UNQUOTED([ovn-nbctl  --column encap list sb_port_binding lp11], [0], [dnl
+#encap               : ${encap_rec}
+#])
 
-AT_CHECK_UNQUOTED([ovn-sbctl  --column encap list port_binding lp12], [0], [dnl
-encap               : ${encap_rec}
-])
+#AT_CHECK_UNQUOTED([ovn-nbctl  --column encap list sb_port_binding lp12], [0], [dnl
+#encap               : ${encap_rec}
+#])
 
 # For Chassis 2
-encap_rec=`ovn-sbctl --data=bare --no-heading --column _uuid find encap chassis_name=hv2 type=geneve ip=192.168.0.2`
+#encap_rec=`ovn-nbctl --data=bare --no-heading --column _uuid find sb_encap chassis_name=hv2 type=geneve ip=192.168.0.2`
 
-AT_CHECK_UNQUOTED([ovn-sbctl  --column encap list port_binding lp21], [0], [dnl
-encap               : ${encap_rec}
-])
+#AT_CHECK_UNQUOTED([ovn-nbctl  --column encap list sb_port_binding lp21], [0], [dnl
+#encap               : ${encap_rec}
+#])
 
-AT_CHECK_UNQUOTED([ovn-sbctl  --column encap list port_binding lp22], [0], [dnl
-encap               : ${encap_rec}
-])
+#AT_CHECK_UNQUOTED([ovn-nbctl  --column encap list sb_port_binding lp22], [0], [dnl
+#encap               : ${encap_rec}
+#])
 
 # Pre-populate the hypervisors' ARP tables so that we don't lose any
 # packets for ARP resolution (native tunneling doesn't queue packets
@@ -2967,8 +2967,8 @@ for is in 1 2 3; do
   done
 done
 
-ovn-sbctl -f csv -d bare --no-heading \
-    -- --columns=logical_port,ip,mac list mac_binding > mac_bindings
+ovn-nbctl -f csv -d bare --no-heading \
+    -- --columns=logical_port,ip,mac list sb_mac_binding > mac_bindings
 
 # Now check the packets actually received against the ones expected.
 for i in 1 2 3; do
@@ -3154,7 +3154,7 @@ sha=f00000000011
 spa=`ip_to_hex 192 168 1 100`
 tpa=$spa
 test_arp 11 $sha $spa $tpa
-OVS_WAIT_UNTIL([test `ovn-sbctl find mac_binding ip="192.168.1.100" | wc -l` -gt 0])
+OVS_WAIT_UNTIL([test `ovn-nbctl find sb_mac_binding ip="192.168.1.100" | wc -l` -gt 0])
 ovn-nbctl --wait=hv sync
 
 # Send an IP packet from lp21 to 192.168.1.100, which should go to lp11.
@@ -3169,7 +3169,7 @@ test_ip 21 $smac $dmac $sip $dip 11
 
 sha=f00000000012
 test_arp 12 $sha $spa $tpa
-OVS_WAIT_UNTIL([ovn-sbctl find mac_binding ip="192.168.1.100" | grep f0:00:00:00:00:12])
+OVS_WAIT_UNTIL([ovn-nbctl find sb_mac_binding ip="192.168.1.100" | grep f0:00:00:00:00:12])
 ovn-nbctl --wait=hv sync
 
 # Send an IP packet from lp21 to 192.168.1.100, which should go to lp12.
@@ -3687,14 +3687,14 @@ echo $packet | ovstest test-ovn expr-to-packets > expected
 
 OVN_CHECK_PACKETS([hv2/vif1-tx.pcap], [expected])
 
-AT_CHECK([ovn-sbctl dump-flows | grep lr_in_arp_resolve | \
+AT_CHECK([ovn-nbctl lflow-list | grep lr_in_arp_resolve | \
 grep "reg0 == 172.16.1.2" | wc -l], [0], [1
 ])
 
 # Disable the ls2-lp1 port.
 ovn-nbctl --wait=hv set logical_switch_port ls2-lp1 enabled=false
 
-AT_CHECK([ovn-sbctl dump-flows | grep lr_in_arp_resolve | \
+AT_CHECK([ovn-nbctl lflow-list | grep lr_in_arp_resolve | \
 grep "reg0 == 172.16.1.2" | wc -l], [0], [0
 ])
 
@@ -6527,7 +6527,7 @@ AT_CHECK([ovn-nbctl --wait=sb lsp-add ls1 c0 parent1 3])
 AT_CHECK([ovn-nbctl lsp-get-tag c0], [0], [3
 ])
 dnl The same 'tag' gets created in southbound database.
-AT_CHECK([ovn-sbctl --data=bare --no-heading --columns=tag find port_binding \
+AT_CHECK([ovn-nbctl --data=bare --no-heading --columns=tag find sb_port_binding \
 logical_port="c0"], [0], [3
 ])
 
@@ -6535,20 +6535,20 @@ dnl Allocate tags and see it getting created in both NB and SB
 AT_CHECK([ovn-nbctl --wait=sb lsp-add ls1 c1 parent1 0])
 AT_CHECK([ovn-nbctl lsp-get-tag c1], [0], [1
 ])
-AT_CHECK([ovn-sbctl --data=bare --no-heading --columns=tag find port_binding \
+AT_CHECK([ovn-nbctl --data=bare --no-heading --columns=tag find sb_port_binding \
 logical_port="c1"], [0], [1
 ])
 
 AT_CHECK([ovn-nbctl --wait=sb lsp-add ls1 c2 parent1 0])
 AT_CHECK([ovn-nbctl lsp-get-tag c2], [0], [2
 ])
-AT_CHECK([ovn-sbctl --data=bare --no-heading --columns=tag find port_binding \
+AT_CHECK([ovn-nbctl --data=bare --no-heading --columns=tag find sb_port_binding \
 logical_port="c2"], [0], [2
 ])
 AT_CHECK([ovn-nbctl --wait=sb lsp-add ls1 c3 parent1 0])
 AT_CHECK([ovn-nbctl lsp-get-tag c3], [0], [4
 ])
-AT_CHECK([ovn-sbctl --data=bare --no-heading --columns=tag find port_binding \
+AT_CHECK([ovn-nbctl --data=bare --no-heading --columns=tag find sb_port_binding \
 logical_port="c3"], [0], [4
 ])
 
@@ -6556,14 +6556,14 @@ dnl A different parent.
 AT_CHECK([ovn-nbctl --wait=sb lsp-add ls1 c4 parent2 0])
 AT_CHECK([ovn-nbctl lsp-get-tag c4], [0], [1
 ])
-AT_CHECK([ovn-sbctl --data=bare --no-heading --columns=tag find port_binding \
+AT_CHECK([ovn-nbctl --data=bare --no-heading --columns=tag find sb_port_binding \
 logical_port="c4"], [0], [1
 ])
 
 AT_CHECK([ovn-nbctl --wait=sb lsp-add ls1 c5 parent2 0])
 AT_CHECK([ovn-nbctl lsp-get-tag c5], [0], [2
 ])
-AT_CHECK([ovn-sbctl --data=bare --no-heading --columns=tag find port_binding \
+AT_CHECK([ovn-nbctl --data=bare --no-heading --columns=tag find sb_port_binding \
 logical_port="c5"], [0], [2
 ])
 
@@ -6572,7 +6572,7 @@ AT_CHECK([ovn-nbctl --wait=sb lsp-del c1])
 AT_CHECK([ovn-nbctl --wait=sb lsp-add ls1 c6 parent1 0])
 AT_CHECK([ovn-nbctl lsp-get-tag c6], [0], [1
 ])
-AT_CHECK([ovn-sbctl --data=bare --no-heading --columns=tag find port_binding \
+AT_CHECK([ovn-nbctl --data=bare --no-heading --columns=tag find sb_port_binding \
 logical_port="c6"], [0], [1
 ])
 
@@ -6603,7 +6603,7 @@ dnl It should go through fine with a duplicate tag.
 AT_CHECK([ovn-nbctl --wait=sb lsp-add ls1 c7 parent2 2])
 AT_CHECK([ovn-nbctl lsp-get-tag c7], [0], [2
 ])
-AT_CHECK([ovn-sbctl --data=bare --no-heading --columns=tag find port_binding \
+AT_CHECK([ovn-nbctl --data=bare --no-heading --columns=tag find sb_port_binding \
 logical_port="c7"], [0], [2
 ])
 AT_CHECK([ovn-nbctl lsp-get-tag c5], [0], [2
@@ -6616,7 +6616,7 @@ AT_CHECK([ovn-nbctl --wait=sb lsp-add ls2 local0 "" 25])
 AT_CHECK([ovn-nbctl lsp-get-tag local0], [0], [25
 ])
 dnl The same 'tag' gets created in southbound database.
-AT_CHECK([ovn-sbctl --data=bare --no-heading --columns=tag find port_binding \
+AT_CHECK([ovn-nbctl --data=bare --no-heading --columns=tag find sb_port_binding \
 logical_port="local0"], [0], [25
 ])
 dnl If 'tag_request' is 0 for localnet, nothing gets written to 'tag'
@@ -8803,12 +8803,12 @@ expected=${dst_mac}${src_mac}08004500001c000000003f110100${src_ip}${dst_ip}00351
 echo $expected >> hv2-vif1.expected
 OVN_CHECK_PACKETS([hv2/vif1-tx.pcap], [hv2-vif1.expected])
 
-AT_CHECK([ovn-sbctl --bare --columns _uuid find Port_Binding logical_port=cr-alice | wc -l], [0], [1
+AT_CHECK([ovn-nbctl --bare --columns _uuid find sb_Port_Binding logical_port=cr-alice | wc -l], [0], [1
 ])
 
 ovn-nbctl --timeout=3 --wait=sb remove Logical_Router_Port alice options redirect-chassis
 
-AT_CHECK([ovn-sbctl find Port_Binding logical_port=cr-alice | wc -l], [0], [0
+AT_CHECK([ovn-nbctl find sb_Port_Binding logical_port=cr-alice | wc -l], [0], [0
 ])
 
 OVN_CLEANUP([hv1],[hv2],[hv3])
@@ -9079,15 +9079,18 @@ ovn-nbctl --wait=hv --timeout=3 sync
 
 # Check that there is a logical flow in logical switch foo's pipeline
 # to set the outport to rp-foo (which is expected).
-OVS_WAIT_UNTIL([test 1 = `ovn-sbctl dump-flows foo | grep ls_in_l2_lkup | \
+
+uuid=`ovn-nbctl lflow-list |grep "Datapath:" | grep foo -w| cut -d "(" -f2 | cut -d ")" -f1|uniq `
+OVS_WAIT_UNTIL([test 1 = `ovn-nbctl lflow-list $uuid | grep ls_in_l2_lkup | \
 grep rp-foo | grep -v is_chassis_resident | wc -l`])
 
 # Set the option 'reside-on-redirect-chassis' for foo
 ovn-nbctl set logical_router_port foo options:reside-on-redirect-chassis=true
 # Check that there is a logical flow in logical switch foo's pipeline
 # to set the outport to rp-foo with the condition is_chassis_redirect.
-ovn-sbctl dump-flows foo
-OVS_WAIT_UNTIL([test 1 = `ovn-sbctl dump-flows foo | grep ls_in_l2_lkup | \
+ovn-nbctl lflow-list $uuid
+uuid=`ovn-nbctl lflow-list |grep "Datapath:" | grep foo -w| cut -d "(" -f2 | cut -d ")" -f1|uniq `
+OVS_WAIT_UNTIL([test 1 = `ovn-nbctl lflow-list $uuid | grep ls_in_l2_lkup | \
 grep rp-foo | grep is_chassis_resident | wc -l`])
 
 echo "---------NB dump-----"
@@ -9101,13 +9104,13 @@ ovn-nbctl list logical_router_port
 echo "---------------------"
 
 echo "---------SB dump-----"
-ovn-sbctl list datapath_binding
+ovn-nbctl list sb_datapath_binding
 echo "---------------------"
-ovn-sbctl list port_binding
+ovn-nbctl list sb_port_binding
 echo "---------------------"
-ovn-sbctl dump-flows
+ovn-nbctl lflow-list
 echo "---------------------"
-ovn-sbctl list chassis
+ovn-nbctl list sb-chassis
 echo "---------------------"
 
 for chassis in hv1 hv2 hv3; do
@@ -9536,7 +9539,7 @@ packet=${dst_mac}${src_mac}08004500001c0000000040110000${src_ip}${dst_ip}0035111
 # Send the first packet to trigger a ARP response and population of
 # mac_bindings table.
 as hv1 ovs-appctl netdev-dummy/receive hv1-vif1 $packet
-OVS_WAIT_UNTIL([test `ovn-sbctl find mac_binding ip="10.0.0.2" | wc -l` -gt 0])
+OVS_WAIT_UNTIL([test `ovn-nbctl find sb_mac_binding ip="10.0.0.2" | wc -l` -gt 0])
 ovn-nbctl --wait=hv sync
 
 # Packet to Expect at 'alice1'
@@ -9809,8 +9812,8 @@ as hv1 ovs-ofctl dump-flows br-int table=32
 echo "--- hv2 ---"
 as hv2 ovs-ofctl dump-flows br-int table=32
 
-gw1_chassis=$(ovn-sbctl --bare --columns=_uuid find Chassis name=gw1)
-gw2_chassis=$(ovn-sbctl --bare --columns=_uuid find Chassis name=gw2)
+gw1_chassis=$(ovn-nbctl --bare --columns=_uuid find sb_Chassis name=gw1)
+gw2_chassis=$(ovn-nbctl --bare --columns=_uuid find sb_Chassis name=gw2)
 
 AT_CHECK([as hv1 ovs-ofctl dump-flows br-int table=32 | grep active_backup | grep slaves:$hv1_gw1_ofport,$hv1_gw2_ofport | wc -l], [0], [1
 ])
@@ -9835,7 +9838,7 @@ AT_CHECK([as gw2 ovs-ofctl dump-flows br-int table=9 | grep arp_tpa=192.168.0.10
 
 
 # check that the chassis redirect port has been claimed by the gw1 chassis
-AT_CHECK([ovn-sbctl --columns chassis --bare find Port_Binding logical_port=cr-outside | grep $gw1_chassis | wc -l],
+AT_CHECK([ovn-nbctl --columns chassis --bare find sb_Port_Binding logical_port=cr-outside | grep $gw1_chassis | wc -l],
          [0],[[1
 ]])
 
@@ -9860,7 +9863,7 @@ AT_CHECK([as hv2 ovs-ofctl dump-flows br-int table=32 | grep active_backup | gre
 ])
 
 # check that the chassis redirect port has been reclaimed by the gw2 chassis
-AT_CHECK([ovn-sbctl --columns chassis --bare find Port_Binding logical_port=cr-outside | grep $gw2_chassis | wc -l],
+AT_CHECK([ovn-nbctl --columns chassis --bare find sb_Port_Binding logical_port=cr-outside | grep $gw2_chassis | wc -l],
          [0],[[1
 ]])
 
@@ -9933,7 +9936,7 @@ AT_CHECK([as gw2 ovs-ofctl dump-flows br-int table=24 | grep 00:00:02:01:02:04 |
 ]])
 
 # check that the chassis redirect port has been reclaimed by the gw1 chassis
-AT_CHECK([ovn-sbctl --columns chassis --bare find Port_Binding logical_port=cr-outside | grep $gw1_chassis | wc -l],
+AT_CHECK([ovn-nbctl --columns chassis --bare find sb_Port_Binding logical_port=cr-outside | grep $gw1_chassis | wc -l],
          [0],[[1
 ]])
 
@@ -10266,21 +10269,23 @@ OVS_WAIT_UNTIL([test x`ovn-nbctl lsp-get-up sw0_ip6-port1` = xup])
 
 # There should be 2 Neighbor Advertisement flows for the router port
 # aef0:: ip address in logical switch pipeline with action nd_na_router.
-AT_CHECK([ovn-sbctl dump-flows sw0_ip6 | grep ls_in_arp_rsp | \
+uuid=`ovn-nbctl lflow-list |grep "Datapath:" | grep sw0_ip6 -w| cut -d "(" -f2 | cut -d ")" -f1|uniq `
+AT_CHECK([ovn-nbctl lflow-list $uuid | grep ls_in_arp_rsp | \
 grep "nd_na_router" | wc -l], [0], [2
 ])
 
 # There should be 4 Neighbor Advertisement flows with action nd_na_router
 # in the router pipeline for the router lr0_ip6.
-AT_CHECK([ovn-sbctl dump-flows lr0_ip6 | grep nd_na_router | \
+uuid=`ovn-nbctl lflow-list |grep "Datapath:" | grep lr0_ip6 | cut -d "(" -f2 | cut -d ")" -f1|uniq `
+AT_CHECK([ovn-nbctl dump-flows $uuid | grep nd_na_router | \
 wc -l], [0], [4
 ])
 
-cr_uuid=`ovn-sbctl find port_binding logical_port=cr-ip6_public | grep _uuid | cut -f2 -d ":"`
+cr_uuid=`ovn-nbctl find sb_port_binding logical_port=cr-ip6_public | grep _uuid | cut -f2 -d ":"`
 
 # There is only one chassis.
-chassis_uuid=`ovn-sbctl list chassis | grep _uuid | cut -f2 -d ":"`
-OVS_WAIT_UNTIL([test $chassis_uuid = `ovn-sbctl get port_binding $cr_uuid chassis`])
+chassis_uuid=`ovn-nbctl list sb_chassis | grep _uuid | cut -f2 -d ":"`
+OVS_WAIT_UNTIL([test $chassis_uuid = `ovn-nbctl get sb_port_binding $cr_uuid chassis`])
 
 trim_zeros() {
     sed 's/\(00\)\{1,\}$//'
@@ -12220,8 +12225,8 @@ ovn-nbctl lr-nat-add lr0 dnat_and_snat 172.24.4.100 10.0.0.10
 ovn-nbctl lr-nat-add lr1 dnat_and_snat 172.24.4.200 20.0.0.10
 
 # Check that the MAC_Binding entries have been properly created
-OVS_WAIT_UNTIL([test `ovn-sbctl find mac_binding logical_port="lr0-pub" ip="172.24.4.200" | wc -l` -gt 0])
-OVS_WAIT_UNTIL([test `ovn-sbctl find mac_binding logical_port="lr1-pub" ip="172.24.4.100" | wc -l` -gt 0])
+OVS_WAIT_UNTIL([test `ovn-nbctl find sb_mac_binding logical_port="lr0-pub" ip="172.24.4.200" | wc -l` -gt 0])
+OVS_WAIT_UNTIL([test `ovn-nbctl find sb_mac_binding logical_port="lr1-pub" ip="172.24.4.100" | wc -l` -gt 0])
 
 # Check that the GARPs went also to the external physical network
 # Wait until at least 4 packets have arrived and copy them to a separate file as

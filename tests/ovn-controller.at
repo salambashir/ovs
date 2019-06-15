@@ -2,6 +2,7 @@ AT_BANNER([ovn-controller])
 
 AT_SETUP([ovn-controller - ovn-bridge-mappings])
 AT_KEYWORDS([ovn])
+ovn_init_db ovn-nb
 ovn_init_db ovn-sb
 net_add n1
 sim_add hv
@@ -12,6 +13,7 @@ ovs-vsctl \
     -- add-br br-eth1 \
     -- add-br br-eth2
 ovn_attach n1 br-phys 192.168.0.1
+
 
 # Waits until the OVS database contains exactly the specified patch ports.
 # Each argument should be of the form BRIDGE PORT PEER.
@@ -51,7 +53,7 @@ patch
 check_bridge_mappings () {
     local_mappings=$1
     sysid=$(ovs-vsctl get Open_vSwitch . external_ids:system-id)
-    OVS_WAIT_UNTIL([test x"${local_mappings}" = x$(ovn-sbctl get Chassis ${sysid} external_ids:ovn-bridge-mappings | sed -e 's/\"//g')])
+    OVS_WAIT_UNTIL([test x"${local_mappings}" = x$(ovn-nbctl get sb_Chassis ${sysid} external_ids:ovn-bridge-mappings | sed -e 's/\"//g')])
 }
 
 # Initially there should be no patch ports.
@@ -62,37 +64,38 @@ AT_CHECK([ovs-vsctl set Open_vSwitch . external-ids:ovn-bridge-mappings=physnet1
 check_bridge_mappings "physnet1:br-eth0,physnet2:br-eth1"
 check_patches
 
+echo "--we survived to here !----"
 # Create a localnet port, but we should still have no patch ports, as they
 # won't be created until there's a localnet port on a logical switch with
 # another logical port bound to this chassis.
-ovn-sbctl \
-    -- --id=@dp101 create Datapath_Binding tunnel_key=101 \
-    -- create Port_Binding datapath=@dp101 logical_port=localnet1 tunnel_key=1 \
+ovn-nbctl \
+    -- --id=@dp101 create SB_Datapath_Binding tunnel_key=101 \
+    -- create SB_Port_Binding datapath=@dp101 logical_port=localnet1 tunnel_key=1 \
         type=localnet options:network_name=physnet1
 check_patches
-
+echo "--we survived to here2 !----"
 # Create a localnet port on a logical switch with a port bound to this chassis.
 # Now we should get some patch ports created.
-ovn-sbctl \
-    -- --id=@dp102 create Datapath_Binding tunnel_key=102 \
-    -- create Port_Binding datapath=@dp102 logical_port=localnet2 tunnel_key=1 \
+ovn-nbctl \
+    -- --id=@dp102 create SB_Datapath_Binding tunnel_key=102 \
+    -- create SB_Port_Binding datapath=@dp102 logical_port=localnet2 tunnel_key=1 \
         type=localnet options:network_name=physnet1 \
-    -- create Port_Binding datapath=@dp102 logical_port=localvif2 tunnel_key=2
+    -- create SB_Port_Binding datapath=@dp102 logical_port=localvif2 tunnel_key=2
 ovs-vsctl add-port br-int localvif2 -- set Interface localvif2 external_ids:iface-id=localvif2
 check_patches \
     'br-int  patch-br-int-to-localnet2 patch-localnet2-to-br-int' \
     'br-eth0 patch-localnet2-to-br-int patch-br-int-to-localnet2'
-
+echo "--we survived to here 3----"
 # Add logical patch ports to connect new logical datapath.
 #
 # OVN no longer uses OVS patch ports to implement logical patch ports, so
 # the set of OVS patch ports doesn't change.
-AT_CHECK([ovn-sbctl \
-    -- --id=@dp1 create Datapath_Binding tunnel_key=1 \
-    -- --id=@dp2 create Datapath_Binding tunnel_key=2 \
-    -- create Port_Binding datapath=@dp1 logical_port=foo tunnel_key=1 type=patch options:peer=bar \
-    -- create Port_Binding datapath=@dp2 logical_port=bar tunnel_key=2 type=patch options:peer=foo \
-    -- create Port_Binding datapath=@dp1 logical_port=dp1vif tunnel_key=3 \
+AT_CHECK([ovn-nbctl \
+    -- --id=@dp1 create SB_Datapath_Binding tunnel_key=1 \
+    -- --id=@dp2 create SB_Datapath_Binding tunnel_key=2 \
+    -- create SB_Port_Binding datapath=@dp1 logical_port=foo tunnel_key=1 type=patch options:peer=bar \
+    -- create SB_Port_Binding datapath=@dp2 logical_port=bar tunnel_key=2 type=patch options:peer=foo \
+    -- create SB_Port_Binding datapath=@dp1 logical_port=dp1vif tunnel_key=3 \
 | uuidfilt], [0], [<0>
 <1>
 <2>
@@ -122,6 +125,7 @@ AT_CLEANUP
 AT_SETUP([ovn-controller - Chassis external_ids])
 AT_KEYWORDS([ovn])
 ovn_init_db ovn-sb
+ovn_init_db ovn-nb
 
 net_add n1
 sim_add hv
@@ -136,10 +140,10 @@ ovn_attach n1 br-phys 192.168.0.1
 sysid=$(ovs-vsctl get Open_vSwitch . external_ids:system-id)
 
 # Make sure that the datapath_type set in the Bridge table
-# is mirrored into the Chassis record in the OVN_Southbound db.
+# is mirrored into the Chassis record in the OVN_Southbound db. --siraj Changed here from sb to nbcel before get chassis
 check_datapath_type () {
     datapath_type=$1
-    chassis_datapath_type=$(ovn-sbctl get Chassis ${sysid} external_ids:datapath-type | sed -e 's/"//g') #"
+    chassis_datapath_type=$(ovn-nbctl get sb_Chassis ${sysid} external_ids:datapath-type | sed -e 's/"//g') #"
     test "${datapath_type}" = "${chassis_datapath_type}"
 }
 
@@ -174,15 +178,15 @@ OVS_WAIT_UNTIL([check_datapath_type foobar])
 
 expected_iface_types=$(ovs-vsctl get Open_vSwitch . iface_types | tr -d '[[]] ""')
 echo "expected_iface_types = ${expected_iface_types}"
-chassis_iface_types=$(ovn-sbctl get Chassis ${sysid} external_ids:iface-types | sed -e 's/\"//g')
+chassis_iface_types=$(ovn-nbctl get sb_Chassis ${sysid} external_ids:iface-types | sed -e 's/\"//g')
 echo "chassis_iface_types = ${chassis_iface_types}"
 AT_CHECK([test "${expected_iface_types}" = "${chassis_iface_types}"])
 
 # Change the value of external_ids:iface-types using ovn-sbctl.
 # ovn-controller should again set it back to proper one.
-ovn-sbctl set Chassis ${sysid} external_ids:iface-types="foo"
+ovn-nbctl set sb_Chassis ${sysid} external_ids:iface-types="foo"
 OVS_WAIT_UNTIL([
-    chassis_iface_types=$(ovn-sbctl get Chassis ${sysid} external_ids:iface-types | sed -e 's/\"//g')
+    chassis_iface_types=$(ovn-nbctl get sb_Chassis ${sysid} external_ids:iface-types | sed -e 's/\"//g')
     echo "chassis_iface_types = ${chassis_iface_types}"
     test "${expected_iface_types}" = "${chassis_iface_types}"
 ])

@@ -14,9 +14,15 @@
 
 
 
-#include "openvswitch/ofp-actions.h"
 #include "colors.h"
+#include "openvswitch/dynamic-string.h"
+#include "openvswitch/json.h"
+#include "openvswitch/ofp-actions.h"
 #include "openvswitch/ofp-flow.h"
+#include "openvswitch/ofp-print.h"
+#include "openvswitch/shash.h"
+#include "openvswitch/vconn.h"
+#include "openvswitch/vlog.h"
 #include <config.h>
 
 #include <getopt.h>
@@ -5115,6 +5121,8 @@ static const struct ctl_table_class tables[NBREC_N_TABLES] = {
     = {&nbrec_port_group_col_name, NULL, NULL},
 
     [NBREC_TABLE_ACL].row_ids[0] = {&nbrec_acl_col_name, NULL, NULL},
+
+    [NBREC_TABLE_SB_CHASSIS].row_ids[0] = {&nbrec_sb_chassis_col_name, NULL, NULL},
 };
 
 static char *
@@ -5559,6 +5567,10 @@ static const struct ctl_command_syntax nbctl_commands[] = {
     {"lflow-list", 0, INT_MAX, "[DATAPATH] [LFLOW...]",
      pre_get_info, cmd_lflow_list, NULL,
      "--uuid,--ovs?,--stats", RO},
+
+    {"dump-flows", 0, INT_MAX, "[DATAPATH] [LFLOW...]",
+     pre_get_info, cmd_lflow_list, NULL,
+     "--uuid,--ovs?,--stats", RO}, /* Friendly alias for lflow-list */
 
     {NULL, 0, 0, NULL, NULL, NULL, NULL, "", RO},
 };
