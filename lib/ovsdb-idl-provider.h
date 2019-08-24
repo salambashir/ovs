@@ -135,6 +135,12 @@ struct ovsdb_idl_row *ovsdb_idl_get_row_arc(
     const struct ovsdb_idl_table_class *dst_table,
     const struct uuid *dst_uuid);
 
+// Salam
+struct ovsdb_idl_row *ovsdb_idl_get_row_arc_from_nb(
+    struct ovsdb_idl_row *src,
+    const struct ovsdb_idl_table_class *dst_table,
+    const struct uuid *dst_uuid);
+
 void ovsdb_idl_txn_verify(const struct ovsdb_idl_row *,
                           const struct ovsdb_idl_column *);
 

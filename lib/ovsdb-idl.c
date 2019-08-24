@@ -82,6 +82,8 @@ struct ovsdb_idl_arc {
     struct ovsdb_idl_row *dst;  /* Destination row. */
 };
 
+struct ovsdb_idl_db *global_nb_db; // Salam
+
 /* Connection state machine.
  *
  * When a JSON-RPC session connects, the IDL sends a "monitor_cond" request for
@@ -423,6 +425,10 @@ ovsdb_idl_db_init(struct ovsdb_idl_db *db, const struct ovsdb_idl_class *class,
         ovsdb_idl_condition_init(&table->condition);
         ovsdb_idl_condition_add_clause_true(&table->condition);
         table->cond_changed = false;
+
+        if (strcmp(tc->name, "NB_Global") == 0){ // Salam
+            global_nb_db = db;
+        }
     }
     db->monitor_id = json_array_create_2(json_string_create("monid"),
                                          json_string_create(class->database));
@@ -3299,6 +3305,56 @@ ovsdb_idl_get_row_arc(struct ovsdb_idl_row *src,
                       const struct uuid *dst_uuid)
 {
     struct ovsdb_idl_db *db = src->table->db;
+    struct ovsdb_idl_table *dst_table;
+    struct ovsdb_idl_arc *arc;
+    struct ovsdb_idl_row *dst;
+
+    dst_table = ovsdb_idl_db_table_from_class(db, dst_table_class);
+    dst = ovsdb_idl_get_row(dst_table, dst_uuid);
+    if (db->txn || is_index_row(src)) {
+        /* There are two cases we should not update any arcs:
+         *
+         * 1. We're being called from ovsdb_idl_txn_write(). We must not update
+         * any arcs, because the transaction will be backed out at commit or
+         * abort time and we don't want our graph screwed up.
+         *
+         * 2. The row is used as an index for querying purpose only.
+         *
+         * In these cases, just return the destination row, if there is one and
+         * it has not been deleted. */
+        if (dst && (hmap_node_is_null(&dst->txn_node) || dst->new_datum)) {
+            return dst;
+        }
+        return NULL;
+    } else {
+        /* We're being called from some other context.  Update the graph. */
+        if (!dst) {
+            dst = ovsdb_idl_row_create(dst_table, dst_uuid);
+        }
+
+        /* Add a new arc, if it wouldn't be a self-arc or a duplicate arc. */
+        if (may_add_arc(src, dst)) {
+            /* The arc *must* be added at the front of the dst_arcs list.  See
+             * ovsdb_idl_row_reparse_backrefs() for details. */
+            arc = xmalloc(sizeof *arc);
+            ovs_list_push_front(&src->src_arcs, &arc->src_node);
+            ovs_list_push_front(&dst->dst_arcs, &arc->dst_node);
+            arc->src = src;
+            arc->dst = dst;
+        }
+
+        return !ovsdb_idl_row_is_orphan(dst) ? dst : NULL;
+    }
+}
+
+// Salam - all function
+/* Called by ovsdb-idlc generated code. (OUR GENERATED CODE) */
+struct ovsdb_idl_row *
+ovsdb_idl_get_row_arc_from_nb(struct ovsdb_idl_row *src,
+                      const struct ovsdb_idl_table_class *dst_table_class,
+                      const struct uuid *dst_uuid)
+{
+    struct ovsdb_idl_db *db = global_nb_db;
     struct ovsdb_idl_table *dst_table;
     struct ovsdb_idl_arc *arc;
     struct ovsdb_idl_row *dst;
